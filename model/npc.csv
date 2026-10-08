@@ -1,0 +1,12 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+hp,HP,number,1,E54_Dimension,P43_has_dimension,,,
+str,STR,number,1,E54_Dimension,P43_has_dimension,,,
+dex,DEX,number,1,E54_Dimension,P43_has_dimension,,,
+wil,WIL,number,1,E54_Dimension,P43_has_dimension,,,
+armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,
+faction,Faction,resource-instance-list,1,E74_Group,P107i_is_current_or_former_member_of,,,faction
+home,Home,resource-instance-list,1,E53_Place,P74_has_current_or_former_residence,,,place
+background,Background,resource-instance-list,1,E55_Type,P2_has_type,,,background
+statblock,Stat block,resource-instance-list,1,E55_Type,P2_has_type,,,monstertype

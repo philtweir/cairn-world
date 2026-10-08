@@ -1,0 +1,10 @@
+alias,name,ontology_class
+place,Place,E53_Place
+faction,Faction,E74_Group
+npc,NPC,E21_Person
+creature,Creature,E20_Biological_Object
+relic,Relic,E22_Human-Made_Object
+event,Event,E5_Event
+background,Background,E55_Type
+monstertype,Monster Type,E55_Type
+itemtype,Item Type,E55_Type

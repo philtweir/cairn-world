@@ -1,0 +1,7 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+disposition,Disposition,concept,1,E55_Type,P2_has_type,,Disposition,
+base,Base,resource-instance-list,1,E53_Place,P74_has_current_or_former_residence,,,place
+allies,Allies,resource-instance-list,n,E74_Group,cairn:allied_with,,,faction
+enemies,Enemies,resource-instance-list,n,E74_Group,cairn:hostile_to,,,faction

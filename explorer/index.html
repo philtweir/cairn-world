@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cairn World Explorer</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-view="list">
+<header>
+  <a class="brand" href="#/">Cairn World</a>
+  <input id="q" type="search" placeholder="Search names and text  ( / )" aria-label="Search" autocomplete="off">
+  <a class="plain" href="pages/index.html">Plain pages</a>
+</header>
+<div id="status" role="status">Loading Alizarin…</div>
+<div id="app" hidden>
+  <aside id="side">
+    <div id="chips" role="group" aria-label="Filter by model"></div>
+    <label class="rules"><input id="rules" type="checkbox"> Include rules reference <span id="rules-count"></span></label>
+    <ul id="list"></ul>
+  </aside>
+  <main id="detail"></main>
+</div>
+<noscript>The explorer needs JavaScript. The <a href="pages/index.html">plain pages</a> work without it.</noscript>
+<footer>Rules text adapted from <a href="https://cairnrpg.com">Cairn</a> by Yochai Gal, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Unofficial fan project.</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

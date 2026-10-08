@@ -1,0 +1,17 @@
+collection_name,concept_label
+Place Kind,Region
+Place Kind,Settlement
+Place Kind,Site
+Place Kind,Landmark
+Disposition,Friendly
+Disposition,Neutral
+Disposition,Wary
+Disposition,Hostile
+Item Kind,Weapon
+Item Kind,Armor
+Item Kind,Transport
+Item Kind,Tool
+Item Kind,Relic
+Item Property,bulky
+Item Property,petty
+Item Property,slow

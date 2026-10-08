@@ -1,0 +1,6 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+names,Names,string,1,E62_String,P3_has_note,,,
+gear,Starting gear,string,1,E62_String,P3_has_note,,,
+source,Source,string,1,E62_String,P3_has_note,,,

@@ -1,0 +1,6 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+session,Session,number,1,E54_Dimension,P43_has_dimension,,,
+place,Place,resource-instance-list,1,E53_Place,P7_took_place_at,,,place
+participants,Participants,resource-instance-list,n,E39_Actor,P11_had_participant,,,npc|faction
