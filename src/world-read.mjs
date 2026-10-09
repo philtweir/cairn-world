@@ -1,7 +1,7 @@
 // Read the whole world back through Alizarin's ORM into plain objects.
 // Shared by the Node build (static pages) and the browser explorer, so both see the same data.
 //
-// Input is the store's manifest.json plus an initialised graphManager (client already set).
+// Input is a view's manifest.json plus an initialised graphManager (client already set).
 
 const isNull = v => v === null || v === undefined;
 
@@ -46,7 +46,7 @@ export async function readEntities(graphManager, manifest, onProgress = () => {}
       const entry = entryOf.get(e.id);
       const fields = [];
       for (const n of m.nodes) fields.push({ alias: n.alias, label: n.name, datatype: n.datatype, targets: n.targets, value: await readField(e, n) });
-      entities.push({ model: m.alias, id: e.id, key: entry?.key ?? e.id, origin: entry?.origin ?? 'data', fields });
+      entities.push({ model: m.alias, id: e.id, key: entry?.key ?? e.id, layers: entry?.layers ?? [], fields });
     }
     onProgress(m, entities.length);
   }

@@ -1,5 +1,0 @@
-ResourceID,name,description,kind,hex,within
-weeping-wood,The Weeping Wood,"A drowned forest where the trees ooze sap like tears.",Region,,
-hollowmere,Hollowmere,"A palisaded fishing village built on stilts.",Settlement,C4,weeping-wood
-sunken-chapel,The Sunken Chapel,"A half-flooded chapel. The bell still rings at night.",Site,D5,weeping-wood
-gallow-hill,Gallow Hill,"A bare hill crowned with a leaning gibbet.",Landmark,B3,weeping-wood

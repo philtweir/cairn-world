@@ -8,3 +8,5 @@ event,Event,E5_Event
 background,Background,E55_Type
 monstertype,Monster Type,E55_Type
 itemtype,Item Type,E55_Type
+universe,Universe,E89_Propositional_Object
+campaign,Campaign,E7_Activity

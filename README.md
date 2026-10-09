@@ -8,13 +8,17 @@ No server, and no connection to the Cairn rules site.
 ```sh
 npm install
 npm run check          # validate everything, write nothing
-npm run build          # write dist/: explorer, plain pages, tile store
+npm run build          # write dist/: explorer, plain pages, tile store (published views only)
+npm run build -- --all # also include unpublished universes/campaigns, for local preview
 npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 ```
 
-Needs Node 22+. Alizarin is pinned to `2.0.0-beta.9` (the default npm tag is a stale 1.0.0 with no
-CSV support). Alizarin is AGPL-3.0, which applies to anything that ships it, including this site.
+Needs Node 22+. Alizarin is **vendored** as `vendor/alizarin-2.0.0-alpha.135.tgz`, built from
+`flaxandteal/alizarin` `release/2.0` at `5b2d33c`, because that is the first build with
+`composeResourceLayers` (and a WASM fix for `uuidNamespace`) and it is not on npm yet. Swap the
+dependency back to the npm release once one includes them. Alizarin is AGPL-3.0, which applies to
+anything that ships it, including this site.
 
 ## Layout
 
@@ -23,7 +27,8 @@ CSV support). Alizarin is AGPL-3.0, which applies to anything that ships it, inc
 | `model/models.csv` | One row per model: `alias,name,ontology_class` |
 | `model/<alias>.csv` | That model's fields (see below) |
 | `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label` |
-| `data/<alias>.csv` | The world itself, one row per entry |
+| `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
+| `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin into the site root |
 | `src/` | Build script, rules importer, CSV helpers, HTML renderer, shared ORM reader |
@@ -39,8 +44,8 @@ A deliberately small CIDOC-CRM subset. Models come in two kinds: *instances* (yo
 | Faction | E74 Group | Monster Type | E55 Type |
 | NPC | E21 Person | Item Type | E55 Type |
 | Creature | E20 Biological Object | Vocabularies (SKOS) | E55 Type |
-| Relic | E22 Human-Made Object | | |
-| Event | E5 Event | | |
+| Relic | E22 Human-Made Object | Universe | E89 Propositional Object |
+| Event | E5 Event | Campaign | E7 Activity |
 
 Links: NPC -> Background and Stat block (Monster Type); Creature -> Monster Type; Relic -> Item
 Type. Every type page lists the campaign entries that use it ("Linked from"). Other CRM properties
@@ -48,6 +53,47 @@ used: P89 falls within, P7 took place at, P11 had participant, P55 has current l
 current owner, P107i member of, P74 residence. Faction alliances and enmities have no CRM
 equivalent, so they use `cairn:allied_with` / `cairn:hostile_to`. Cairn stats are plain number
 fields; no ontology covers game mechanics.
+
+## Layers
+
+The world is a stack of layers. Each layer holds models and entries; an upper layer can add entries,
+override parts of lower ones, and add to their lists, without copying them.
+
+| Layer | Where | Sits on |
+|---|---|---|
+| **General** | `model/`, `rules/`, optional `layers/general/` | nothing: the base of every stack |
+| **Universe** | `layers/<key>/`, holding one Universe row with ResourceID `<key>` | General |
+| **Campaign** | `layers/<key>/`, holding one Campaign row with ResourceID `<key>` | General plus the universes in its `universes` field |
+
+Nothing is tagged with a campaign. Which layer an entry belongs to is where its row lives, and how
+layers stack is read from the root entities themselves (a Campaign's `universes` links).
+
+**Links point down.** A row may only link to entries visible in its own layer's stack: General
+cannot point into a universe, a universe cannot point into a campaign, and two campaigns cannot see
+each other. The build reports a link that breaks this, naming the layer that holds the target.
+
+**Same key, same entity.** Alizarin derives a resource id from model + ResourceID only, so a row in
+a campaign with the key of a universe entry *is* that entry. Each Universe and Campaign is a
+**view**: its stack composed by Alizarin's `composeResourceLayers`, topmost layer first:
+
+| Field kind | What an upper layer does | Example (`ashes-of-hollowmere`) |
+|---|---|---|
+| Single-valued | Replaces it; fields it leaves blank are inherited | `place.csv`: `hollowmere,Burned,...` keeps Hollowmere's name, kind and hex |
+| Single-valued link | Replaces the link | `npc.csv`: Old Marta's `home` becomes the Sunken Chapel |
+| Multi-valued | Adds to it; can never remove an entry | `faction.csv`: the Ferrymen gain an enemy |
+
+To end something (an alliance, a life), use a single-valued status or an Event, not deletion. The
+build prints every composed entry and how many single-valued overrides it took, as an audit of what
+each campaign changes. Each layer is built with its own tile namespace; without that, the same field
+in two layers shares a tile id and composition silently keeps only the topmost list.
+
+**Publishing.** Universe and Campaign rows have `published`. `npm run build` writes only published
+views, and only the layers they stand on, so unpublished data never reaches `dist/`.
+`npm run build -- --all` includes everything for a local GM preview: never deploy that output.
+
+Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
+models in `layers/<key>/model/`, and Alizarin's `LayeredGraph` supports overlays, but the build does
+not create overlay graphs yet.
 
 ## Rules data (`rules/`)
 
@@ -63,12 +109,11 @@ Not imported: the d6 origin tables, 2e bestiary prose, spells, services and hire
 as text on Background, not linked to Item Types. The source text is CC-BY-SA 4.0; each row has a
 `source` field, and anything you publish built from it must credit and share alike.
 
-Campaign-specific types (a "Bell" item) go in `data/<alias>.csv`; rules and data rows merge, and
-keys must be unique across both.
+Setting- or campaign-specific types (a "Bell" item) go in that layer's `data/itemtype.csv`.
 
 ## Authoring
 
-**Add an entry:** append a row to `data/<alias>.csv`. `ResourceID` is your own stable slug
+**Add an entry:** append a row to `layers/<key>/data/<alias>.csv`. `ResourceID` is your own stable slug
 (`old-marta`); it also becomes the page filename.
 
 **Link entries:** put the target's `ResourceID` in the link cell. Several links go in one quoted
@@ -96,33 +141,32 @@ label exactly.
 
 | Path | What |
 |---|---|
-| `index.html`, `app.js`, `alizarin_bg.wasm` | The explorer: a single-page app that loads the tile store with Alizarin's WASM ORM and uses it for everything it shows |
-| `pages/` | The same world as plain HTML, readable without JavaScript |
+| `index.html`, `app.js`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
+| `pages/` | Every view as plain HTML, readable without JavaScript |
 | `data/` | The tile store |
 
-The explorer has a searchable list with model filters, a detail page per entry, "Linked from"
-backlinks, and a 1-hop relationship graph (click a node to move along it). URLs look like
-`/#/faction/ferrymen`, so entries can be linked to. Rules reference entries (192 of them) are hidden
-by default; a checkbox reveals them, and following a link to one reveals it automatically.
+The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
+per entry saying which layers it comes from ("Defined in The Weeping Wood · changed in Ashes of
+Hollowmere"), "Linked from" backlinks, and a 1-hop relationship graph. URLs look like
+`/#/<view>/<model>/<key>`. Switching view reloads the page: the ORM's caches are global and the same
+entity differs between views. General-only entries (the 192 rules) are hidden until asked for.
 
-The explorer and the Node build share `src/world-read.mjs`, so both read the world the same way.
-Every URL is relative, so the site works at the root of a domain or under any sub-path.
+The build reads each view back through the ORM in its own process, for the same reason, and
+renders the plain pages from that, so both share `src/world-read.mjs`.
 
 ### Tile store (`dist/data/`)
 
-Plain JSON in Arches' own format, no server needed:
-
 | Path | Contents |
 |---|---|
-| `manifest.json` | Models, their fields, and every entry's id, key and origin (`rules` or `data`) |
-| `graphs.json`, `graphs/<id>.json` | Model index and full resource-model definitions |
-| `bundles/<graphid>.json` | All resources of one model; what the explorer loads |
-| `resources/<id>.json` | One resource, for lazy lookups |
-| `collections/<id>.json` | Vocabularies |
-| `index.json` | Graph id -> bundle files |
+| `views.json` | Published views, their stacks, and layer names |
+| `views/<view>/manifest.json` | That view's models, fields, and every entry's id, key and contributing layers |
+| `views/<view>/bundles/<graphid>.json`, `resources/<id>.json` | Composed resources, per model and one by one |
+| `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
+| `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
 
-A resource is `{ resourceinstance, tiles: [{ nodegroup_id, data: { <node id>: value } }] }`: one tile
-per field group, values keyed by node id. Output is deterministic (same CSVs, same bytes).
+A resource is `{ resourceinstance, tiles: [{ nodegroup_id, data: { <node id>: value } }] }`. Output is
+deterministic: the same CSVs give the same bytes. About 13 MB with three views, mostly the WASM and
+each view's copy of the rules.
 
 ## Deploying
 
@@ -135,7 +179,7 @@ too: build and upload `dist/`.
   put GM-only secrets in a world you publish.
 - **Size.** About 7 MB, most of it Alizarin's 4.4 MB WASM, fetched once per visitor.
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
-  and the adapted data is share-alike. Alizarin is AGPL-3.0. Add your own licence for `data/`.
+  and the adapted data is share-alike. Alizarin is AGPL-3.0. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths. The deploy workflow itself has
   not been run.
 

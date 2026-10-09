@@ -1,5 +1,5 @@
-// Static HTML for the world. Input is what the ORM read back, so this exercises the
-// same path a live display site would use.
+// Static HTML for each view of the world. Input is what the ORM read back, so this exercises
+// the same path a live display site would use.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,14 +41,32 @@ ${body}
 </main></body></html>
 `;
 
-export function renderSite({ models, entities, outDir }) {
+// "Defined in Weeping Wood · changed in Ashes of Hollowmere": which layers an entry comes from.
+const provenance = (e, viewsMeta) => {
+  const name = l => viewsMeta.layers[l]?.name ?? l;
+  const [first, ...rest] = e.layers;
+  if (!first) return '';
+  return `Defined in ${name(first)}` + (rest.length ? ` · changed in ${rest.map(name).join(', ')}` : '');
+};
+
+export function renderViewIndex({ viewsMeta, outDir }) {
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'style.css'), CSS);
+  const items = viewsMeta.views.map(v =>
+    `<li><a href="${esc(v.key)}/index.html">${esc(v.name)}</a> <span class="kind">${esc(v.kind)} · ${v.stack.map(l => esc(viewsMeta.layers[l]?.name ?? l)).join(' › ')}</span></li>`).join('');
+  fs.writeFileSync(path.join(outDir, 'index.html'), page('Cairn World', '<a href="../index.html">Explorer</a>',
+    `<h1>Cairn World</h1><p>Pick a universe or campaign. Each shows its own entries on top of the ones it builds on.</p><ul>${items}</ul>`, 0));
+}
+
+export function renderSite({ view, viewsMeta, models, entities, outDir }) {
+  const viewName = viewsMeta.views.find(v => v.key === view)?.name ?? view;
   const byId = new Map(entities.map(e => [e.id, e]));
   const titleOf = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
   const modelName = Object.fromEntries(models.map(m => [m.alias, m.name]));
   const href = (e, depth) => `${'../'.repeat(depth)}${e.model}/${e.key}.html`;
   const link = (e, depth) => `<a href="${href(e, depth)}">${esc(titleOf(e))}</a>`;
 
-  const nav = depth => `<a href="${'../'.repeat(depth)}index.html">World</a>` +
+  const nav = depth => `<a href="${'../'.repeat(depth + 1)}index.html">All views</a><a href="${'../'.repeat(depth)}index.html">${esc(viewName)}</a>` +
     models.map(m => `<a href="${'../'.repeat(depth)}index.html#${m.alias}">${esc(m.name)}</a>`).join('');
 
   // Reverse edges: who points at whom, and through which field.
@@ -74,7 +92,7 @@ export function renderSite({ models, entities, outDir }) {
     return `<h2 id="${m.alias}">${esc(m.name)} (${items.length})</h2><ul>${items.map(e => `<li>${link(e, 0)}</li>`).join('')}</ul>`;
   }).join('');
   fs.writeFileSync(path.join(outDir, 'index.html'),
-    page('Cairn World', nav(0), `<h1>Cairn World</h1><p class="kind">${entities.length} entries</p><p><a href="../index.html">Open the interactive explorer →</a></p>${sections}`, 0));
+    page(`${viewName} · Cairn World`, nav(0), `<h1>${esc(viewName)}</h1><p class="kind">${entities.length} entries</p><p><a href="../../index.html#/${esc(view)}/">Open the interactive explorer →</a></p>${sections}`, 0));
 
   // Entity pages
   for (const e of entities) {
@@ -93,13 +111,13 @@ export function renderSite({ models, entities, outDir }) {
       .map(b => `<li>${link(b.from, 1)} <span class="kind">${esc(modelName[b.from.model])} · ${esc(b.via)}</span></li>`).join('');
 
     const description = e.fields.find(f => f.alias === 'description')?.value;
-    const body = `<p class="kind">${esc(modelName[e.model])}</p><h1>${esc(titleOf(e))}</h1>` +
+    const body = `<p class="kind">${esc(modelName[e.model])} · ${esc(provenance(e, viewsMeta))}</p><h1>${esc(titleOf(e))}</h1>` +
       (description ? `<p>${esc(description)}</p>` : '') +
       (rows ? `<dl>${rows}</dl>` : '') +
       (inbound ? `<h2>Linked from</h2><ul>${inbound}</ul>` : '');
 
     const dir = path.join(outDir, e.model);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, `${e.key}.html`), page(`${titleOf(e)} · Cairn World`, nav(1), body, 1));
+    fs.writeFileSync(path.join(dir, `${e.key}.html`), page(`${titleOf(e)} · ${viewName}`, nav(1), body, 1));
   }
 }

@@ -10,6 +10,7 @@
 <body data-view="list">
 <header>
   <a class="brand" href="#/">Cairn World</a>
+  <select id="view" aria-label="Universe or campaign"></select>
   <input id="q" type="search" placeholder="Search names and text  ( / )" aria-label="Search" autocomplete="off">
   <a class="plain" href="pages/index.html">Plain pages</a>
 </header>
@@ -17,7 +18,7 @@
 <div id="app" hidden>
   <aside id="side">
     <div id="chips" role="group" aria-label="Filter by model"></div>
-    <label class="rules"><input id="rules" type="checkbox"> Include rules reference <span id="rules-count"></span></label>
+    <label class="rules"><input id="rules" type="checkbox"> Include General (rules reference) <span id="rules-count"></span></label>
     <ul id="list"></ul>
   </aside>
   <main id="detail"></main>

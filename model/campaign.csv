@@ -1,0 +1,5 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+universes,Set in,resource-instance-list,n,E89_Propositional_Object,cairn:set_in,,,universe
+published,Published,boolean,1,E62_String,P3_has_note,,,

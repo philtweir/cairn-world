@@ -30,19 +30,38 @@ const svg = (tag, attrs = {}, ...kids) => {
   return el;
 };
 
-const state = { models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '' };
+const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '' };
 
 const title = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
 const text = e => e.fields.map(f => (typeof f.value === 'string' ? f.value : '')).join(' ').toLowerCase();
-const route = e => `#/${e.model}/${e.key}`;
+const route = e => `#/${state.view}/${e.model}/${e.key}`;
+// Entries that come only from General are the shared rules reference, hidden by default.
+const isGeneral = e => e.layers.length === 1 && e.layers[0] === 'general';
+const layerName = l => state.viewsMeta.layers[l]?.name ?? l;
+const provenance = e => {
+  const [first, ...rest] = e.layers;
+  return first ? `Defined in ${layerName(first)}` + (rest.length ? ` · changed in ${rest.map(layerName).join(', ')}` : '') : '';
+};
+// The hash is #/<view>/<model>/<key>; the view is the first segment.
+const hashParts = () => location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
 const status = (msg, error = false) => { const s = $('status'); s.textContent = msg; s.className = error ? 'error' : ''; s.hidden = !msg; };
 
 // ---- Load -----------------------------------------------------------------------------------
 
 async function load() {
+  state.viewsMeta = await fetch(`${DATA}/views.json`).then(r => r.json());
+  const keys = state.viewsMeta.views.map(v => v.key);
+  if (!keys.length) throw new Error('this site has no published universe or campaign');
+  const [first, ...rest] = hashParts();
+  if (keys.includes(first)) state.view = first;
+  else {
+    // An old link without a view (#/faction/ferrymen) opens in the default view.
+    state.view = state.viewsMeta.default ?? keys[0];
+    history.replaceState(null, '', `#/${[state.view, ...(first ? [first, ...rest] : [])].map(encodeURIComponent).join('/')}`);
+  }
   const [manifest, index] = await Promise.all([
-    fetch(`${DATA}/manifest.json`).then(r => r.json()),
-    fetch(`${DATA}/index.json`).then(r => r.json()),
+    fetch(`${DATA}/views/${state.view}/manifest.json`).then(r => r.json()),
+    fetch(`${DATA}/views/${state.view}/index.json`).then(r => r.json()),
   ]);
   await A.wasmReady;
   const archesClient = new A.client.ArchesClientRemoteStatic(DATA, {
@@ -50,7 +69,7 @@ async function load() {
     graphToGraphFile: meta => `graphs/${meta.graphid}.json`,
     graphIdToGraphFile: id => `graphs/${id}.json`,
     graphIdToResourcesFiles: id => index[id] ?? [],
-    resourceIdToFile: id => `resources/${id}.json`,
+    resourceIdToFile: id => `views/${state.view}/resources/${id}.json`,
     collectionIdToFile: id => `collections/${id}.json`,
   });
   A.graphManager.archesClient = archesClient;
@@ -67,7 +86,7 @@ async function load() {
 
 // ---- Sidebar --------------------------------------------------------------------------------
 
-const visible = e => state.rules || e.origin !== 'rules';
+const visible = e => state.rules || !isGeneral(e);
 const matches = e => {
   if (state.filter.size && !state.filter.has(e.model)) return false;
   return !state.q || title(e).toLowerCase().includes(state.q) || text(e).includes(state.q);
@@ -82,7 +101,7 @@ function renderSide(currentId) {
       onclick: () => { state.filter.has(m.alias) ? state.filter.delete(m.alias) : state.filter.add(m.alias); renderSide(currentId); },
     }, m.name, h('small', {}, counts[m.alias]))));
 
-  const nRules = state.entities.filter(e => e.origin === 'rules').length;
+  const nRules = state.entities.filter(isGeneral).length;
   $('rules-count').textContent = `(${nRules})`;
 
   const rows = state.entities.filter(e => visible(e) && matches(e))
@@ -132,8 +151,8 @@ function renderDetail(e) {
   ]);
 
   put($('detail'), 
-    h('a', { class: 'back', href: '#/' }, '← All entries'),
-    h('div', { class: 'kind' }, `${model.name}${e.origin === 'rules' ? ' · rules reference' : ''}`),
+    h('a', { class: 'back', href: `#/${state.view}/` }, '← All entries'),
+    h('div', { class: 'kind' }, `${model.name} · ${provenance(e)}`),
     h('h1', {}, title(e)),
     description && h('p', {}, description),
     stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, f.label, h('b', {}, String(f.value))))),
@@ -190,15 +209,19 @@ function node(e, x, y, r, tip, short, center = false) {
 // ---- Routing --------------------------------------------------------------------------------
 
 function show() {
-  const m = /^#\/([^/]+)\/(.+)$/.exec(location.hash);
-  const e = m && state.byRoute.get(`${decodeURIComponent(m[1])}/${decodeURIComponent(m[2])}`);
-  // A link to a rules entry must open even while rules are hidden in the list.
-  if (e && e.origin === 'rules' && !state.rules) { state.rules = true; $('rules').checked = true; }
+  const [view, model, key] = hashParts();
+  // The ORM's caches belong to one view, so moving to another view reloads the page.
+  if (view && view !== state.view) { location.reload(); return; }
+  const m = model && key ? [null, model, key] : null;
+  const e = m && state.byRoute.get(`${m[1]}/${m[2]}`);
+  // A link to a General entry must open even while General is hidden in the list.
+  if (e && isGeneral(e) && !state.rules) { state.rules = true; $('rules').checked = true; }
   document.body.dataset.view = e || (m && !e) ? 'detail' : 'list';
   if (e) renderDetail(e);
-  else if (m) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: '#/' }, 'Back to the list'));
+  else if (m) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: `#/${state.view}/` }, 'Back to the list'));
   else {
-    put($('detail'), h('h1', {}, 'Cairn World'),
+    const v = state.viewsMeta.views.find(x => x.key === state.view);
+    put($('detail'), h('div', { class: 'kind' }, `${v.kind} · ${v.stack.map(layerName).join(' › ')}`), h('h1', {}, v.name),
       h('p', { class: 'empty' }, `${state.entities.filter(visible).length} entries across ${state.models.length} models. Pick one on the left, or search.`));
     document.title = 'Cairn World Explorer';
   }
@@ -210,6 +233,10 @@ try {
   await load();
   status('');
   $('app').hidden = false;
+  put($('view'), state.viewsMeta.views.map(v => h('option', { value: v.key, selected: v.key === state.view }, `${v.name} (${v.kind})`)));
+  $('view').addEventListener('change', ev => { location.hash = `#/${ev.target.value}/`; });
+  document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
+  document.querySelector('a.plain').setAttribute('href', `pages/${state.view}/index.html`);
   $('q').addEventListener('input', ev => { state.q = ev.target.value.trim().toLowerCase(); renderSide(); });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
   addEventListener('hashchange', show);
