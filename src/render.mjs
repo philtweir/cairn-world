@@ -6,6 +6,7 @@ import path from 'node:path';
 import { blocks, inline, tableRows, toHtml } from './md.mjs';
 import { backlinks as reverseLinks } from './world-read.mjs';
 import { assignLenses } from './lenses.mjs';
+import { groupViews } from './views.mjs';
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -77,8 +78,10 @@ const provenance = (e, viewsMeta) => {
 export function renderViewIndex({ viewsMeta, outDir }) {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'style.css'), CSS);
-  const items = viewsMeta.views.map(v =>
-    `<li>${v.gate ? `${esc(v.name)} <a href="../index.html#/${esc(v.key)}/">(password, in the explorer)</a>` : `<a href="${esc(v.key)}/index.html">${esc(v.name)}</a>`} <span class="kind">${esc(v.kind)} · ${v.stack.map(l => esc(viewsMeta.layers[l]?.name ?? l)).join(' › ')}</span></li>`).join('');
+  const item = v =>
+    `<li>${v.gate ? `${esc(v.name)} <a href="../index.html#/${esc(v.key)}/">(password, in the explorer)</a>` : `<a href="${esc(v.key)}/index.html">${esc(v.name)}</a>`} <span class="kind">${esc(v.kind)}</span></li>`;
+  // Grouped by universe: the universe itself, then its campaigns.
+  const items = groupViews(viewsMeta).map(g => `<li><b>${esc(g.label)}</b><ul>${g.views.map(item).join('')}</ul></li>`).join('');
   fs.writeFileSync(path.join(outDir, 'index.html'), page('Cairn World', '<a href="../index.html">Explorer</a>',
     `<h1>Cairn World</h1><p>Pick a universe or campaign. Each shows its own entries on top of the ones it builds on.</p><ul>${items}</ul>`, 0,
     footerFor(Object.values(viewsMeta.layers))));

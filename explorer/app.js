@@ -8,6 +8,7 @@ import { readEntities, backlinks, links } from '../src/world-read.mjs';
 import { blocks, inline, tableRows } from '../src/md.mjs';
 import { assignLenses } from '../src/lenses.mjs';
 import { drawLens } from './lens-views.mjs';
+import { groupViews } from '../src/views.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
 const LIST_LIMIT = 200;
@@ -163,7 +164,10 @@ function rightsLine(l) {
 function fillViews() {
   const stack = state.viewsMeta.views.find(x => x.key === state.view)?.stack ?? [];
   put($('rights'), stack.map(k => state.viewsMeta.layers[k]).filter(Boolean).map(rightsLine));
-  put($('view'), state.viewsMeta.views.map(v => h('option', { value: v.key, selected: v.key === state.view }, `${v.gate ? '🔒 ' : ''}${v.name} (${v.kind})`)));
+  // Grouped by universe: the universe itself, then its campaigns.
+  put($('view'), groupViews(state.viewsMeta).map(g => h('optgroup', { label: g.label },
+    g.views.map(v => h('option', { value: v.key, selected: v.key === state.view },
+      `${v.gate ? '🔒 ' : ''}${v.kind === 'universe' ? `${v.name} (universe)` : v.name}`)))));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
   document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
