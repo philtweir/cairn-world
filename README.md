@@ -28,7 +28,7 @@ anything that ships it, including this site.
 | `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label[,match]` (`rules/vocab.csv` adds the ones generated from the rules' tables) |
 | `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
-| `layers/<key>/layer.json` | Optional: layer settings; today only a password `gate` |
+| `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note. `layers/general/layer.json` is General's |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin and d3-force into the site root |
@@ -153,6 +153,20 @@ in two layers shares a tile id and composition silently keeps only the topmost l
 **Publishing.** Universe and Campaign rows have `published`. `npm run build` writes only published
 views, and only the layers they stand on, so unpublished data never reaches `dist/`.
 `npm run build -- --all` includes everything for a local GM preview: never deploy that output.
+
+**Rights.** Every layer carries its copyright attribution in `layers/<key>/layer.json`, and the
+build stops if one is missing:
+
+```json
+{ "rights": { "holder": "Yochai Gal", "statement": "Rules data adapted from Cairn (2nd edition) by Yochai Gal.",
+              "licence": { "name": "CC BY-SA 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/" },
+              "source": { "name": "cairnrpg.com", "url": "https://cairnrpg.com" }, "year": "2024" } }
+```
+
+`holder` and `statement` are required; `year`, `licence` and `source` are optional, and no
+`licence` means all rights reserved. Each page's footer, in the explorer and the plain pages,
+credits every layer in that view's stack. A layer can also carry `"test": "..."`, shown on its
+views' home pages and footers, for content that should not stay.
 
 **Password gate.** `npm run set-password -- <layer>` writes a random salt and the salted SHA-256
 of a password to `layers/<layer>/layer.json`. The explorer then asks for that password before it
@@ -317,10 +331,11 @@ too: build and upload `dist/`.
 |---|---|---|
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
-| `the-empire` | Universe | Player-facing background for Seven Silver Spheres |
-| `seven-silver-spheres` | Campaign, password gate | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |
+| `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
+| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |
 
-*Seven Silver Spheres* is © Martin Orchard and is not openly licensed. The layer condenses and
+*Seven Silver Spheres* and The Empire are test layers, to be removed when done. *Seven Silver
+Spheres* is © Martin Orchard and is not openly licensed; both layers' `rights` say so. The layer condenses and
 paraphrases it as running notes and credits the author; it is not a substitute for the booklet.
 Because this repository is public, those notes are public too, password or not. Make the
 repository private, or keep that layer out of it, if that matters.

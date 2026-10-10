@@ -220,8 +220,20 @@ if (problems.length) bail();
 
 // ---- 4. Layer structure, read from each layer's root entity --------------------------
 
-const layers = {};   // key -> { key, kind, name, published, parents, stack }
-layers[GENERAL] = { key: GENERAL, kind: 'general', name: 'General', published: true, parents: [], stack: [GENERAL] };
+// layers/<key>/layer.json: the layer's rights (required: every layer carries its copyright
+// attribution), an optional password gate (src/set-password.mjs), and an optional `test` note.
+function readSettings(key) {
+  const file = path.join(LAYERS_DIR, key, 'layer.json');
+  const settings = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+  const r = settings.rights;
+  if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
+  if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
+  if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
+  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null };
+}
+
+const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
+layers[GENERAL] = { key: GENERAL, kind: 'general', name: 'General', published: true, parents: [], stack: [GENERAL], ...readSettings(GENERAL) };
 for (const a of ROOT_MODELS) for (const r of tables[GENERAL][a]?.rows ?? []) problem(`${rel(r.file)}:${r.line} a ${a} belongs in its own layers/<key>/ folder, not General`);
 
 for (const key of layerKeys.filter(k => k !== GENERAL)) {
@@ -232,12 +244,8 @@ for (const key of layerKeys.filter(k => k !== GENERAL)) {
   const own = roots.filter(x => x.row.cells[0] === key);
   if (own.length !== 1) { problem(`layers/${key}/ needs exactly one Universe or Campaign row with ResourceID "${key}" (found ${own.length})`); continue; }
   const { kind, row } = own[0];
-  // layers/<key>/layer.json may hold a password gate for the explorer (see src/set-password.mjs).
-  const settingsFile = path.join(LAYERS_DIR, key, 'layer.json');
-  const settings = fs.existsSync(settingsFile) ? JSON.parse(fs.readFileSync(settingsFile, 'utf8')) : {};
-  if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(settingsFile)} gate needs "salt" and a hex "sha256"`);
   layers[key] = {
-    key, kind, name: row.get.name || key, published: row.get.published === 'true', row, gate: settings.gate ?? null,
+    key, kind, name: row.get.name || key, published: row.get.published === 'true', row, ...readSettings(key),
     parents: kind === 'universe' ? [GENERAL] : [GENERAL, ...splitKeys(row.get.universes)],
   };
 }
@@ -445,7 +453,7 @@ for (const l of shippedLayers) for (const m of usedModels) {
   if (list?.length) write(`layers/${l}/${m.built.graph.graphid}.json`, { business_data: { resources: list } });
 }
 
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, ...(l.gate ? { gate: l.gate } : {}) });
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,

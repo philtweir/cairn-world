@@ -150,7 +150,19 @@ function unlock(v) {
   });
 }
 
+// The footer credits every layer in this view's stack (layers/<key>/layer.json rights).
+function rightsLine(l) {
+  const r = l.rights;
+  if (!r) return null;
+  return h('li', {}, h('b', {}, l.name), `: ${r.statement} © ${r.year ? `${r.year} ` : ''}${r.holder}. `,
+    r.licence ? h('a', { href: r.licence.url }, r.licence.name) : 'All rights reserved',
+    r.source ? [' · ', h('a', { href: r.source.url }, r.source.name)] : null,
+    l.test ? h('span', { class: 'test' }, ` (${l.test})`) : null);
+}
+
 function fillViews() {
+  const stack = state.viewsMeta.views.find(x => x.key === state.view)?.stack ?? [];
+  put($('rights'), stack.map(k => state.viewsMeta.layers[k]).filter(Boolean).map(rightsLine));
   put($('view'), state.viewsMeta.views.map(v => h('option', { value: v.key, selected: v.key === state.view }, `${v.gate ? '🔒 ' : ''}${v.name} (${v.kind})`)));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
@@ -330,6 +342,7 @@ function renderHome() {
   put($('detail'),
     h('div', { class: 'kind' }, `${v.kind} · ${v.stack.map(layerName).join(' › ')}`),
     h('h1', {}, r ? title(r) : v.name),
+    v.stack.map(k => state.viewsMeta.layers[k]).filter(l => l?.test).map(l => h('div', { class: 'testbanner' }, `${l.name}: ${l.test}`)),
     description && h('div', { class: 'text' }, md(blocks(description))),
     h('div', { class: 'lenscards' }, state.lenses.map(l => {
       const all = state.entities.filter(e => e !== r && inLens(l, e));
