@@ -1,6 +1,10 @@
 {
   "rights": {
     "holder": "philtweir",
-    "statement": "Solo campaign notes in Bith na Bró."
+    "statement": "Solo campaign notes in Bith na Bró.",
+    "licence": {
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
   }
 }

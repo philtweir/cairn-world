@@ -1,7 +1,11 @@
 {
   "rights": {
     "holder": "philtweir",
-    "statement": "Bith na Bró setting notes."
+    "statement": "Bith na Bró setting notes and maps.",
+    "licence": {
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
   },
   "globe": {
     "remap": { "pole": [50.27, -10], "seam": [150, -50], "south": 0.5, "eastWest": 0.55 },

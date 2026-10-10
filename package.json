@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Cairn campaign world as an Alizarin graph: CSV in, static site out",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "engines": {
     "node": ">=22"

@@ -463,15 +463,33 @@ too: build and upload `dist/`.
 - **Pages sites are public.** Everything in `data/` is readable on the site, JSON included, gated
   views too. Do not put GM-only secrets in a world you publish.
 - **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
-- **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
-  and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
-  `data/ontology.json`) is CC BY 4.0 and credited in the footer. `@alizarin/geo` is AGPL-3.0, like
-  Alizarin. d3-force, d3-geo and the Lucide icons are ISC. Elevation is from Terrain Tiles
-  (Mapzen/Tilezen on AWS Open Data), whose sources ask for attribution: SRTM and GMTED2010 (USGS),
-  ETOPO1 (NOAA), EU-DEM (produced using Copernicus data and information funded by the European
-  Union) and others; check its attribution list before covering other regions. Natural Earth data (basemaps and realm
-  outlines) is public domain; `polygon-clipping` (MIT), `topojson-server` and `topojson-simplify` (ISC), `pngjs` (MIT) and `d3-contour` (ISC) are used only by the globe and terrain scripts. Add your own licence for `layers/`.
+- **Licences.** See Licensing below.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
+
+## Licensing
+
+- **Code** (`src/`, `explorer/`, the build and scripts): AGPL-3.0-or-later; see `LICENSE`.
+- **Our content** (the Bith na Bró universe and the Ravens in the Dells campaign, by philtweir, and
+  the example Weeping Wood layers): CC BY-SA 4.0, as each layer's `rights` says. That includes what
+  the scripts make from it: the place geometry, `basemap.json` and `relief.json`, and any maps or
+  art added later. Unless a layer says otherwise, new content we write goes under CC BY-SA 4.0 too.
+- **Other people's content keeps its own terms:**
+  - Rules text in `rules/` is adapted from Cairn by Yochai Gal (CC BY-SA 4.0), so the site credits it
+    and the adapted data is share-alike.
+  - The two test layers (*Seven Silver Spheres* and The Empire) are © Martin Orchard, all rights
+    reserved, as their `rights` say.
+- **Data we draw on**, credited in the site footer where asked:
+  - The CIDOC-CRM RDFS (published as `data/ontology.json`) is CC BY 4.0.
+  - Natural Earth (basemaps, realm outlines, Russia's regions) is public domain.
+  - Elevation is from Terrain Tiles (Mapzen/Tilezen on AWS Open Data), whose sources ask for
+    attribution: SRTM and GMTED2010 (USGS), ETOPO1 (NOAA), EU-DEM (produced using Copernicus data
+    and information funded by the European Union) and others. Check its attribution list before
+    covering other regions.
+- **Libraries:**
+  - Alizarin and `@alizarin/geo` are AGPL-3.0.
+  - d3-force, d3-geo and the Lucide icons are ISC.
+  - Used only by the globe and terrain scripts: `polygon-clipping` (MIT), `topojson-server` and
+    `topojson-simplify` (ISC), `pngjs` (MIT) and `d3-contour` (ISC).
 
 ## Campaigns in this repository
 

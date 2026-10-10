@@ -1,6 +1,10 @@
 {
   "rights": {
     "holder": "cairn-world contributors",
-    "statement": "Example world written for cairn-world."
+    "statement": "Example world written for cairn-world.",
+    "licence": {
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+    }
   }
 }
