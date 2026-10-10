@@ -32,7 +32,7 @@ anything that ships it, including this site.
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
 | `layers/<key>/globe.csv`, `basemap.json` | Optional: what each place is on Earth or on a regional map, and the globe's land, for `npm run globe` (see Maps) |
-| `layers/<key>/terrain.csv`, `relief.json` | Optional: story edits to the relief, and the relief itself, for `npm run terrain` (see Maps) |
+| `layers/<key>/terrain.csv`, `relief.json`, `relief-*.webp` | Optional: story edits to the relief, and the shaded-relief images, for `npm run terrain` (see Maps) |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin, d3-force and d3-geo into the site root |
@@ -307,19 +307,28 @@ northern places fell in Turkey, which no realm names.) That makes the Dells abou
 Hearth to the Trading Post about one 30 km watch.
 
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
-inverse of the one above: each point of the globe is looked up on Earth) for each regional map's
-detailed area, applies the layer's story edits, and writes `relief.json`: elevation bands from
-250 m to 3,500 m as contours on the globe, which the explorer stacks over the land, darker with
-height, when a map is zoomed in to that area. Elevation is from the Terrain Tiles open dataset
-(Mapzen/Tilezen on AWS: SRTM, GMTED2010, ETOPO1, EU-DEM and others), fetched once into
-`.cache/terrain/`; the site's footer carries its attribution. `terrain.csv` holds the edits, in
-order: `volcano` (a cone rising to a height), `raise` (add metres, fading out), `scale` (multiply
-heights, fading out), each at a place, a globe `POINT`, or an `EARTH POINT`, with a radius in km.
+inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
+edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
+globe (0.15°, about 15 km a pixel) and one of each regional map's detailed area (0.01°, about 1 km).
+Each is a WebP (with `sharp`): grey is hillshade, alpha is height (0 at sea). `relief.json` says
+where they lie. The explorer draws them with a small WebGL shader that, for each pixel, undoes
+d3's orthographic projection and rotation and reads the image there, tinting by height and shading
+by the hillshade in the theme's colours; the detailed image is fetched only when a map is zoomed in
+to its area. Elevation is from the Terrain Tiles open dataset (Mapzen/Tilezen on AWS: SRTM,
+GMTED2010, ETOPO1, EU-DEM and others), fetched once into `.cache/terrain/`; the site's footer
+carries its attribution. `terrain.csv` holds the edits, in order: `volcano` (a cone rising to a
+height), `raise` (add metres, fading out), `scale` (multiply heights, fading out), each at a place,
+a globe `POINT`, or an `EARTH POINT`, with a radius in km.
 
-Bith na Bró's Balkan interior is volcanic and more mountainous than Earth's, by four edits: its
-relief raised by up to 40%, and volcanoes on Rila, Pirin and the central Balkan range; a fifth
-puts a 3,400 m volcano at Volcano, Valleys and Glaciers, south of the Dells. So far only the Dells'
-area (about 700 km across) has relief.
+Bith na Bró's Balkan interior is more mountainous than Earth's, by one edit: its relief raised by
+up to 40%, fading out towards the coasts. Its volcanoes are Earth's own massifs (Rila, Pirin, the
+Balkan range) in the story, unchanged in shape: cones drawn as edits read as artificial.
+
+**Speed.** Turning a map redraws only what is in view, at most once a frame: relief costs the same
+however detailed (it is per pixel, in the shader); land outside the view is skipped, and inside a
+detailed area the coarse coast is not drawn; the graticule covers only the view; paths are cut to
+the map's box; and d3's adaptive resampling is off (the coasts are fine enough without it). In
+Chromium a redraw takes about 3 ms on an entry's map of the Dells and 13 ms on the whole globe.
 
 How far real terrain survives the remap: on the globe's northern half (the Greater Lands, Africa,
 Asia, Australia) ground is squeezed about 1.45 to 1, east-west against north-south, and its area
@@ -441,7 +450,7 @@ does not come back.
 | `views/<view>/bundles/<graphid>.json`, `resources/<id>.json` | Composed resources, per model and one by one |
 | `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
-| `layers/<layer>/basemap.json` | A universe's land on its globe, for maps (see Maps) |
+| `layers/<layer>/basemap.json`, `relief.json`, `relief-*.webp` | A universe's land on its globe, and its shaded relief, for maps (see Maps) |
 
 `views.json` carries `build`, a hash of the rest of `data/`. The explorer fetches `views.json`
 fresh and requests every other file, and the page its script and stylesheet, with `?v=<build>`,
@@ -489,7 +498,7 @@ too: build and upload `dist/`.
   - Alizarin and `@alizarin/geo` are AGPL-3.0.
   - d3-force, d3-geo and the Lucide icons are ISC.
   - Used only by the globe and terrain scripts: `polygon-clipping` (MIT), `topojson-server` and
-    `topojson-simplify` (ISC), `pngjs` (MIT) and `d3-contour` (ISC).
+    `topojson-simplify` (ISC), `pngjs` (MIT) and `sharp` (Apache-2.0).
 
 ## Campaigns in this repository
 

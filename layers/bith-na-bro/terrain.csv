@@ -1,6 +1,2 @@
 kind,at,radius,value,note
-scale,EARTH POINT (23.8 42.3),300,1.4,"The Balkan interior is more mountainous than Earth's: its relief raised by up to 40%, fading out towards the coasts."
-volcano,EARTH POINT (23.585 42.18),30,3600,"A volcano on Rila (Musala): the Balkan interior is volcanic."
-volcano,EARTH POINT (23.4 41.767),25,3300,"A volcano on Pirin (Vihren)."
-volcano,EARTH POINT (24.917 42.717),25,3000,"A volcano on the central Balkan range (Botev)."
-volcano,the-glaciers,22,3400,"The Dells' volcano: Volcano, Valleys and Glaciers, snow-capped, with the River of Sulphur running from it."
+scale,EARTH POINT (23.8 42.3),300,1.4,"The Balkan interior is more mountainous than Earth's: its relief raised by up to 40%, fading out towards the coasts. (Its volcanoes are Earth's own massifs, Rila, Pirin and the Balkan range, unchanged in shape: cones drawn as edits looked artificial.)"

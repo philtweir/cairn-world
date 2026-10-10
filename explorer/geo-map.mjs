@@ -8,6 +8,7 @@
 
 import { geoOrthographic, geoPath, geoGraticule, geoCentroid, geoDistance, geoBounds, geoArea } from 'd3-geo';
 import { ancestors, CRM } from '../src/lenses.mjs';
+import { reliefLayer } from './relief-gl.mjs';
 
 const E53 = `${CRM}E53_Place`;
 const GEO = 'geojson-feature-collection';
@@ -90,12 +91,18 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const fitTo = { type: 'FeatureCollection', features: [
     ...(focus.length ? focus : items).flatMap(x => x.geom.features),
     ...lines.flatMap(l => [l.a, l.b].flatMap(g => g.features)) ] };
+  // Three layers: the sea, land and graticule (an SVG); relief (WebGL, relief-gl.mjs); and the
+  // entry's places, routes and labels (an SVG, which also takes the drags and clicks).
   const box = h('div', { class: cls });
+  const baseSvg = svg('svg', { class: 'base', 'aria-hidden': 'true' });
+  const canvas = h('canvas', { class: 'relief', 'aria-hidden': 'true' });
   const el = svg('svg', { role: 'img', 'aria-label': label });
   const tools = h('div', { class: 'geotools' });
-  box.append(el, tools);
+  box.append(baseSvg, canvas, el, tools);
 
-  const projection = geoOrthographic().clipAngle(90).precision(0.3);
+  // No adaptive resampling: the geometry is fine-grained enough without it, and it was most of the
+  // cost of turning the globe.
+  const projection = geoOrthographic().clipAngle(90).precision(0);
   const path = geoPath(projection);
   let W = 0, H = 0, base = 1, home = null;
   // Fit: turn the globe to face the items' middle, then scale to show them all (at least minSpan
@@ -120,12 +127,23 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const mask = svg('mask', { id: `${id}-m`, maskUnits: 'userSpaceOnUse' });
   const gLand = svg('g', { mask: `url(#${id}-m)` }), gDetail = svg('g', {});
   const gShapes = svg('g', {}), gLines = svg('g', {}), gPoints = svg('g', {}), gLabels = svg('g', { class: 'labels' });
-  el.append(svg('defs', {}, mask), gSea, gLand, gDetail, gGrat, gShapes, gLines, gPoints, gLabels);
+  baseSvg.append(svg('defs', {}, mask), gSea, gLand, gDetail, gGrat);
+  el.append(gShapes, gLines, gPoints, gLabels);
   const KINDS = { land: 'land', unnamed: 'land unnamed' };
-  let coarse = [], holes = [], details = [], clipPaths = [], reliefG = null, reliefSpan = 0;
+  let coarse = [], holes = [], details = [], relief = null;
   basemap?.then(b => {
+    if (b?.relief?.images?.length) {
+      try { relief = reliefLayer(canvas, b.relief); } catch (err) { console.warn('relief:', err); relief = null; }
+      if (relief) relief.onLoad = () => schedule();
+    }
     const fs = b?.features ?? [];
-    coarse = Object.entries(KINDS).map(([k, cls]) => ({ geom: fs.find(f => f.properties.kind === k)?.geometry, node: svg('path', { class: cls }) })).filter(c => c.geom);
+    // Each kind of land kept as its separate polygons with their bounds, so a map zoomed in draws only
+    // those near the view.
+    coarse = Object.entries(KINDS).map(([k, cls]) => {
+      const g = fs.find(f => f.properties.kind === k)?.geometry;
+      const polys = !g ? [] : (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).map(c => ({ c, b: geoBounds({ type: 'Polygon', coordinates: c }) }));
+      return { geom: g, polys, node: svg('path', { class: cls }) };
+    }).filter(c => c.geom);
     put(gLand, coarse.map(c => c.node));
     const boxes = new Map();
     for (const f of fs.filter(f => f.bbox && f.properties.kind.endsWith('-detail'))) {
@@ -139,7 +157,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
         // d3 takes the smaller side of a ring as its inside only when wound clockwise.
         const box = { type: 'Polygon', coordinates: [ring] };
         if (geoArea(box) > 2 * Math.PI) ring.reverse();
-        boxes.set(key, { box, hole: svg('path', { fill: 'black' }) });
+        boxes.set(key, { box, bbox: f.bbox, hole: svg('path', { fill: 'black' }) });
       }
       const node = svg('path', { class: KINDS[f.properties.kind.replace(/-detail$/, '')] ?? 'land' });
       gDetail.append(node);
@@ -147,24 +165,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     }
     holes = [...boxes.values()];
     put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
-    // Relief: elevation bands (src/terrain.mjs), each "at least this high", stacked so the land
-    // darkens with height; clipped to the detailed coast, which they were not drawn against.
-    const relief = fs.filter(f => f.properties.kind === 'relief').sort((a, b) => a.properties.min - b.properties.min);
-    if (relief.length) {
-      const clip = svg('clipPath', { id: `${id}-c` }, details.map(d => { const n = svg('path', {}); clipPaths.push({ geom: d.geom, node: n }); return n; }));
-      el.querySelector('defs').append(clip);
-      const g = svg('g', { 'clip-path': `url(#${id}-c)`, class: 'relief' });
-      for (const f of relief) {
-        const node = svg('path', {}, svg('title', {}, `Above ${f.properties.min} m`));
-        g.append(node); details.push({ geom: f.geometry, node });
-      }
-      gDetail.append(g);
-      // Shown only while the view is about as small as the area it covers: wider out, it would read
-      // as a patch.
-      reliefG = g;
-      reliefSpan = Math.min(...relief.map(f => (f.bbox[2] - f.bbox[0]) / 2));
-    }
-    draw();
+    schedule();
   });
 
   const go = e => () => { location.hash = route(e); };
@@ -198,14 +199,36 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   }
 
   const visible = c => geoDistance(c, [-projection.rotate()[0], -projection.rotate()[1]]) < Math.PI / 2 - 1e-6;
+  // At most one redraw a frame, however many drags and loads ask for one.
+  let queued = false;
+  const schedule = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; draw(); }); } };
   function draw() {
     if (!W) return;
     gSea.setAttribute('d', path({ type: 'Sphere' }));
     const span = 180 / Math.PI * (W / 2) / projection.scale();   // degrees across half the width, roughly
     const step = span > 40 ? 15 : span > 12 ? 5 : span > 4 ? 1 : 0.5;
-    gGrat.setAttribute('d', path(geoGraticule().step([step, step])()));
-    for (const c of [...coarse, ...details, ...clipPaths]) c.node.setAttribute('d', path(c.geom) ?? '');
-    if (reliefG) reliefG.style.display = span > reliefSpan ? 'none' : '';
+    // The graticule only around the view: a fine one over the whole globe is thousands of lines.
+    const [gx, gy] = [-projection.rotate()[0], -projection.rotate()[1]];
+    const gdy = Math.min(90, span * 1.6), gdx = span > 40 ? 180 : Math.min(180, gdy / Math.max(0.1, Math.cos(Math.min(89, Math.abs(gy) + gdy) * Math.PI / 180)));
+    const snap = v => Math.floor(v / step) * step;
+    gGrat.setAttribute('d', path(geoGraticule().step([step, step]).extent(gdx >= 180 ? [[-180, -90 + 1e-6], [180, 90 - 1e-6]] : [[snap(gx - gdx), Math.max(-90, snap(gy - gdy))], [snap(gx + gdx) + step, Math.min(90, snap(gy + gdy) + step)]])()));
+    // Zoomed in, only the land polygons whose bounds come near the view (a box around its centre,
+    // widened for longitude's narrowing towards the poles).
+    const [cx, cy] = [-projection.rotate()[0], -projection.rotate()[1]];
+    const near = span > 40 ? null : (() => {
+      const dy = span * 1.6, dx = Math.min(180, dy / Math.max(0.1, Math.cos(Math.min(89, Math.abs(cy) + dy) * Math.PI / 180)));
+      return ({ b: [[x0, y0], [x1, y1]] }) => {
+        if (y0 > cy + dy || y1 < cy - dy) return false;
+        if (x0 > x1 || dx >= 180) return true;   // crosses 180, or the view is wide: keep
+        const d = lon => Math.abs(((lon - cx) % 360 + 540) % 360 - 180);
+        return (cx >= x0 && cx <= x1) || d(x0) <= dx || d(x1) <= dx;
+      };
+    })();
+    // Inside a detailed area the coarse coast is masked out, so it need not be drawn at all.
+    const inDetail = holes.some(({ bbox: [x0, y0, x1, y1] }) => cx - span * 1.3 > x0 && cx + span * 1.3 < x1 && cy - span > y0 && cy + span < y1);
+    for (const c of coarse) c.node.setAttribute('d', inDetail ? '' : path(near ? { type: 'MultiPolygon', coordinates: c.polys.filter(near).map(p => p.c) } : c.geom) ?? '');
+    for (const c of details) c.node.setAttribute('d', path(c.geom) ?? '');
+    relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
     for (const s of shapes) { s.fill.setAttribute('d', path(s.g) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }
     for (const r of routes) r.node.firstChild.setAttribute('d', path(r.g) ?? '');
@@ -236,15 +259,15 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     moved = true;
     const k = 180 / Math.PI / projection.scale();
     projection.rotate([drag.r[0] + dx * k, Math.max(-90, Math.min(90, drag.r[1] - dy * k)), drag.r[2]]);
-    draw();
+    schedule();
   });
   const end = () => { drag = null; };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   el.addEventListener('click', ev => { if (moved) { ev.preventDefault(); ev.stopPropagation(); moved = false; } }, true);
-  const zoom = f => () => { projection.scale(Math.max(base / 4, Math.min(base * 64, projection.scale() * f))); draw(); };
+  const zoom = f => () => { projection.scale(Math.max(base / 4, Math.min(base * 64, projection.scale() * f))); schedule(); };
   const button = (name, text, onclick) => h('button', { type: 'button', title: text, 'aria-label': text, onclick }, ctx.icon(name));
   tools.append(button('plus', 'Zoom in', zoom(1.6)), button('minus', 'Zoom out', zoom(1 / 1.6)),
-    button('locate-fixed', 'Back to fit', () => { projection.rotate(home).scale(base); draw(); }));
+    button('locate-fixed', 'Back to fit', () => { projection.rotate(home).scale(base); schedule(); }));
 
   // Drawn at the box's real size, and again whenever that changes.
   new ResizeObserver(() => {
@@ -253,7 +276,10 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const first = !W;
     W = Math.round(r.width); H = Math.round(r.height);
     el.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    baseSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     if (first) fit(); else projection.translate([W / 2, H / 2]);
+    // Paths cut to the box (with a margin for strokes), so zoomed in they stay small.
+    projection.clipExtent([[-20, -20], [W + 20, H + 20]]);
     draw();
   }).observe(el);
   return box;

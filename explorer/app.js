@@ -212,7 +212,9 @@ const basemap = () => (state.basemap ??= (() => {
     const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.[what]);
     return key ? fetch(`${DATA}/${state.viewsMeta.layers[key][what]}${V}`).then(r => (r.ok ? r.json() : null)).catch(() => null) : null;
   };
-  return Promise.all([get('basemap'), get('relief')]).then(([b, r]) => (b ? { ...b, features: [...b.features, ...(r?.features ?? [])] } : null));
+  // Relief images sit beside relief.json; each gets its address here.
+  const reliefDir = () => { const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.relief); return key && `${DATA}/${state.viewsMeta.layers[key].relief.replace(/[^/]*$/, '')}`; };
+  return Promise.all([get('basemap'), get('relief')]).then(([b, r]) => (b ? { ...b, relief: r ? { ...r, images: r.images.map(i => ({ ...i, url: `${reliefDir()}${i.file}${V}` })) } : null } : null));
 })());
 const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
 const matches = e => {
