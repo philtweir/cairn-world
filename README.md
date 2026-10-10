@@ -256,6 +256,21 @@ errors on unknown or ambiguous keys.
 
 **Add a field:** add a row to `model/<alias>.csv`, then a column of the same alias in the data.
 
+**References in text.** Any text field can name another entry: `[[Caryes]]` links by name
+(ignoring case, a leading "The" and a trailing parenthetical, so `[[Prince of Miurna]]` finds
+"The Prince of Miurna (deceased)"); `[[faction/realm-ievure|the Emirate]]` names the target exactly
+and shows other words. Like links, references point down: the build warns when a reference
+matches nothing the layer can see, or several things (with the exact form to use instead); either
+way the text still reads, unlinked. Each reference also becomes a derived "Mentions" link
+(P67 refers to), so the referent lists it under "Linked from" and graphs show it.
+
+In the explorer and the plain pages, a reference is styled by how the entry whose text it is
+stands to the referent: **related** (it links to the referent by a real field: a normal link),
+**related only the other way** (dashed), or **mentioned, no relationship** (dotted amber). The last
+are the ones to check: a passing mention needs no relationship, but "her brother" probably does.
+Only direct links count, so membership through a cell or a place reached through an event still
+reads as a mention.
+
 **Groups** (ties, scars, a document's creation): a `semantic` row in the model with
 `parent_alias` set on its fields. In the data, a resource takes one row per group entry; repeat
 the ResourceID and leave its other single-valued fields blank (the build rejects a repeat row

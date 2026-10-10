@@ -23,6 +23,7 @@ import { renderSite, renderViewIndex } from './render.mjs';
 import { buildExplorer } from './build-explorer.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
+import { makeResolver, refsIn } from './refs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -318,6 +319,24 @@ for (const key of layerKeys) {
   }
 }
 if (problems.length) bail();
+
+// [[References]] in text must name something the layer can see (like links, they point down).
+// A miss or an ambiguous name is a warning, not an error: the text still reads, unlinked.
+{
+  const named = {};   // layer -> [{ model, key, name }]
+  for (const key of layerKeys) named[key] = Object.entries(tables[key]).flatMap(([alias, t]) =>
+    [...new Map(t.rows.filter(r => r.get.name).map(r => [r.cells[0], { model: alias, key: r.cells[0], name: r.get.name }])).values()]);
+  for (const key of layerKeys) {
+    const resolve = makeResolver([...new Map(layers[key].stack.flatMap(l => named[l]).map(c => [`${c.model}/${c.key}`, c])).values()]);
+    for (const [alias, t] of Object.entries(tables[key])) for (const r of t.rows) for (const [j, col] of t.header.entries()) {
+      for (const ref of refsIn(r.cells[j])) {
+        const got = resolve(ref.target);
+        if (got.missing) console.warn(`warning: ${rel(r.file)}:${r.line} ${ref.raw} matches nothing layer "${key}" can see; it stays plain text`);
+        else if (got.ambiguous) console.warn(`warning: ${rel(r.file)}:${r.line} ${ref.raw} could be ${got.ambiguous.map(c => `${c.model}/${c.key}`).join(' or ')}; write [[${got.ambiguous[0].model}/${got.ambiguous[0].key}|${ref.label}]]`);
+      }
+    }
+  }
+}
 
 // Field rule citations must name a General rule.
 for (const m of models) for (const n of m.nodes) {

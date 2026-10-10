@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { blocks, inline, tableRows, toHtml } from './md.mjs';
-import { backlinks as reverseLinks } from './world-read.mjs';
+import { backlinks as reverseLinks, resolverFor, refRelation } from './world-read.mjs';
 import { assignLenses } from './lenses.mjs';
 import { groupViews } from './views.mjs';
 
@@ -23,8 +23,8 @@ export function rightsHtml(layer) {
 const footerFor = layerList => `<ul class="rights">${layerList.map(rightsHtml).join('')}</ul><p>${CRM_CREDIT}</p>`;
 
 const CSS = `
-:root{--bg:#fbfaf7;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12}
-@media (prefers-color-scheme:dark){:root{--bg:#171512;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a}}
+:root{--mention:#a8780f;--bg:#fbfaf7;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12}
+@media (prefers-color-scheme:dark){:root{--mention:#e2bd5a;--bg:#171512;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,serif}
 main{max-width:46rem;margin:0 auto;padding:1.5rem 1rem 4rem}
@@ -35,6 +35,8 @@ h1{margin:1.2rem 0 .2rem}
 dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1.2rem;margin:1.2rem 0}
 dt{font:14px system-ui,sans-serif;color:var(--muted)}
 dt a{color:inherit;text-decoration-style:dotted}
+a.ref.rel-in{text-decoration-style:dashed}
+a.ref.mention{color:var(--mention);text-decoration-style:dotted}
 ul.group{margin:0;padding-left:1.1rem}
 dd{margin:0}
 h2{font:600 17px system-ui,sans-serif;margin-top:2.2rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
@@ -117,9 +119,21 @@ export function renderSite({ view, viewsMeta, models, entities, outDir, ontology
     const width = Math.max(...rows.map(r => r.length));
     const th = head.length === width ? `<thead><tr>${head.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>`
       : fieldOf(e, 'die') ? `<caption>Roll ${esc(fieldOf(e, 'die'))}</caption>` : '';
-    return `<div class="wrap"><table>${th}<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${toHtml(inline(c))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    return `<div class="wrap"><table>${th}<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${toHtml(inline(c), refHref)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   };
-  const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die']);
+  const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die', 'mentions']);
+  // [[references]] in text link to their entry's page (entity pages sit one folder down).
+  const resolve = resolverFor(entities);
+  // Coloured by how the page's entry stands to the referent (see refRelation): related,
+  // related only the other way, or mentioned without any relationship.
+  let current = null;
+  const REL_TITLE = { 'rel-in': 'Related only from the other side', mention: 'Mentioned, but no relationship recorded' };
+  const refHref = target => {
+    const t = resolve(target);
+    if (!t) return null;
+    const rel = refRelation(current, t, backlinks);
+    return { href: `../${t.model}/${t.key}.html`, class: `ref ${rel}`, title: REL_TITLE[rel] };
+  };
 
   // Index: grouped by lens (src/lenses.mjs), the same CIDOC-CRM classes the explorer uses.
   const { lenses } = assignLenses(ontology, models.map(m => ({ alias: m.alias, ontology: m.ontology })));
@@ -136,6 +150,7 @@ export function renderSite({ view, viewsMeta, models, entities, outDir, ontology
 
   // Entity pages
   for (const e of entities) {
+    current = e;
     const present = f => f.value !== null && f.value !== undefined && !(Array.isArray(f.value) && !f.value.length);
     const valueHtml = f => {
       if (f.targets.length) return f.value.map(id => byId.get(id)).filter(Boolean).map(t => link(t, 1)).join(', ');
@@ -144,7 +159,7 @@ export function renderSite({ view, viewsMeta, models, entities, outDir, ontology
       if (Array.isArray(f.value)) return f.value.map(term).join(', ');
       if (f.datatype === 'concept') return term(f.value);
       if (typeof f.value === 'boolean') return f.value ? 'Yes' : 'No';
-      return typeof f.value === 'string' ? toHtml(inline(f.value)) : esc(f.value);
+      return typeof f.value === 'string' ? toHtml(inline(f.value), refHref) : esc(f.value);
     };
     // A field that cites its rule links its label to that rule's page.
     const label = f => (f.rule?.key && byId.has(f.rule.id) ? `<a href="../rule/${esc(f.rule.key)}.html" title="Rule">${esc(f.label)}</a>` : esc(f.label));
@@ -165,7 +180,7 @@ export function renderSite({ view, viewsMeta, models, entities, outDir, ontology
 
     const description = e.fields.find(f => f.alias === 'description')?.value;
     const body = `<p class="kind">${esc(modelName[e.model])} · ${esc(provenance(e, viewsMeta))}</p><h1>${esc(titleOf(e))}</h1>` +
-      (description ? toHtml(blocks(description)) : '') +
+      (description ? toHtml(blocks(description), refHref) : '') +
       (e.model === 'rolltable' && fieldOf(e, 'entries') ? rollTable(e) : '') +
       (rows ? `<dl>${rows}</dl>` : '') +
       (inbound ? `<h2>Linked from</h2><ul>${inbound}</ul>` : '');

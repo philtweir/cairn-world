@@ -2,15 +2,17 @@
 // quotes, **bold**, _italic_), parsed to a tree so the static pages (HTML strings) and the
 // explorer (DOM text nodes) render it the same way without ever trusting it as HTML.
 //
-//   node: { t: 'p'|'ul'|'ol'|'li'|'blockquote'|'strong'|'em', c: [node|string] }
+//   node: { t: 'p'|'ul'|'ol'|'li'|'blockquote'|'strong'|'em'|'ref', c: [node|string] }
+// A 'ref' node ([[target|label]], see src/refs.mjs) also has `target`; renderers resolve it.
 
 export function inline(s) {
   const out = [];
-  const re = /\*\*([^*]+)\*\*|(?<![\w*])[_*]([^_*\n]+)[_*](?![\w*])/g;
+  const re = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]|\*\*([^*]+)\*\*|(?<![\w*])[_*]([^_*\n]+)[_*](?![\w*])/g;
   let at = 0, m;
   while ((m = re.exec(s))) {
     if (m.index > at) out.push(s.slice(at, m.index));
-    out.push(m[1] !== undefined ? { t: 'strong', c: inline(m[1]) } : { t: 'em', c: [m[2]] });
+    if (m[1] !== undefined) out.push({ t: 'ref', target: m[1], c: [m[2] ?? m[1]] });
+    else out.push(m[3] !== undefined ? { t: 'strong', c: inline(m[3]) } : { t: 'em', c: [m[4]] });
     at = m.index + m[0].length;
   }
   if (at < s.length) out.push(s.slice(at));
@@ -48,4 +50,15 @@ export function blocks(text) {
 export const tableRows = entries => String(entries ?? '').split('\n').filter(Boolean).map(l => l.split(' | '));
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-export const toHtml = nodes => nodes.map(n => (typeof n === 'string' ? esc(n) : `<${n.t}>${toHtml(n.c)}</${n.t}>`)).join('');
+// `href(target)` turns a reference into a link ({ href, class, title }, or just an href string),
+// or returns null to leave it as plain text.
+export const toHtml = (nodes, href = () => null) => nodes.map(n => {
+  if (typeof n === 'string') return esc(n);
+  if (n.t === 'ref') {
+    const u = href(n.target);
+    if (!u) return toHtml(n.c, href);
+    const { href: url, class: cls, title } = typeof u === 'string' ? { href: u } : u;
+    return `<a href="${esc(url)}"${cls ? ` class="${esc(cls)}"` : ''}${title ? ` title="${esc(title)}"` : ''}>${toHtml(n.c, href)}</a>`;
+  }
+  return `<${n.t}>${toHtml(n.c, href)}</${n.t}>`;
+}).join('');

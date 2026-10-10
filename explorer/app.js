@@ -4,7 +4,7 @@
 // Everything user-visible is built with DOM text nodes; data never goes through innerHTML.
 
 import * as A from 'alizarin';
-import { readEntities, backlinks, links } from '../src/world-read.mjs';
+import { readEntities, backlinks, links, resolverFor, refRelation } from '../src/world-read.mjs';
 import { blocks, inline, tableRows } from '../src/md.mjs';
 import { assignLenses } from '../src/lenses.mjs';
 import { drawLens } from './lens-views.mjs';
@@ -37,11 +37,25 @@ const svg = (tag, attrs = {}, ...kids) => {
 };
 
 // Markdown tree (src/md.mjs) to DOM, as text nodes only.
-const md = nodes => nodes.map(n => (typeof n === 'string' ? n : h(n.t, {}, md(n.c))));
+// A [[reference]] links to its entry in this view; one with no entry here stays plain text. Its
+// style says how the entry whose text it is (`textOf`) stands to the referent: related,
+// related only the other way, or mentioned with no relationship (see refRelation).
+let textOf = null;
+const REL_TITLE = { 'rel-in': 'Related only from the other side', mention: 'Mentioned, but no relationship recorded' };
+const md = nodes => nodes.map(n => {
+  if (typeof n === 'string') return n;
+  if (n.t === 'ref') {
+    const t = state.resolve?.(n.target);
+    if (!t) return md(n.c);
+    const rel = refRelation(textOf, t, state.back);
+    return h('a', { href: route(t), class: `ref ${rel}`, title: REL_TITLE[rel] ?? false }, md(n.c));
+  }
+  return h(n.t, {}, md(n.c));
+});
 const field = (e, alias) => e.fields.find(f => f.alias === alias)?.value;
 const section = e => field(e, 'section') ?? Infinity;
 const inOrder = (a, b) => section(a) - section(b) || title(a).localeCompare(title(b));
-const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die']);
+const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die', 'mentions']);
 
 function rollTable(e) {
   const head = [field(e, 'die') || 'Roll', ...(field(e, 'columns') ? field(e, 'columns').split(' | ') : [])];
@@ -113,6 +127,7 @@ async function load() {
   state.entities = await readEntities(A.graphManager, manifest, (m, n) => status(`Reading ${m.name}… (${n} entries)`));
   for (const e of state.entities) { state.byId.set(e.id, e); state.byRoute.set(`${e.model}/${e.key}`, e); }
   state.back = backlinks(state.entities);
+  state.resolve = resolverFor(state.entities);
   ({ lenses: state.lenses, lensOf: state.lensOf } = assignLenses(ontology, manifest.models.map(m => ({ alias: m.alias, ontology: m.ontology }))));
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
   state.root = state.entities.find(e => e.key === state.view && e.layers[0] === state.view) ?? null;
@@ -226,6 +241,7 @@ function linkTo(e) {
 }
 
 function renderDetail(e) {
+  textOf = e;
   const model = state.modelOf[e.model];
   const description = e.fields.find(f => f.alias === 'description')?.value;
   const present = e.fields.filter(f => !HIDDEN.has(f.alias) && f.value != null && !(Array.isArray(f.value) && !f.value.length));
@@ -277,6 +293,8 @@ function renderDetail(e) {
     h('div', { class: 'kind' }, lens && [h('a', { href: `#/${state.view}/@${lens.id}` }, lens.label), ' › '], `${model.name} · ${provenance(e)}`),
     h('h1', {}, title(e)),
     description && h('div', { class: 'text' }, md(blocks(description))),
+    description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'Links: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
+      h('a', { class: 'ref rel-in' }, 'related only the other way'), ' · ', h('a', { class: 'ref mention' }, 'mentioned, no relationship')),
     e.model === 'rolltable' && field(e, 'entries') && rollTable(e),
     stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, label(f), h('b', {}, String(f.value))))),
     rows.length > 0 && h('dl', {}, rows),
@@ -342,6 +360,7 @@ function renderLensBar(active) {
 }
 
 function renderHome() {
+  textOf = state.root;
   const v = state.viewsMeta.views.find(x => x.key === state.view);
   const r = state.root;
   const own = e => e.layers.includes(state.view);

@@ -1,6 +1,6 @@
-:root{--c0:#8a3b12;--c1:#3d5a80;--c2:#2f7d4f;--c3:#8e5aa3;--c4:#a8780f;--c5:#257f7f;--c6:#a33d5c;--c7:#5f6b3a;--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
+:root{--mention:#a8780f;--c0:#8a3b12;--c1:#3d5a80;--c2:#2f7d4f;--c3:#8e5aa3;--c4:#a8780f;--c5:#257f7f;--c6:#a33d5c;--c7:#5f6b3a;--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
 [hidden]{display:none !important}
-@media (prefers-color-scheme:dark){:root{--c0:#e0925a;--c1:#8fb3dd;--c2:#7cc79a;--c3:#c39bd6;--c4:#e2bd5a;--c5:#6fcfcf;--c6:#e08aa3;--c7:#b5c27a;--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
+@media (prefers-color-scheme:dark){:root{--mention:#e2bd5a;--c0:#e0925a;--c1:#8fb3dd;--c2:#7cc79a;--c3:#c39bd6;--c4:#e2bd5a;--c5:#6fcfcf;--c6:#e08aa3;--c7:#b5c27a;--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,serif}
 header{display:flex;align-items:center;gap:1rem;padding:.6rem 1rem;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;position:sticky;top:0;background:var(--bg);z-index:2}
@@ -35,6 +35,10 @@ dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1.2rem;margin:1
 dt{font:14px system-ui,sans-serif;color:var(--muted)}
 dd{margin:0}
 dt a{color:inherit;text-decoration-style:dotted}
+a.ref.rel-in{text-decoration-style:dashed}
+a.ref.mention{color:var(--mention);text-decoration-style:dotted;text-decoration-thickness:2px}
+.reflegend{font:12px system-ui,sans-serif;color:var(--muted);margin:-.2rem 0 .8rem}
+.reflegend a{pointer-events:none}
 ul.group{margin:0;padding-left:1.1rem}
 .m{font:12px system-ui,sans-serif;color:var(--muted);margin-left:.4rem}
 ul.rel{padding-left:1.2rem;margin:.3rem 0}
