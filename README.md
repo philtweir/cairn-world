@@ -30,7 +30,7 @@ anything that ships it, including this site.
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Optional: layer settings; today only a password `gate` |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
-| `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv` |
+| `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin and d3-force into the site root |
 | `src/` | Build script, rules importer, CSV helpers, HTML and markdown renderers, shared ORM reader |
 
@@ -169,23 +169,25 @@ not create overlay graphs yet.
 
 The explorer divides each view into **lenses**, and takes them from CIDOC-CRM rather than from a
 list of models. Each layout it can draw is pinned to the CRM property it is built on
-(`src/lenses.mjs`); the lens's class is that property's domain or range in the RDFS, and its name
-is that class's CRM label:
+(`src/lenses.mjs`); the lens's class is that property's domain or range in the RDFS. Its name is
+the class's display label from `ontology/labels.csv` (term, label, one-line summary; unknown terms
+fail the build), or CRM's own label where there is none. The CRM code and label stay on show
+beside it:
 
-| Lens | Layout | Built on | Class (from the RDFS) |
+| Lens | Class (from the RDFS) | Layout | Built on |
 |---|---|---|---|
-| Actor | network of links between actors | P107 has current or former member | range: E39 Actor |
-| Place | "within" tree, plus a graph of connections | P89 falls within | domain: E53 Place |
-| Temporal Entity | timeline: by session, then by CRM "before" relations (P176, P182, P183) | P4 has time-span | domain: E2 Temporal Entity |
-| Physical Thing | cards grouped by the place or actor each links to | P52 has current owner | domain: E18 Physical Thing |
-| Propositional Object | whole/part tree | P148 has component | domain: E89 Propositional Object |
-| Type | broader/narrower tree, with how much of the view uses each type | P127 has broader term | domain: E55 Type |
+| People & Groups | range: E39 Actor | network of links between actors | P107 has current or former member |
+| Places | domain: E53 Place | "within" tree, plus a graph of connections | P89 falls within |
+| Events & Times | domain: E2 Temporal Entity | timeline: by session, then by CRM "before" relations (P176, P182, P183) | P4 has time-span |
+| Things | domain: E18 Physical Thing | cards grouped by the place or actor each links to | P52 has current owner |
+| Texts & Lore | domain: E89 Propositional Object | whole/part tree | P148 has component |
+| Kinds | domain: E55 Type | broader/narrower tree, with how much of the view uses each type | P127 has broader term |
 
 A model joins the lens whose class is its nearest ancestor in the CRM class hierarchy, so a
 Person is an Actor before a Physical Thing. Nothing maps a model to a lens by hand: a new model in
 any layer finds its lens from its class, and a class from another ontology finds it through the
-CRM parent it must declare. (Tested: a campaign-only Ship, E22, appears under Physical Thing; a
-foreign `ex:Familiar` is rejected until declared under E20, then appears there too.) The layouts
+CRM parent it must declare. (Tested: a campaign-only Ship, E22, appears under Things; a foreign
+`ex:Familiar` is rejected until declared under E20, then appears there too.) The layouts
 work from links, lens membership and those properties alone: an entry that only joins two places
 is drawn as the line between them, whatever its model.
 

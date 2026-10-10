@@ -52,6 +52,19 @@ export function loadOntology(root, expand) {
       properties[term] = { label: r.label, domain: expand(r.domain), range: expand(r.range), parents: r.parent ? r.parent.split('|').map(expand) : [], inverse: null, comment: r.comment, source: 'extension' };
     } else problems.push(`${where} kind must be "class" or "property"`);
   });
+  // Display labels (ontology/labels.csv): a friendlier name for any term, kept with the
+  // ontology so the interface still names nothing itself. The CRM label stays as `label`.
+  const labelsFile = path.join(root, 'ontology/labels.csv');
+  if (fs.existsSync(labelsFile)) {
+    const [lh, ...lrows] = parseCsv(fs.readFileSync(labelsFile, 'utf8'));
+    lrows.forEach((cells, i) => {
+      const r = Object.fromEntries(lh.map((h, j) => [h, cells[j] ?? '']));
+      const term = expand(r.term), entry = classes[term] ?? properties[term];
+      if (!entry) { problems.push(`ontology/labels.csv:${i + 2} ${r.term} is not a known class or property`); return; }
+      entry.display = r.label;
+      if (r.comment) entry.displayComment = r.comment;
+    });
+  }
   return { classes, properties, problems };
 }
 

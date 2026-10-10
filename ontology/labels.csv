@@ -1,0 +1,8 @@
+term,label,comment
+E39_Actor,People & Groups,Anyone who can act: individuals and the groups they form.
+E53_Place,Places,Where things are and happen.
+E2_Temporal_Entity,Events & Times,Things that happen over time.
+E18_Physical_Thing,Things,"Physical things, natural or made."
+E89_Propositional_Object,Texts & Lore,"Things that say something: texts, rules and ideas."
+E55_Type,Kinds,Kinds of thing that classify the rest.
+E1_CRM_Entity,Other,

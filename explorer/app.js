@@ -318,7 +318,7 @@ function renderLensBar(active) {
     h('a', { href: `#/${state.view}/`, 'aria-current': active === 'home' ? 'page' : false }, 'Home'),
     state.lenses.map(l => {
       const n = state.entities.filter(e => visible(e) && inLens(l, e)).length;
-      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: l.comment }, l.label, h('small', {}, n)) : null;
+      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.label, h('small', {}, n)) : null;
     }));
 }
 
@@ -338,6 +338,7 @@ function renderHome() {
       return h('a', { class: 'lenscard', href: `#/${state.view}/@${l.id}` },
         h('div', { class: 'kind' }, l.class.replace(/^.*\//, '').replace(/_/g, ' ')),
         h('h3', {}, l.label),
+        l.summary && h('p', { class: 'summary' }, l.summary),
         h('p', {}, l.models.map(m => state.modelOf[m].name).join(', ')),
         h('p', { class: 'counts' }, [here && `${here} here`, inherited && `${inherited} inherited`, general && `${general} General`].filter(Boolean).join(' · ')));
     })),
@@ -357,7 +358,8 @@ function renderLens(lens) {
     h('a', { class: 'back', href: `#/${state.view}/` }, '← Home'),
     h('div', { class: 'kind' }, `${lens.class.replace(/^.*\//, '').replace(/_/g, ' ')} · ${lens.models.map(m => state.modelOf[m].name).join(', ')}`),
     h('h1', {}, lens.label),
-    lens.comment && h('p', { class: 'scope' }, lens.comment),
+    lens.summary && h('p', {}, lens.summary),
+    lens.comment && h('p', { class: 'scope' }, `CIDOC-CRM, ${lens.crmLabel}: ${lens.comment}`),
     anchor && h('p', { class: 'note' }, `Laid out by ${lens.anchor.replace(/^.*\//, '').replace(/_/g, ' ')}.`),
     drawLens(ctx(), lens, entries),
     !state.rules && state.entities.some(e => isGeneral(e) && inLens(lens, e)) && h('p', { class: 'note' }, 'General entries are hidden; tick "Include General" to add them.'));

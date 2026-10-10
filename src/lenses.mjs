@@ -3,7 +3,8 @@
 // Each layout the interface knows how to draw is pinned to one CIDOC-CRM property that it is
 // built on: a network of who belongs to whom, a map of what lies within what, a timeline of
 // what has a time-span, and so on. The lens's class is that property's domain or range as the
-// RDFS defines it, and its name is the class's CRM label. A model belongs to the lens whose
+// RDFS defines it, and its name is the class's label (a display label from ontology/labels.csv,
+// else CRM's). A model belongs to the lens whose
 // class is its nearest ancestor in the CRM class hierarchy (ties go to the earlier lens). No
 // model, field or category name appears here, so a new model in any layer finds its lens from
 // its class alone, and a class from another ontology does through its declared CRM parent.
@@ -55,8 +56,13 @@ export function assignLenses(ontology, models) {
     }
     lensOf[m.alias] = (best?.l ?? FALLBACK).id;
   }
+  // A lens is named by its class's display label (ontology/labels.csv) if it has one, else its
+  // CRM label; `crmLabel` and `comment` keep CRM's own wording.
   const lenses = defined.filter(l => Object.values(lensOf).includes(l.id)).map(l => ({
-    ...l, label: ontology.classes[l.class]?.label ?? l.class, comment: ontology.classes[l.class]?.comment ?? '',
+    ...l, label: ontology.classes[l.class]?.display ?? ontology.classes[l.class]?.label ?? l.class,
+    crmLabel: ontology.classes[l.class]?.label ?? l.class,
+    summary: ontology.classes[l.class]?.displayComment ?? '',
+    comment: ontology.classes[l.class]?.comment ?? '',
     models: models.filter(m => lensOf[m.alias] === l.id).map(m => m.alias),
   }));
   return { lenses, lensOf };
