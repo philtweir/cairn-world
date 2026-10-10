@@ -1,16 +1,16 @@
-alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
-name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
-description,Description,string,1,E62_String,P3_has_note,,,
-kind,Kind,concept,1,E55_Type,P2_has_type,,Item Kind,
-damage,Damage,string,1,E62_String,P3_has_note,,,
-armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,
-slots,Slots,number,1,E54_Dimension,P43_has_dimension,,,
-uses,Uses,number,1,E54_Dimension,P43_has_dimension,,,
-charges,Charges,number,1,E54_Dimension,P43_has_dimension,,,
-properties,Properties,concept-list,n,E55_Type,P2_has_type,,Item Property,
-recharge,Recharge,string,1,E62_String,P3_has_note,,,
-price,Price (gp),number,1,E54_Dimension,P43_has_dimension,,,
-spell,Spell,resource-instance-list,n,E55_Type,cairn:holds_spell,,,spellbook
-listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable
-refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling
-source,Source,string,1,E62_String,P3_has_note,,,
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+kind,Kind,concept,1,E55_Type,P2_has_type,,Item Kind,,
+damage,Damage,string,1,E62_String,P3_has_note,,,,core-rules-attacking-damage
+armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-armor
+slots,Slots,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-inventory-slots
+uses,Uses,number,1,E54_Dimension,P43_has_dimension,,,,
+charges,Charges,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-relics
+properties,Properties,concept-list,n,E55_Type,P2_has_type,,Item Property,,character-creation-inventory-slots
+recharge,Recharge,string,1,E62_String,P3_has_note,,,,core-rules-relics
+price,Price (gp),number,1,E54_Dimension,P43_has_dimension,,,,
+spell,Spell,resource-instance-list,n,E55_Type,cairn:holds_spell,,,spellbook,
+listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable,
+refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling,
+source,Source,string,1,E62_String,P3_has_note,,,,

@@ -1,14 +1,14 @@
-alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
-name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
-description,Description,string,1,E62_String,P3_has_note,,,
-hp,HP,number,1,E54_Dimension,P43_has_dimension,,,
-armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,
-str,STR,number,1,E54_Dimension,P43_has_dimension,,,
-dex,DEX,number,1,E54_Dimension,P43_has_dimension,,,
-wil,WIL,number,1,E54_Dimension,P43_has_dimension,,,
-attacks,Attacks,string,1,E62_String,P3_has_note,,,
-group,Group,resource-instance-list,n,E55_Type,P127_has_broader_term,,,monstergroup
-spells,Spells,resource-instance-list,n,E55_Type,cairn:wields,,,spellbook
-listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable
-refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling
-source,Source,string,1,E62_String,P3_has_note,,,
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+hp,HP,number,1,E54_Dimension,P43_has_dimension,,,,creating-monsters-hit-protection
+armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,,creating-monsters-armor
+str,STR,number,1,E54_Dimension,P43_has_dimension,,,,creating-monsters-strength
+dex,DEX,number,1,E54_Dimension,P43_has_dimension,,,,creating-monsters-dexterity
+wil,WIL,number,1,E54_Dimension,P43_has_dimension,,,,creating-monsters-willpower
+attacks,Attacks,string,1,E62_String,P3_has_note,,,,creating-monsters-attacks
+group,Group,resource-instance-list,n,E55_Type,P127_has_broader_term,,,monstergroup,
+spells,Spells,resource-instance-list,n,E55_Type,cairn:wields,,,spellbook,
+listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable,
+refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling,
+source,Source,string,1,E62_String,P3_has_note,,,,

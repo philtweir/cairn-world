@@ -34,6 +34,8 @@ a{color:var(--accent)}
 dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1.2rem;margin:1rem 0}
 dt{font:14px system-ui,sans-serif;color:var(--muted)}
 dd{margin:0}
+dt a{color:inherit;text-decoration-style:dotted}
+ul.group{margin:0;padding-left:1.1rem}
 .m{font:12px system-ui,sans-serif;color:var(--muted);margin-left:.4rem}
 ul.rel{padding-left:1.2rem;margin:.3rem 0}
 .group{font:13px system-ui,sans-serif;color:var(--muted);margin-top:.8rem}

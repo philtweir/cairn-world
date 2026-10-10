@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { blocks, inline, tableRows, toHtml } from './md.mjs';
+import { backlinks as reverseLinks } from './world-read.mjs';
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -22,6 +23,8 @@ h1{margin:1.2rem 0 .2rem}
 .kind{font:13px system-ui,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1.2rem;margin:1.2rem 0}
 dt{font:14px system-ui,sans-serif;color:var(--muted)}
+dt a{color:inherit;text-decoration-style:dotted}
+ul.group{margin:0;padding-left:1.1rem}
 dd{margin:0}
 h2{font:600 15px system-ui,sans-serif;color:var(--muted);margin-top:2rem}
 ul,ol{padding-left:1.2rem}
@@ -78,16 +81,8 @@ export function renderSite({ view, viewsMeta, models, entities, outDir }) {
     models.map(m => `<a href="${'../'.repeat(depth)}index.html#${m.alias}">${esc(m.name)}</a>`).join('');
 
   // Reverse edges: who points at whom, and through which field.
-  const backlinks = new Map();
-  for (const e of entities) {
-    for (const f of e.fields) {
-      if (!f.targets.length || !f.value) continue;
-      for (const id of f.value) {
-        if (!backlinks.has(id)) backlinks.set(id, []);
-        backlinks.get(id).push({ from: e, via: f.label });
-      }
-    }
-  }
+  const backlinks = reverseLinks(entities);
+  const matches = Object.assign({}, ...models.map(m => m.matches ?? {}));
 
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'style.css'), CSS);
@@ -117,14 +112,27 @@ export function renderSite({ view, viewsMeta, models, entities, outDir }) {
 
   // Entity pages
   for (const e of entities) {
+    const present = f => f.value !== null && f.value !== undefined && !(Array.isArray(f.value) && !f.value.length);
+    const valueHtml = f => {
+      if (f.targets.length) return f.value.map(id => byId.get(id)).filter(Boolean).map(t => link(t, 1)).join(', ');
+      // A concept mapped to another ontology's term (vocab.csv `match`) links to that term.
+      const term = v => { const uri = matches[f.collection]?.[v]; return uri ? `<a href="${esc(uri)}" title="${esc(uri)}">${esc(v)}</a>` : esc(v); };
+      if (Array.isArray(f.value)) return f.value.map(term).join(', ');
+      if (f.datatype === 'concept') return term(f.value);
+      if (typeof f.value === 'boolean') return f.value ? 'Yes' : 'No';
+      return typeof f.value === 'string' ? toHtml(inline(f.value)) : esc(f.value);
+    };
+    // A field that cites its rule links its label to that rule's page.
+    const label = f => (f.rule?.key && byId.has(f.rule.id) ? `<a href="../rule/${esc(f.rule.key)}.html" title="Rule">${esc(f.label)}</a>` : esc(f.label));
     const rows = e.fields
-      .filter(f => !HIDDEN.has(f.alias) && f.value !== null && f.value !== undefined && !(Array.isArray(f.value) && !f.value.length))
+      .filter(f => !HIDDEN.has(f.alias) && present(f))
       .map(f => {
-        let v;
-        if (f.targets.length) v = f.value.map(id => byId.get(id)).filter(Boolean).map(t => link(t, 1)).join(', ');
-        else if (Array.isArray(f.value)) v = f.value.map(esc).join(', ');
-        else v = typeof f.value === 'string' ? toHtml(inline(f.value)) : esc(f.value);
-        return `<dt>${esc(f.label)}</dt><dd>${v}</dd>`;
+        // A group: one line per entry, its values joined ("Mentor · Marcos").
+        if (f.datatype === 'semantic') {
+          const lines = f.value.map(item => item.fields.filter(present).map(valueHtml).join(' · '));
+          return `<dt>${label(f)}</dt><dd>${lines.length > 1 ? `<ul class="group">${lines.map(l => `<li>${l}</li>`).join('')}</ul>` : lines[0]}</dd>`;
+        }
+        return `<dt>${label(f)}</dt><dd>${valueHtml(f)}</dd>`;
       }).join('');
 
     const inbound = (backlinks.get(e.id) ?? [])

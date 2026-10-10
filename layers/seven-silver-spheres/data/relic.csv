@@ -1,4 +1,8 @@
-ResourceID,name,description,itemtype,location,holder
-the-five-spheres,The Five Remaining Spheres,Five silver spheres still on their pedestals in the temple hall.,silver-sphere,temple-of-st-rylan,
-the-missing-spheres,The Two Missing Spheres,Taken by Archmage Hann 33 years ago and never returned.,silver-sphere,,archmage-hann
-statue-staff,The Statue's Staff,Still shining in the hand of the defaced statue; break it off for a Stone Torch.,stone-torch-of-st-rylan,bridge-of-saints,
+ResourceID,name,description,itemtype,location,holder,carries
+the-five-spheres,The Five Remaining Spheres,Five silver spheres still on their pedestals in the temple hall.,silver-sphere,temple-of-st-rylan,,
+the-missing-spheres,The Two Missing Spheres,Taken by Archmage Hann 33 years ago and never returned.,silver-sphere,,archmage-hann,
+statue-staff,The Statue's Staff,Still shining in the hand of the defaced statue; break it off for a Stone Torch.,stone-torch-of-st-rylan,bridge-of-saints,,
+bryn-letter-and-map,Bryn's Letter and Map,One of the identical copies handed out at the reading of the will.,,,bryn,"marcos-letter,marcos-map"
+gann-letter-and-map,Gann's Letter and Map,One of the identical copies handed out at the reading of the will.,,,gann,"marcos-letter,marcos-map"
+akshara-letter-and-map,Akshara's Letter and Map,One of the identical copies handed out at the reading of the will.,,,akshara,"marcos-letter,marcos-map"
+hann-note-paper,Hann's Note (on the pedestals),"The note itself, lying on the empty pedestals.",,temple-of-st-rylan,,hann-note

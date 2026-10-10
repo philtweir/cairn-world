@@ -32,8 +32,14 @@ const INCLUDE_UNPUBLISHED = process.argv.includes('--all');
 const RDM_NAMESPACE = 'http://cairn-world.example/rdm/';
 const CRM = 'http://www.cidoc-crm.org/cidoc-crm/';
 const CAIRN = 'http://cairn-world.example/ns/';
+// Ontologies interleaved with CIDOC-CRM. Unprefixed names are CRM; full URIs pass through.
+const PREFIXES = {
+  cairn: CAIRN,
+  rel: 'http://purl.org/vocab/relationship/',
+  skos: 'http://www.w3.org/2004/02/skos/core#',
+};
 const NODE_COLS = ['alias', 'name', 'datatype', 'cardinality', 'ontology_class',
-  'parent_property', 'parent_alias', 'collection_name', 'graphs'];
+  'parent_property', 'parent_alias', 'collection_name', 'graphs', 'description'];
 const LINK_TYPES = new Set(['resource-instance', 'resource-instance-list']);
 const ROOT_MODELS = ['universe', 'campaign'];
 const GENERAL = 'general';
@@ -48,7 +54,11 @@ const bail = () => {
 };
 
 // "E21_Person" -> CIDOC-CRM URI, "cairn:allied_with" -> our namespace, URIs pass through.
-const expand = s => (!s ? s : /^https?:/.test(s) ? s : s.startsWith('cairn:') ? CAIRN + s.slice(6) : CRM + s);
+const expand = s => {
+  if (!s || /^https?:/.test(s)) return s;
+  const m = /^([a-z]+):(.+)$/.exec(s);
+  return m && PREFIXES[m[1]] ? PREFIXES[m[1]] + m[2] : CRM + s;
+};
 
 // Deterministic UUID from a string, for the per-layer tile namespaces.
 const stableUuid = seed => {
@@ -74,11 +84,13 @@ function report(file, diagnostics) {
   for (const d of diagnostics) {
     const msg = `${file}${d.line ? ':' + d.line : ''} ${d.message}`;
     if (d.level === 'Error') problem(msg);
-    else if (!d.message.includes(CAIRN)) console.warn(`warning: ${msg}`);
+    // Alizarin flags non-CRM properties; the ones from our own prefixes are deliberate.
+    else if (!Object.values(PREFIXES).some(ns => d.message.includes(ns))) console.warn(`warning: ${msg}`);
   }
 }
 
-const listCsv = dir => (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.csv')).sort() : []);
+// Data tables in a folder; rules/vocab.csv holds vocabularies, not entries.
+const listCsv = dir => (fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.csv') && f !== 'vocab.csv').sort() : []);
 const splitKeys = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
 
 await A.wasmReady;
@@ -95,7 +107,20 @@ const layerModelDir = key => (key === GENERAL ? path.join(ROOT, 'model') : path.
 
 // ---- 2. Models: General's, plus any a layer defines for itself ------------------
 
-const vocabCsv = fs.readFileSync(path.join(ROOT, 'model/vocab.csv'), 'utf8');
+// Vocabularies: model/vocab.csv (hand-written) plus rules/vocab.csv (generated from the rules'
+// tables). An optional `match` column maps a concept to a term in another ontology
+// (skos:exactMatch); Alizarin's collections CSV has no such column, so the build keeps the
+// matches itself and publishes them with each view.
+const vocabRows = [], vocabMatches = {};
+for (const f of [path.join(ROOT, 'model/vocab.csv'), path.join(ROOT, 'rules/vocab.csv')].filter(f => fs.existsSync(f))) {
+  for (const r of readTable(f).rows) {
+    const { collection_name: c, concept_label: l, match } = r.get;
+    if (vocabRows.some(([c2, l2]) => c2 === c && l2 === l)) { problem(`${rel(f)}:${r.line} "${l}" is already in vocabulary "${c}"`); continue; }
+    vocabRows.push([c, l]);
+    if (match) (vocabMatches[c] ??= {})[l] = expand(match);
+  }
+}
+const vocabCsv = toCsv([['collection_name', 'concept_label'], ...vocabRows]);
 const models = [];
 for (const key of layerKeys) {
   const index = path.join(layerModelDir(key), 'models.csv');
@@ -123,7 +148,11 @@ for (const m of models) {
   // Authors name link targets by model alias (target_model); Alizarin's `graphs` column wants
   // model names, from which it derives each target's graph id.
   const cell = (n, c) => (c === 'ontology_class' || c === 'parent_property') ? expand(n[c])
-    : c === 'graphs' ? n.targets.map(t => modelByAlias[t]?.name ?? t).join('|') : n[c];
+    : c === 'graphs' ? n.targets.map(t => modelByAlias[t]?.name ?? t).join('|')
+    // A field can cite the rule that defines it (model CSV column `rule`); it travels in the
+    // graph as the node's description, so the model itself says where its fields come from.
+    : c === 'description' ? (n.description || (n.rule ? `Defined by Cairn rule "${n.rule}"` : ''))
+    : n[c];
   const nodesCsv = toCsv([NODE_COLS, ...m.nodes.map(n => NODE_COLS.map(c => cell(n, c)))]);
   report(rel(m.file), A.validateModelCsvs(graphCsv, nodesCsv, vocabCsv));
   try {
@@ -164,7 +193,12 @@ for (const key of layerKeys) {
       into.rows.push(...t.rows);
     }
   }
-  for (const t of Object.values(tables[key])) for (const r of t.rows) r.cells = t.header.map(c => r.get[c] ?? '');
+  for (const t of Object.values(tables[key])) {
+    for (const r of t.rows) r.cells = t.header.map(c => r.get[c] ?? '');
+    // Alizarin wants a resource's rows together; authors may add a repeat row anywhere.
+    const order = [...new Set(t.rows.map(r => r.cells[0]))];
+    t.rows = order.flatMap(k => t.rows.filter(r => r.cells[0] === k));
+  }
 }
 if (problems.length) bail();
 
@@ -236,20 +270,34 @@ const present = {};   // model -> key -> { id, layers: Set }
 for (const key of layerKeys) {
   for (const [alias, t] of Object.entries(tables[key])) {
     const m = modelByAlias[alias];
-    const seen = new Set();
+    // A ResourceID may take several rows, each adding an entry to repeatable (cardinality n)
+    // fields such as a group of ties. Single-valued fields must not disagree between rows.
+    const first = new Map();
     for (const r of t.rows) {
-      if (seen.has(r.cells[0])) problem(`${rel(r.file)}:${r.line} duplicate ResourceID "${r.cells[0]}" in layer ${key}`);
-      seen.add(r.cells[0]);
+      const k = r.cells[0];
+      if (!first.has(k)) { first.set(k, r); continue; }
+      for (const [j, col] of t.header.entries()) {
+        const n = m.nodes.find(x => x.alias === col);
+        if (j === 0 || !n || n.cardinality !== '1' || n.parent_alias) continue;
+        const a = first.get(k).cells[j], b = r.cells[j];
+        if (b && a !== b) problem(`${rel(r.file)}:${r.line} "${k}" repeats with a different ${col} ("${b}" vs "${a}" on line ${first.get(k).line}); leave it blank on repeat rows`);
+      }
     }
     const keep = t.header.map((c, j) => (j === 0 || !isLinkCol(m, c) ? j : -1)).filter(j => j >= 0);
     const out = buildResources(m, toCsv([keep.map(j => t.header[j]), ...t.rows.map(r => keep.map(j => r.cells[j]))]), key, t.rows);
-    out?.forEach((res, i) => {
-      const k = t.rows[i].cells[0];
+    out?.forEach(res => {
+      const k = res.resourceinstance.legacyid;
       const p = ((present[alias] ??= new Map()).get(k) ?? { id: res.resourceinstance.resourceinstanceid, layers: new Set() });
       p.layers.add(key);
       present[alias].set(k, p);
     });
   }
+}
+if (problems.length) bail();
+
+// Field rule citations must name a General rule.
+for (const m of models) for (const n of m.nodes) {
+  if (n.rule && !present.rule?.get(n.rule)?.layers.has(GENERAL)) problem(`${rel(m.file)}:${n.line} rule "${n.rule}" is not a rule in General`);
 }
 if (problems.length) bail();
 
@@ -400,7 +448,12 @@ for (const v of viewKeys) {
       alias: m.alias, name: m.name, ontology: m.ontology, definedIn: m.definedIn,
       kind: m.ontology.endsWith('E55_Type') ? 'type' : 'instance',
       graphid: gid,
-      nodes: m.nodes.map(n => ({ alias: n.alias, name: n.name, datatype: n.datatype, targets: n.targets, collection: n.collection_name || null })),
+      nodes: m.nodes.map(n => ({
+        alias: n.alias, name: n.name, datatype: n.datatype, cardinality: n.cardinality, parent: n.parent_alias || null,
+        targets: n.targets, collection: n.collection_name || null,
+        rule: n.rule ? { key: n.rule, id: present.rule?.get(n.rule)?.id ?? null } : null,
+      })),
+      matches: Object.fromEntries(m.nodes.filter(n => vocabMatches[n.collection_name]).map(n => [n.collection_name, vocabMatches[n.collection_name]])),
       entries: vm.entries,
     });
   }

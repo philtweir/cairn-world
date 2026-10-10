@@ -1,4 +1,5 @@
-ResourceID,name,description,hp,str,dex,wil,armor,faction,home,background,statblock
-old-marta,Old Marta,"Ferrywoman who knows every ford and every lie told at them.",4,8,11,10,0,ferrymen,hollowmere,rill-runner,
-brother-alder,Brother Alder,"Bell-keeper. Afraid of the dark, and of what answers it.",3,7,8,13,0,chapter-of-ash,sunken-chapel,,acolyte
-hroth,Hroth the Antlered,"Brackenfolk war-leader wearing a real stag skull.",6,12,9,7,1,brackenfolk,gallow-hill,,berserker
+ResourceID,name,description,hp,str,dex,wil,armor,faction,home,background,statblock,tie_with,tie_kind
+old-marta,Old Marta,Ferrywoman who knows every ford and every lie told at them.,4,8,11,10,0,ferrymen,hollowmere,rill-runner,,,
+brother-alder,Brother Alder,"Bell-keeper. Afraid of the dark, and of what answers it.",3,7,8,13,0,chapter-of-ash,sunken-chapel,,acolyte,,
+hroth,Hroth the Antlered,Brackenfolk war-leader wearing a real stag skull.,6,12,9,7,1,brackenfolk,gallow-hill,,berserker,,
+old-marta,,,,,,,,,,,,brother-alder,Friend

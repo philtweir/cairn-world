@@ -16,3 +16,5 @@ spellbook,Spellbook,E55_Type
 hireling,Hireling Role,E55_Type
 universe,Universe,E89_Propositional_Object
 campaign,Campaign,E7_Activity
+pc,PC,E21_Person
+document,Document,E31_Document

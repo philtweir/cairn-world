@@ -1,0 +1,13 @@
+ResourceID,name,description,kind,created_by,created_when,refers_to
+marcos-will,The Will of Marcos,His last will. At its reading each friend receives the same letter and annotated map.,Will,marcos,,"marcos-letter,marcos-map"
+marcos-letter,Marcos's Letter,"Great treasure waits at the Temple of St. Rylan, deep in the Forest of Dawn: the Seven Silver Spheres, long thought lost, whose existence he has proved. He has researched the paths too, but is too old to walk them safely.",Letter,marcos,,"temple-of-st-rylan,forest-of-dawn,the-five-spheres,the-missing-spheres"
+marcos-map,Marcos's Annotated Map,"The player handout. Its notes:
+
+- ""Begin here"" at the fork of the old road and the forest trail.
+- The well was a secret escape route.
+- The temple door opens only on the Spring or Autumn equinox; be quick, and don't linger among the trees.
+- There was once a village at the bridge, but he knows of no human settlers still living there.
+- Do not stray from the old road or the trails: the forest is full of shadows, and imperial authority left long ago.",Map,marcos,,"forest-of-dawn,the-fork,secret-well,well-passage,temple-of-st-rylan,bridge-of-saints,old-ford,sister-stones,rising-sun-tavern,porcelain-gatehouse,great-oak,road-fork-bridge,road-bridge-tavern,road-tavern-gatehouse,trail-fork-ford,autumn-equinox"
+hann-note,Archmage Hann's Note,"Left on the empty pedestals: the two missing spheres will be returned as soon as his ""very important work"" is complete.",Note,archmage-hann,33 years ago,the-missing-spheres
+priests-plea,The Last Priest's Plea,"Carved in old-fashioned script beside the altar: a welcome to travellers, and a plea not to disturb the ritual or the spheres, which are all that keeps the forest's shadow from spreading. The more that is taken, the weaker the magic.",Inscription,last-priest,,"the-five-spheres,the-shadow"
+goblob-teachings,The Teachings of Goblob,"Scrawled teachings of Goblob, The Best Goblin; copies turn up as minor loot.",Tract,goblob,,

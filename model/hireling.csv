@@ -1,6 +1,6 @@
-alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
-name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
-description,Description,string,1,E62_String,P3_has_note,,,
-wage,Wage (gp/day),number,1,E54_Dimension,P43_has_dimension,,,
-listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule
-source,Source,string,1,E62_String,P3_has_note,,,
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+wage,Wage (gp/day),number,1,E54_Dimension,P43_has_dimension,,,,core-rules-hirelings
+listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule,
+source,Source,string,1,E62_String,P3_has_note,,,,

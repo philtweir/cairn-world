@@ -25,7 +25,7 @@ anything that ships it, including this site.
 |---|---|
 | `model/models.csv` | One row per model: `alias,name,ontology_class` |
 | `model/<alias>.csv` | That model's fields (see below) |
-| `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label` |
+| `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label[,match]` (`rules/vocab.csv` adds the ones generated from the rules' tables) |
 | `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Optional: layer settings; today only a password `gate` |
@@ -42,7 +42,8 @@ A deliberately small CIDOC-CRM subset. Models come in three kinds: *instances* (
 |---|---|---|---|---|---|
 | Place, Route | E53 Place | Background | E55 Type | Rule | E89 Propositional Object |
 | Faction | E74 Group | Monster Type, Monster Group | E55 Type | Roll Table | E89 Propositional Object |
-| NPC | E21 Person | Item Type, Spellbook | E55 Type | Universe | E89 Propositional Object |
+| NPC, PC | E21 Person | Item Type, Spellbook | E55 Type | Universe | E89 Propositional Object |
+| Document | E31 Document | | | | |
 | Creature | E20 Biological Object | Hireling Role | E55 Type | Campaign | E7 Activity |
 | Relic | E22 Human-Made Object | Vocabularies (SKOS) | E55 Type | | |
 | Event | E5 Event | | | | |
@@ -64,6 +65,37 @@ Typed relationships:
 | Creature / Relic | Type / Item type | P2 has type | Monster Type / Item Type |
 | Faction | Allies, Enemies | `cairn:allied_with`, `cairn:hostile_to` | Faction |
 | Campaign | Set in | `cairn:set_in` | Universe |
+| NPC, PC | Ties (group) | P140i was attributed by → E13 Attribute Assignment: P141 assigned (NPC, PC), P177 assigned property of type (Tie Kind) | |
+| PC | Scars (group) | P44 has condition → E3 Condition State: P2 has type (Scar) | |
+| PC | Inventory | `cairn:carries` | Item Type, Spellbook |
+| Document | Creation (group) | P94i was created by → E65 Creation: P14 carried out by, P4 has time-span | NPC, PC, Faction |
+| Document | Refers to | P67 refers to | most instance and type models |
+| Relic | Carries | P128 carries | Document (a physical copy of it) |
+| Event | Kind; Involved | P2 has type (Event Kind); P12 occurred in the presence of | Relic, Document, Creature |
+
+**PC.** Character Creation defines a PC, so General defines the model: background, age, current
+and maximum STR/DEX/WIL and HP, Armor, gold, Fatigue, Deprived, the eight traits, bond, omen,
+inventory, scars, ties. Traits and scars are concepts from vocabularies the importer builds out of
+the rules' own d10 and Scars tables. PCs themselves live in campaign layers.
+
+**Fields cite their rules.** A model CSV may have a `rule` column naming a General Rule
+(`hp,...,character-creation-hit-protection`). The build checks it exists, writes it into the
+graph as the node's description, and the explorer and plain pages link that field's label to the
+rule. PC, NPC, Monster Type, Item Type, Spellbook, Hireling Role and Background fields cite theirs.
+
+**Typed ties** are E13 Attribute Assignments, CIDOC-CRM's way to say a link has a type. CRM has no
+person-to-person relationship property, so each tie is an entry in a repeatable group: who it is
+with (P141) and what kind (P177, a Tie Kind concept). The kind reads "the other person is my X":
+on Bryn, `marcos,Mentor` says Marcos is her mentor; on Marcos, `bryn,Apprentice` says the reverse.
+Tie Kinds match terms in the [RELATIONSHIP vocabulary](http://purl.org/vocab/relationship/)
+(`rel:mentorOf` is the property from the other person to this one). Kinds without a term
+(Relative) are left unmatched.
+
+**Other ontologies.** Prefixes in model CSVs expand through `PREFIXES` in `src/build.mjs`
+(`cairn:`, `rel:`, `skos:`; unprefixed names are CRM). A vocabulary row's `match` column maps a
+concept to another ontology's term (as skos:exactMatch). Alizarin's collections CSV has no column
+for this, so the build keeps the matches and publishes them in each view's manifest; the
+explorer and plain pages link a matched concept to its term.
 
 Also used: P89 falls within, P7 took place at, P11 had participant, P55 has current location, P52
 has current owner, P107i member of, P74 residence. Cairn stats are plain number fields; no ontology
@@ -160,14 +192,23 @@ errors on unknown or ambiguous keys.
 
 **Add a field:** add a row to `model/<alias>.csv`, then a column of the same alias in the data.
 
+**Groups** (ties, scars, a document's creation): a `semantic` row in the model with
+`parent_alias` set on its fields. In the data, a resource takes one row per group entry; repeat
+the ResourceID and leave its other single-valued fields blank (the build rejects a repeat row
+that contradicts the first). Repeat rows need not be adjacent. Groups are repeatable
+(cardinality `n`) and accumulate across layers like any other list: a campaign can add a tie to
+a universe NPC.
+
 | Column | Meaning |
 |---|---|
 | `alias` | Field key; also the data CSV column name |
 | `datatype` | `string`, `number`, `concept`, `concept-list`, `resource-instance-list` |
 | `cardinality` | `1` or `n` |
-| `ontology_class`, `parent_property` | CRM names (`E41_Appellation`), full URIs, or `cairn:` terms |
+| `ontology_class`, `parent_property` | CRM names (`E41_Appellation`), full URIs, or prefixed terms (`cairn:`, `rel:`) |
+| `parent_alias` | For a field inside a group: the group's alias |
 | `collection_name` | For concept fields: which vocabulary in `vocab.csv` |
 | `target_model` | For links: model alias, or `npc\|faction` for several |
+| `rule` | Optional: the General Rule that defines this field |
 
 The build passes `target_model` to Alizarin as model names in its `graphs` column, and checks that
 the graph ids Alizarin derives from those names match the models it built. Link cells are resolved
@@ -230,7 +271,7 @@ too: build and upload `dist/`.
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
 | `the-empire` | Universe | Player-facing background for Seven Silver Spheres |
-| `seven-silver-spheres` | Campaign, password gate | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events |
+| `seven-silver-spheres` | Campaign, password gate | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |
 
 *Seven Silver Spheres* is © Martin Orchard and is not openly licensed. The layer condenses and
 paraphrases it as running notes and credits the author; it is not a substitute for the booklet.

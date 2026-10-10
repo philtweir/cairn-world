@@ -3,7 +3,7 @@
 // Everything user-visible is built with DOM text nodes; data never goes through innerHTML.
 
 import * as A from 'alizarin';
-import { readEntities, backlinks } from '../src/world-read.mjs';
+import { readEntities, backlinks, links } from '../src/world-read.mjs';
 import { blocks, inline, tableRows } from '../src/md.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
@@ -48,7 +48,7 @@ function rollTable(e) {
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, md(inline(c)))))))));
 }
 
-const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '' };
+const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {} };
 
 const title = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
 const text = e => e.fields.map(f => (typeof f.value === 'string' ? f.value : '')).join(' ').toLowerCase();
@@ -99,6 +99,7 @@ async function load() {
   await A.graphManager.initialize();
 
   state.models = manifest.models;
+  state.matches = Object.assign({}, ...manifest.models.map(m => m.matches ?? {}));
   state.modelOf = Object.fromEntries(manifest.models.map(m => [m.alias, m]));
   state.entities = await readEntities(A.graphManager, manifest, (m, n) => status(`Reading ${m.name}… (${n} entries)`));
   for (const e of state.entities) { state.byId.set(e.id, e); state.byRoute.set(`${e.model}/${e.key}`, e); }
@@ -197,12 +198,28 @@ function renderDetail(e) {
   const stats = present.filter(f => f.datatype === 'number');
   const rest = present.filter(f => f.datatype !== 'number');
 
+  const has = f => f.value != null && !(Array.isArray(f.value) && !f.value.length);
+  const valueOf = f => {
+    if (f.targets.length) return f.value.map(id => state.byId.get(id)).filter(Boolean).flatMap((t, i) => [i ? ', ' : '', ...linkTo(t)]);
+    // A concept mapped to another ontology's term (vocab.csv `match`) links to that term.
+    const term = v => { const uri = state.matches[f.collection]?.[v]; return uri ? h('a', { href: uri, title: uri, class: 'match' }, v) : v; };
+    if (Array.isArray(f.value)) return f.value.flatMap((v, i) => [i ? ', ' : '', term(v)]);
+    if (f.datatype === 'concept') return term(f.value);
+    if (typeof f.value === 'boolean') return f.value ? 'Yes' : 'No';
+    return typeof f.value === 'string' ? md(inline(f.value)) : String(f.value);
+  };
+  // A field that cites its rule links its label to that rule.
+  const label = f => {
+    const r = f.rule?.id && state.byId.get(f.rule.id);
+    return r ? h('a', { href: route(r), title: `Rule: ${title(r)}` }, f.label) : f.label;
+  };
   const rows = rest.map(f => {
-    let value;
-    if (f.targets.length) {
-      value = f.value.map(id => state.byId.get(id)).filter(Boolean).flatMap((t, i) => [i ? ', ' : '', ...linkTo(t)]);
-    } else value = Array.isArray(f.value) ? f.value.join(', ') : typeof f.value === 'string' ? md(inline(f.value)) : f.value;
-    return [h('dt', {}, f.label), h('dd', {}, value)];
+    if (f.datatype === 'semantic') {
+      // A group: one line per entry, its values joined ("Mentor · Marcos").
+      const lines = f.value.map(item => item.fields.filter(has).flatMap((c, i) => [i ? ' · ' : '', valueOf(c)]));
+      return [h('dt', {}, label(f)), h('dd', {}, lines.length > 1 ? h('ul', { class: 'group' }, lines.map(l => h('li', {}, l))) : lines[0])];
+    }
+    return [h('dt', {}, label(f)), h('dd', {}, valueOf(f))];
   });
 
   // Incoming links grouped by the model they come from.
@@ -225,7 +242,7 @@ function renderDetail(e) {
     h('h1', {}, title(e)),
     description && h('div', { class: 'text' }, md(blocks(description))),
     e.model === 'rolltable' && field(e, 'entries') && rollTable(e),
-    stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, f.label, h('b', {}, String(f.value))))),
+    stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, label(f), h('b', {}, String(f.value))))),
     rows.length > 0 && h('dl', {}, rows),
     incoming.length ? [h('h2', {}, 'Linked from'), incomingEls] : null,
     h('h2', {}, 'Relationships'),
@@ -239,7 +256,7 @@ function renderDetail(e) {
 function graph(e) {
   const nb = new Map();
   const add = (other, label) => { const x = nb.get(other.id) ?? { e: other, labels: [] }; x.labels.push(label); nb.set(other.id, x); };
-  for (const f of e.fields) if (f.targets.length && f.value) for (const id of f.value) { const t = state.byId.get(id); if (t) add(t, `${f.label} →`); }
+  for (const { id, label } of links(e)) { const t = state.byId.get(id); if (t) add(t, `${label} →`); }
   for (const b of state.back.get(e.id) ?? []) add(b.from, `← ${b.via}`);
   const all = [...nb.values()];
   if (!all.length) return h('p', { class: 'empty' }, 'No links yet.');

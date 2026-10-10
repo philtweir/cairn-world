@@ -1,0 +1,35 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+player,Player,string,1,E41_Appellation,cairn:played_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+background,Background,resource-instance-list,1,E55_Type,P2_has_type,,,background,character-creation-backgrounds
+age,Age,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-attributes-hit-protection-and-traits
+str,STR,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
+dex,DEX,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
+wil,WIL,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
+str_max,Max STR,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-attributes
+dex_max,Max DEX,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-attributes
+wil_max,Max WIL,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-attributes
+hp,HP,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-hit-protection
+hp_max,Max HP,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-hit-protection
+armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-armor
+gold,Gold (gp),number,1,E54_Dimension,P43_has_dimension,,,,marketplace
+fatigue,Fatigue,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-deprivation-fatigue
+deprived,Deprived,boolean,1,E62_String,P3_has_note,,,,core-rules-deprivation-fatigue
+physique,Physique,concept,1,E55_Type,P2_has_type,,Physique,,character-creation-physique
+skin,Skin,concept,1,E55_Type,P2_has_type,,Skin,,character-creation-skin
+hair,Hair,concept,1,E55_Type,P2_has_type,,Hair,,character-creation-hair
+face,Face,concept,1,E55_Type,P2_has_type,,Face,,character-creation-face
+speech,Speech,concept,1,E55_Type,P2_has_type,,Speech,,character-creation-speech
+clothing,Clothing,concept,1,E55_Type,P2_has_type,,Clothing,,character-creation-clothing
+virtue,Virtue,concept,1,E55_Type,P2_has_type,,Virtue,,character-creation-virtue
+vice,Vice,concept,1,E55_Type,P2_has_type,,Vice,,character-creation-vice
+bond,Bond,string,1,E62_String,P3_has_note,,,,character-creation-bonds
+omen,Omen,string,1,E62_String,P3_has_note,,,,character-creation-omens
+inventory,Inventory,resource-instance-list,n,E55_Type,cairn:carries,,,itemtype|spellbook,character-creation-inventory
+scars,Scars,semantic,n,E3_Condition_State,P44_has_condition,,,,core-rules-scars
+scar_kind,Scar,concept,1,E55_Type,P2_has_type,scars,Scar,,
+scar_note,Note,string,1,E62_String,P3_has_note,scars,,,
+ties,Ties,semantic,n,E13_Attribute_Assignment,P140i_was_attributed_by,,,,
+tie_with,With,resource-instance,1,E21_Person,P141_assigned,ties,,npc|pc,
+tie_kind,Kind,concept,1,E55_Type,P177_assigned_property_of_type,ties,Tie Kind,,

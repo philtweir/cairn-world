@@ -532,7 +532,28 @@ for (const model of Object.keys(all)) {
   }
 }
 
-// ---- 7. Write ------------------------------------------------------------------------------------------
+// ---- 7. Vocabularies from the rules' own tables -----------------------------------------------------
+// Character traits and scars are picked from tables, so they become controlled vocabularies
+// (rules/vocab.csv) that the PC model's concept fields use.
+
+const vocab = [];
+const VOCAB_TABLES = {
+  Physique: 'character-creation-physique-table', Skin: 'character-creation-skin-table', Hair: 'character-creation-hair-table',
+  Face: 'character-creation-face-table', Speech: 'character-creation-speech-table', Clothing: 'character-creation-clothing-table',
+  Virtue: 'character-creation-virtue-table', Vice: 'character-creation-vice-table', Scar: 'core-rules-scars-table-table',
+};
+for (const [collection, key] of Object.entries(VOCAB_TABLES)) {
+  const t = all.rolltable.get(key);
+  if (!t) { warnings.push(`vocabulary ${collection}: no table "${key}"`); continue; }
+  const seen = new Set();
+  for (const line of t.fields.entries.split('\n').filter(Boolean)) {
+    // "1 | Athletic"; scars are "1 | Lasting Scar: Roll 1d6..." and take the name before the colon.
+    const label = stripMd(line.split(' | ')[1] ?? '').split(':')[0].trim();
+    if (label && !seen.has(label)) { seen.add(label); vocab.push([collection, label]); }
+  }
+}
+
+// ---- 8. Write ------------------------------------------------------------------------------------------
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
@@ -542,4 +563,6 @@ for (const [model, cols] of Object.entries(MODELS)) {
   const nLinks = [...all[model].values()].reduce((n, e) => n + Object.values(e.links).reduce((a, s) => a + s.size, 0), 0);
   console.log(`rules/${model}.csv: ${rows.length} rows, ${nLinks} links`);
 }
+fs.writeFileSync(path.join(OUT, 'vocab.csv'), toCsv([['collection_name', 'concept_label'], ...vocab]));
+console.log(`rules/vocab.csv: ${vocab.length} concepts in ${Object.keys(VOCAB_TABLES).length} vocabularies`);
 if (warnings.length) console.warn(`\n${warnings.length} warning(s):\n  ${warnings.join('\n  ')}`);

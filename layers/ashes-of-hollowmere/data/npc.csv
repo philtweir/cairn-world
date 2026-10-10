@@ -1,2 +1,3 @@
-ResourceID,home
-old-marta,sunken-chapel
+ResourceID,home,tie_with,tie_kind
+old-marta,sunken-chapel,,
+old-marta,,hroth,Enemy

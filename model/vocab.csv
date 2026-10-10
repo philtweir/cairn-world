@@ -1,30 +1,61 @@
-collection_name,concept_label
-Place Kind,Region
-Place Kind,Settlement
-Place Kind,Site
-Place Kind,Landmark
-Disposition,Friendly
-Disposition,Neutral
-Disposition,Wary
-Disposition,Hostile
-Item Kind,Weapon
-Item Kind,Armor
-Item Kind,Transport
-Item Kind,Tool
-Item Kind,Relic
-Item Property,bulky
-Item Property,petty
-Item Property,slow
-Item Kind,Gear
-Item Kind,Service
-Item Kind,Spellbook
-Rule Category,Principles
-Rule Category,Core Rules
-Rule Category,Character Creation
-Rule Category,Procedures
-Rule Category,Marketplace
-Rule Category,Warden's Guide
-Route Kind,Road
-Route Kind,Trail
-Route Kind,Passage
-Route Kind,Crossing
+collection_name,concept_label,match
+Place Kind,Region,
+Place Kind,Settlement,
+Place Kind,Site,
+Place Kind,Landmark,
+Disposition,Friendly,
+Disposition,Neutral,
+Disposition,Wary,
+Disposition,Hostile,
+Item Kind,Weapon,
+Item Kind,Armor,
+Item Kind,Transport,
+Item Kind,Tool,
+Item Kind,Relic,
+Item Property,bulky,
+Item Property,petty,
+Item Property,slow,
+Item Kind,Gear,
+Item Kind,Service,
+Item Kind,Spellbook,
+Rule Category,Principles,
+Rule Category,Core Rules,
+Rule Category,Character Creation,
+Rule Category,Procedures,
+Rule Category,Marketplace,
+Rule Category,Warden's Guide,
+Route Kind,Road,
+Route Kind,Trail,
+Route Kind,Passage,
+Route Kind,Crossing,
+Tie Kind,Friend,rel:friendOf
+Tie Kind,Close Friend,rel:closeFriendOf
+Tie Kind,Acquaintance,rel:acquaintanceOf
+Tie Kind,Mentor,rel:mentorOf
+Tie Kind,Apprentice,rel:apprenticeTo
+Tie Kind,Colleague,rel:colleagueOf
+Tie Kind,Employer,rel:employerOf
+Tie Kind,Employee,rel:employedBy
+Tie Kind,Parent,rel:parentOf
+Tie Kind,Child,rel:childOf
+Tie Kind,Sibling,rel:siblingOf
+Tie Kind,Spouse,rel:spouseOf
+Tie Kind,Relative,
+Tie Kind,Rival,rel:antagonistOf
+Tie Kind,Enemy,rel:enemyOf
+Document Kind,Letter,
+Document Kind,Map,
+Document Kind,Will,
+Document Kind,Note,
+Document Kind,Inscription,
+Document Kind,Book,
+Document Kind,Tract,
+Event Kind,Death,
+Event Kind,Creation,
+Event Kind,Research,
+Event Kind,Transfer of Custody,
+Event Kind,Construction,
+Event Kind,Ritual,
+Event Kind,Meeting,
+Event Kind,Battle,
+Event Kind,Natural Event,
