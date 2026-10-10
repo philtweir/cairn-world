@@ -457,8 +457,6 @@ function show() {
   // A link to a General entry must open even while General is hidden in the list.
   if (e && isGeneral(e) && !state.rules) { state.rules = true; $('rules').checked = true; }
   state.scope = lens?.id ?? (e ? state.lensOf[e.model] : null);
-  // On a phone one pane shows at a time: the page, or the list while searching.
-  document.body.dataset.view = state.q ? 'list' : 'detail';
   if (e) renderDetail(e);
   else if (lens) renderLens(lens);
   else if (a) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: `#/${state.view}/` }, 'Back home'));
@@ -472,9 +470,13 @@ try {
   await load();
   status('');
   $('app').hidden = false;
+  // On a phone one pane shows at a time: the list while typing a search, else the page. Opening
+  // anything (a result, even the one already open, or any link) shows the page; the query stays,
+  // and focusing the search box brings its results back.
+  const pane = v => { document.body.dataset.view = v; };
   $('q').addEventListener('input', ev => {
     state.q = ev.target.value.trim().toLowerCase();
-    document.body.dataset.view = state.q ? 'list' : 'detail';
+    pane(state.q ? 'list' : 'detail');
     renderSide();
   });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
@@ -486,7 +488,10 @@ try {
     author.setAttribute('aria-pressed', state.author);
     show();
   });
-  addEventListener('hashchange', show);
+  $('q').addEventListener('focus', () => { if (state.q) pane('list'); });
+  $('list').addEventListener('click', ev => { if (ev.target.closest('a')) pane('detail'); });
+  addEventListener('hashchange', () => { pane('detail'); show(); scrollTo(0, 0); });
+  pane('detail');
   addEventListener('keydown', ev => { if (ev.key === '/' && document.activeElement !== $('q')) { ev.preventDefault(); $('q').focus(); } });
   show();
 } catch (err) {
