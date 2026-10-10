@@ -252,11 +252,14 @@ positions per value. The explorer does not need that extension, so it is not in 
 `layer.json`, `globe.remap` gives the remap (the pole that becomes the globe's north pole, the
 point on its seam, and the south and east-west squeeze), and `globe.maps` pins regional maps to it.
 `globe.csv` says, for each place, what it is on Earth (Natural Earth country names joined by `|`,
+each optionally cut to a band of longitude, `Russia@24:60`, for a realm that is part of a country;
 or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
 that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
-`geometry` column of the layer's `place.csv` (countries dissolved into one outline per realm), and
-`basemap.json`, the globe's land: Natural Earth 1:110m for the whole globe and 1:50m around each
-regional map, which the explorer draws in place of the coarse coast there. The script needs the
+`geometry` column of the layer's `place.csv` (each realm's countries unioned into one outline, with
+`polygon-clipping`), and `basemap.json`, the globe's land: the realms' Earth shapes together and
+nothing else, so the world's land is its named lands. It is Natural Earth 1:110m for the whole
+globe and 1:50m around each regional map, which the explorer draws in place of the coarse coast
+there. The script needs the
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
 
@@ -264,12 +267,18 @@ publishes the basemap with the views that stand on the layer.
 east-west 0.55). Realms are their countries ("In the projection: Sweden"). The High Marks are read
 as Austria, Czechia, Slovakia, Hungary, Slovenia, Croatia, Bosnia and Herzegovina, Serbia,
 Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukraine and Belarus: an
-assumption, as the notes say only "the remaining countries of Central and Eastern Europe". Miurna
-and Leantis ("part of Russia") have no shape until it is settled which part, and Cofrey is drawn as
-Mongolia alone. The Dells map is pinned with the Bonefort at remapped Burgas, drawn north-up, at
-5 km to a map unit: the scale at which its land and sea best agree with the globe's coast (14 of
-its 15 places; the Fist of Glass, rocks off the coast, is too small for the coastline data). That
-makes the Dells about 130 by 100 km, and Hearth to the Trading Post about one 30 km watch.
+assumption, as the notes say only "the remaining countries of Central and Eastern Europe". Russia
+is divided arbitrarily along meridians: Miurna is European Russia west of the Urals (24°E to 60°E),
+Leantis Siberia from the Urals to Lake Baikal (60°E to 105°E), and Cofrey Mongolia with Russia east
+of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. Countries no realm
+names (Turkey, Greece, the United Kingdom, the Americas and so on) are sea.
+
+The Dells map is drawn north-up at 5 km to a map unit, with the Bonefort pinned at Earth 27.67°E
+42.83°N, about 40 km north of Burgas where the Balkan range meets the sea. That anchor and scale
+are where its land and sea best agree with the named lands' coast: all 15 of its places fall on
+the right side, and still do if the scale or anchor shifts a little. (At Burgas itself, the Dells'
+northern places fell in what was Turkey, now sea.) That makes the Dells about 130 by 100 km, and
+Hearth to the Trading Post about one 30 km watch.
 
 ## Rules data (`rules/`)
 
@@ -408,7 +417,7 @@ too: build and upload `dist/`.
   and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
   `data/ontology.json`) is CC BY 4.0 and credited in the footer. `@alizarin/geo` is AGPL-3.0, like
   Alizarin. d3-force, d3-geo and the Lucide icons are ISC. Natural Earth data (basemaps and realm
-  outlines) is public domain. Add your own licence for `layers/`.
+  outlines) is public domain; `polygon-clipping` (MIT) is used only by the globe script. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository

@@ -8,7 +8,7 @@
     "maps": {
       "dells": {
         "name": "The Dells and Surrounds",
-        "anchor": { "at": [2.9, 11.9], "earth": [27.47, 42.5], "place": "the-bonefort" },
+        "anchor": { "at": [2.9, 11.9], "earth": [27.67, 42.83], "place": "the-bonefort" },
         "kmPerUnit": 5
       }
     }

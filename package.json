@@ -25,6 +25,7 @@
     "d3-geo-projection": "4.0.0",
     "esbuild": "0.28.2",
     "lucide-static": "1.48.0",
+    "polygon-clipping": "0.15.7",
     "topojson-client": "3.1.0",
     "world-atlas": "2.0.2"
   }

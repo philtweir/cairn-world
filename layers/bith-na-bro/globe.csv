@@ -1,8 +1,8 @@
 ResourceID,earth,map,note
-miurna,,,"Part of Russia: which part is not settled, so no shape yet."
-leantis,,,"Another part of Russia: which part is not settled, so no shape yet."
+miurna,Russia@24:60,,"European Russia, west of the Urals: an arbitrary division of Russia."
+leantis,Russia@60:105,,Siberia from the Urals to Lake Baikal: an arbitrary division of Russia.
 godrastan,France|Italy|Spain|Portugal,,
-cofrey,Mongolia,,"Mongolia only: the part of Russia it also takes is not settled."
+cofrey,Mongolia|Russia@105:180|Russia@-180:-160,,"Mongolia, and Russia east of Lake Baikal to the Pacific: an arbitrary division of Russia."
 palatinate,Kazakhstan,,
 high-marks,Austria|Czechia|Slovakia|Hungary|Slovenia|Croatia|Bosnia and Herz.|Serbia|Montenegro|Kosovo|Macedonia|Albania|Bulgaria|Romania|Moldova|Ukraine|Belarus,,"""The remaining countries of Central and Eastern Europe"": this reading of that list is an assumption."
 ievure,Sweden,,
@@ -13,13 +13,13 @@ aphinos,Latvia,,
 caryes,Finland,,
 sevine,Belgium,,
 grunheim,Poland,,
-rock-of-aphemenosta,POINT (20.51 54.71),,Kaliningrad.
+rock-of-aphemenosta,Russia@19:24,,Kaliningrad: the Russian exclave.
 zintar,Germany,,
 the-dells,,dells POINT (18.2 3.8),
 the-black-dunes,,dells POINT (9.4 9.4),
 artificers-workshop,,dells POINT (13.8 6.1),
 hearth,,dells POINT (22.2 6.3),
-the-bonefort,,dells POINT (2.9 11.9),"The map's anchor: remapped Burgas."
+the-bonefort,,dells POINT (2.9 11.9),"The map's anchor: Earth 27.67°E 42.83°N, about 40 km north of Burgas, where the Dells map best fits the named lands (all its places on the right side of the coast)."
 the-glaciers,,dells POINT (25.3 19.6),
 cannerly-hall,,dells POINT (24.8 9.7),
 the-sea,,dells POINT (1.6 6.1),

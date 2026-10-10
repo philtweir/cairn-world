@@ -8,9 +8,11 @@
 //   - the `geometry` column of layers/<layer>/data/place.csv, for every place listed in
 //     layers/<layer>/globe.csv, from what it is on Earth (countries, or a point) or where it is on
 //     one of the layer's regional maps (`globe.maps`, each pinned to the globe at one point);
-//   - layers/<layer>/basemap.json, the globe's land, which the explorer draws under its maps.
+//   - layers/<layer>/basemap.json, the globe's land, which the explorer draws under its maps: the
+//     places' Earth shapes together, and nothing else, so the world is only its named lands.
 //
-// globe.csv columns: ResourceID, earth (Natural Earth country names joined by "|", or WKT in
+// globe.csv columns: ResourceID, earth (Natural Earth country names joined by "|", each with an
+// optional band of longitude, "Russia@24:60", for a realm that is part of a country; or WKT in
 // Earth's longitude and latitude), map ("<map> POINT (x y)" in that map's units, x east and y
 // south), note. A place with neither keeps no geometry. Natural Earth data is public domain;
 // it comes from the world-atlas package (a dev dependency: the site never needs it).
@@ -20,7 +22,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { geoProjection, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
-import { feature, merge } from 'topojson-client';
+import { feature } from 'topojson-client';
+import polygonClipping from 'polygon-clipping';
 import { parseCsv, toCsv } from './csv.mjs';
 import { wktToGeometry } from './geometry.mjs';
 
@@ -130,6 +133,28 @@ function mapToGlobe(map, remap, [x, y]) {
   return [lon0 + east / (km * Math.cos(lat0 * deg)), lat0 + north / km];
 }
 
+// A realm's shape on Earth, from Natural Earth countries: "France|Italy", or "Russia@24:60" for the
+// part of a country between two longitudes. Unioned into one outline (planar, in degrees: fine
+// away from the poles and the 180th meridian, which no band here crosses). Returns MultiPolygon
+// coordinates wound as GeoJSON has them (outer rings anticlockwise).
+function earthShape(topo, spec, where) {
+  const byName = new Map(topo.objects.countries.geometries.map(g => [g.properties.name, g]));
+  const parts = spec.split('|').map(s => s.trim()).map(part => {
+    const m = /^(.+?)(?:@(-?[\d.]+):(-?[\d.]+))?$/.exec(part);
+    const g = byName.get(m[1]);
+    if (!g) throw new Error(`${where}: no country "${m[1]}" in Natural Earth (world-atlas)`);
+    const coords = feature(topo, g).geometry.coordinates;
+    if (m[2] === undefined) return coords;
+    const [x0, x1] = [Number(m[2]), Number(m[3])];
+    return polygonClipping.intersection(coords, [[[x0, -90], [x1, -90], [x1, 90], [x0, 90], [x0, -90]]]);
+  });
+  const out = polygonClipping.union(...parts);
+  if (!out.length) throw new Error(`${where}: "${spec}" is empty`);
+  return out;
+}
+// d3-geo takes a ring's inside to be on its right (outer rings clockwise): the reverse of GeoJSON.
+const forD3 = mp => ({ type: 'MultiPolygon', coordinates: mp.map(poly => poly.map(ring => [...ring].reverse())) });
+
 // ---- main --------------------------------------------------------------------------------------
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -141,8 +166,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const remap = makeRemap(settings.globe.remap);
   const maps = settings.globe.maps ?? {};
 
-  const countriesTopo = atlas('countries-110m.json');
-  const byName = new Map(countriesTopo.objects.countries.geometries.map(g => [g.properties.name, g]));
+  const countries = atlas('countries-110m.json'), countriesDetail = atlas('countries-50m.json');
 
   // What each place is: Earth's countries or a WKT shape, or a point on a regional map.
   const rows = parseCsv(fs.readFileSync(path.join(dir, 'globe.csv'), 'utf8'));
@@ -161,11 +185,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     } else if (/^[A-Z]+\s*\(/.test(earth)) {
       g = round(remap.project(wktToGeometry(earth)), 3);
     } else if (earth) {
-      const names = earth.split('|').map(s => s.trim());
-      for (const n of names) if (!byName.has(n)) throw new Error(`globe.csv ${id}: no country "${n}" in Natural Earth (world-atlas countries-110m)`);
-      // Dissolved into one shape, so shared borders between a realm's countries disappear.
-      const earthShape = merge(countriesTopo, names.map(n => byName.get(n)));
-      g = round(dropSpecks(remap.project(earthShape), 2e-6), 2);
+      g = round(dropSpecks(remap.project(forD3(earthShape(countries, earth, `globe.csv ${id}`))), 2e-6), 2);
     }
     if (g) geometryOf.set(id, g);
   }
@@ -180,22 +200,24 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
   fs.writeFileSync(placeFile, toCsv(place));
 
-  // The globe's land, for the explorer to draw under its maps: Natural Earth 1:110m for the whole
+  // The globe's land, for the explorer to draw under its maps: every place's Earth shape together,
+  // and nothing more, so the land is the world's named lands. Natural Earth 1:110m for the whole
   // globe, and 1:50m around each regional map (3 degrees beyond its places), which the explorer
-  // draws instead when a map shows only that area.
-  const landOf = name => { const t = atlas(name); return feature(t, t.objects.land); };
-  const geomOf = fc => (fc.type === 'FeatureCollection' ? fc.features[0].geometry : fc.geometry ?? fc);
-  const features = [{ type: 'Feature', properties: { kind: 'land', source: 'Natural Earth 1:110m land (public domain), remapped' },
-    geometry: dropSpecks(round(geomOf(remap.project(landOf('land-110m.json'))), 2), 2e-6) }];
-  const detailed = remap.project(landOf('land-50m.json'));
-  for (const [name, map] of Object.entries(maps)) {
+  // draws there instead.
+  const specs = rows.slice(1).filter(r => r[0] && r[col('earth')] && !/^[A-Z]+\s*\(/.test(r[col('earth')])).map(r => r[col('earth')]).join('|');
+  const landAt = topo => forD3(earthShape(topo, specs, 'basemap'));
+  const source = scale => `Natural Earth 1:${scale} countries (public domain): the named lands only, remapped`;
+  const features = [{ type: 'Feature', properties: { kind: 'land', source: source('110m') },
+    geometry: dropSpecks(round(remap.project(landAt(countries)), 2), 2e-6) }];
+  const detailed = remap.project(landAt(countriesDetail));
+  const geomOf = x => (x.type === 'FeatureCollection' ? x.features[0]?.geometry : x.type === 'Feature' ? x.geometry : x);
+  for (const [name] of Object.entries(maps)) {
     const pts = rows.slice(1).filter(r => (r[col('map')] ?? '').startsWith(`${name} `)).map(r => geometryOf.get(r[0]).coordinates);
     if (!pts.length) continue;
     const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
     // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
     const clipped = flipY(geoProject(flipY(detailed), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]])));
-    features.push({ type: 'Feature', bbox, properties: { kind: 'land-detail', map: name, source: 'Natural Earth 1:50m land (public domain), remapped' },
-      geometry: round(geomOf(clipped), 3) });
+    features.push({ type: 'Feature', bbox, properties: { kind: 'land-detail', map: name, source: source('50m') }, geometry: round(geomOf(clipped), 3) });
   }
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));
   console.log(`layers/${key}: ${geometryOf.size} place geometries; basemap ${(fs.statSync(path.join(dir, 'basemap.json')).size / 1024).toFixed(0)} KB`);

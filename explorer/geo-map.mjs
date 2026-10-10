@@ -37,7 +37,9 @@ export function locate(ctx, e) {
     if (isPlace(e) && l.property === P) continue;   // its parent: context, below
     direct.push({ e: t, how: l.label });
   }
-  for (const b of state.back.get(e.id) ?? []) {
+  // A place is located by what it links to; another place pointing at it (a route ending there)
+  // does not say where it is. Anything else can be located from a place's side (P53i).
+  for (const b of isPlace(e) ? [] : state.back.get(e.id) ?? []) {
     if (b.derived || b.from === e || !isPlace(b.from) || !spatial(b.property, 'domain') || b.property === P) continue;
     direct.push({ e: b.from, how: b.via });
   }
