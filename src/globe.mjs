@@ -77,7 +77,7 @@ export function makeRemap({ pole, seam, south, eastWest }) {
     return mercator.invert([x, y]);
   };
   // A GeoJSON object in Earth's coordinates -> the same in the globe's.
-  const project = obj => flipY(geoProject(obj, projection));
+  const project = obj => { const g = geoProject(obj, projection); return g && flipY(g); };   // null if nothing is left after the seam cut
   return { rotate, toGlobe, toEarth, project };
 }
 
@@ -185,20 +185,23 @@ function earthShape(topo, spec, where) {
 // two datasets disagree along a coast, each leftover sliver goes to the nearest region.
 // "Russia#Urals+Siberian-Buryat" is the regions named, by federal district (`region`) or by name,
 // less those after "-".
+// A Natural Earth GeoJSON file (public domain), fetched once into .cache/natural-earth/.
+function naturalEarth(name) {
+  const file = path.join(ROOT, '.cache', 'natural-earth', name);
+  if (!fs.existsSync(file)) {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    execFileSync('curl', ['-sfL', '--retry', '3', '-o', file, `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/${name}`]);
+  }
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
 const ADMIN1 = 'ne_10m_admin_1_states_provinces.geojson';
 let admin1 = null;
 const partitions = new Map();
 function regionsOf(topo, country, coords, select, where) {
   const key = `${topo.arcs.length}:${country}`;
   if (!partitions.has(key)) {
-    if (!admin1) {
-      const file = path.join(ROOT, '.cache', 'natural-earth', ADMIN1);
-      if (!fs.existsSync(file)) {
-        fs.mkdirSync(path.dirname(file), { recursive: true });
-        execFileSync('curl', ['-sfL', '--retry', '3', '-o', file, `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/${ADMIN1}`]);
-      }
-      admin1 = JSON.parse(fs.readFileSync(file, 'utf8')).features;
-    }
+    admin1 ??= naturalEarth(ADMIN1).features;
     const units = admin1.filter(f => f.properties.admin === country);
     if (!units.length) throw new Error(`${where}: no admin-1 regions for "${country}"`);
     let t = topology({ units: { type: 'FeatureCollection', features: units } }, 1e6);
@@ -227,6 +230,20 @@ function regionsOf(topo, country, coords, select, where) {
   return polygonClipping.union(polygonClipping.intersection(coords, plane([...chosen])), ...slivers.filter(x => names.has(x.unit)).map(x => [x.poly]));
 }
 const snapPolys = polys => polys.map(poly => poly.map(snapRing).filter(r => r.length >= 4)).filter(poly => poly.length);
+// Douglas-Peucker on an open line, in degrees.
+function simplifyLine(pts, tol) {
+  if (pts.length < 3) return pts;
+  const keep = new Uint8Array(pts.length); keep[0] = keep[pts.length - 1] = 1;
+  const stack = [[0, pts.length - 1]];
+  while (stack.length) {
+    const [a, b] = stack.pop(); let far = -1, dmax = tol;
+    const [ax, ay] = pts[a], [bx, by] = pts[b], dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+    for (let i = a + 1; i < b; i++) { const d = len ? Math.abs(dy * (pts[i][0] - ax) - dx * (pts[i][1] - ay)) / len : Math.hypot(pts[i][0] - ax, pts[i][1] - ay); if (d > dmax) { dmax = d; far = i; } }
+    if (far > 0) { keep[far] = 1; stack.push([a, far], [far, b]); }
+  }
+  return pts.filter((_, i) => keep[i]);
+}
+
 // Coordinates snapped to a 1e-4 degree grid, with the repeats that makes dropped and the ring
 // closed: polygon-clipping fails on near-coincident points otherwise.
 function snapRing(ring) {
@@ -332,6 +349,25 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       if (geometry) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry });
     }
   }
+  // Rivers and lakes: Natural Earth 1:50m, remapped, on every land (named or not). Rivers come in
+  // three widths by Natural Earth's rank (`w` 3 is the greatest); the stretches drawn through lakes
+  // ("lake centerlines") are left out. Each river is its own line, so the explorer can skip those
+  // out of view; in a detailed area it draws the rivers src/terrain.mjs finds there instead.
+  const lineOf = g => (g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : []);
+  const rivers = naturalEarth('ne_50m_rivers_lake_centerlines.geojson').features.filter(f => f.properties.featurecla === 'River');
+  for (const w of [3, 2, 1]) {
+    const lines = rivers.filter(f => (f.properties.scalerank <= 2 ? 3 : f.properties.scalerank <= 4 ? 2 : 1) === w)
+      .flatMap(f => lineOf(geomOf(remap.project(f.geometry) ?? { type: 'none' })))
+      .map(l => simplifyLine(l.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100]), 0.03))
+      .filter(l => l.length >= 2);
+    features.push({ type: 'Feature', properties: { kind: 'river', w, source: 'Natural Earth 1:50m rivers (public domain), remapped' }, geometry: { type: 'MultiLineString', coordinates: lines } });
+  }
+  // Lakes: water over land. Natural Earth winds them as d3 expects, but any read inside out is turned.
+  const lakes = naturalEarth('ne_50m_lakes.geojson').features.flatMap(f => polysOf(geomOf(remap.project(f.geometry) ?? { type: 'none' })))
+    .map(poly => poly.map(r => { const t = simplifyLine(r, 0.04); return t.length >= 4 ? t : r; }))
+    .map(poly => (geoArea({ type: 'Polygon', coordinates: poly }) > 2 * Math.PI ? poly.map(r => [...r].reverse()) : poly));
+  const lakeGeom = dropSpecks(round({ type: 'MultiPolygon', coordinates: lakes }, 2), 3e-6);
+  if (lakeGeom) features.push({ type: 'Feature', properties: { kind: 'lake', source: 'Natural Earth 1:50m lakes (public domain), remapped' }, geometry: lakeGeom });
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));
   console.log(`layers/${key}: ${geometryOf.size} place geometries; basemap ${(fs.statSync(path.join(dir, 'basemap.json')).size / 1024).toFixed(0)} KB`);
 }

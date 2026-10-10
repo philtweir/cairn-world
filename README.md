@@ -32,7 +32,7 @@ anything that ships it, including this site.
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
 | `layers/<key>/globe.csv`, `basemap.json` | Optional: what each place is on Earth or on a regional map, and the globe's land, for `npm run globe` (see Maps) |
-| `layers/<key>/terrain.csv`, `relief.json`, `relief-*.webp` | Optional: story edits to the relief, and the shaded-relief images, for `npm run terrain` (see Maps) |
+| `layers/<key>/terrain.csv`, `relief.json`, `relief-*.webp`, `rivers.json` | Optional: story edits to the relief, the shaded-relief images, and the rivers found in detailed areas, for `npm run terrain` (see Maps) |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin, d3-force and d3-geo into the site root |
@@ -320,15 +320,29 @@ carries its attribution. `terrain.csv` holds the edits, in order: `volcano` (a c
 height), `raise` (add metres, fading out), `scale` (multiply heights, fading out), each at a place,
 a globe `POINT`, or an `EARTH POINT`, with a radius in km.
 
+**Rivers and lakes.** Real ones, so they run down the same valleys as the relief: Natural Earth
+1:50m rivers (in three widths by its rank; the stretches through lakes left out) and lakes,
+remapped by `npm run globe` into `basemap.json`. In each regional map's detailed area, where Natural
+Earth has only the greatest rivers, `npm run terrain` finds them from the 1 km heights instead
+(after the story edits): pits are filled so every cell drains to the sea or the edge, each cell
+drains to its steepest lower neighbour, and a river is drawn wherever more than 400 km² drains
+through (wider past 2,000 and 15,000 km²), smoothed, into `rivers.json`. The explorer draws water
+over the relief, Natural Earth's rivers masked out of a detailed area where the found ones are
+drawn; the smaller rivers and lakes appear as a map zooms in. Rivers found this way follow the real
+terrain, not the hand-drawn regional map, so a story river that must run somewhere else needs an
+edit (or a `raise` to steer it).
+
 Bith na Bró's Balkan interior is more mountainous than Earth's, by one edit: its relief raised by
 up to 40%, fading out towards the coasts. Its volcanoes are Earth's own massifs (Rila, Pirin, the
 Balkan range) in the story, unchanged in shape: cones drawn as edits read as artificial.
 
 **Speed.** Turning a map redraws only what is in view, at most once a frame: relief costs the same
-however detailed (it is per pixel, in the shader); land outside the view is skipped, and inside a
-detailed area the coarse coast is not drawn; the graticule covers only the view; paths are cut to
-the map's box; and d3's adaptive resampling is off (the coasts are fine enough without it). In
-Chromium a redraw takes about 3 ms on an entry's map of the Dells and 13 ms on the whole globe.
+however detailed (it is per pixel, in the shader); land, rivers and lakes outside the view are
+skipped, and inside a detailed area the coarse coast is not drawn; rivers and lakes come in by zoom,
+and while a wide view is being dragged they wait until it stops; the graticule covers only the
+view; paths are cut to the map's box; and d3's adaptive resampling is off (the coasts are fine
+enough without it). In Chromium a redraw takes about 5 ms on an entry's map of the Dells and 14 ms
+on the whole globe.
 
 How far real terrain survives the remap: on the globe's northern half (the Greater Lands, Africa,
 Asia, Australia) ground is squeezed about 1.45 to 1, east-west against north-south, and its area
@@ -450,7 +464,7 @@ does not come back.
 | `views/<view>/bundles/<graphid>.json`, `resources/<id>.json` | Composed resources, per model and one by one |
 | `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
-| `layers/<layer>/basemap.json`, `relief.json`, `relief-*.webp` | A universe's land on its globe, and its shaded relief, for maps (see Maps) |
+| `layers/<layer>/basemap.json`, `rivers.json`, `relief.json`, `relief-*.webp` | A universe's land, rivers and lakes on its globe, and its shaded relief, for maps (see Maps) |
 
 `views.json` carries `build`, a hash of the rest of `data/`. The explorer fetches `views.json`
 fresh and requests every other file, and the page its script and stylesheet, with `?v=<build>`,
@@ -489,7 +503,7 @@ too: build and upload `dist/`.
     reserved, as their `rights` say.
 - **Data we draw on**, credited in the site footer where asked:
   - The CIDOC-CRM RDFS (published as `data/ontology.json`) is CC BY 4.0.
-  - Natural Earth (basemaps, realm outlines, Russia's regions) is public domain.
+  - Natural Earth (basemaps, realm outlines, Russia's regions, rivers and lakes) is public domain.
   - Elevation is from Terrain Tiles (Mapzen/Tilezen on AWS Open Data), whose sources ask for
     attribution: SRTM and GMTED2010 (USGS), ETOPO1 (NOAA), EU-DEM (produced using Copernicus data
     and information funded by the European Union) and others. Check its attribution list before

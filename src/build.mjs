@@ -246,7 +246,8 @@ function readSettings(key) {
   if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
   if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
-  // A basemap (src/globe.mjs writes one) is the land the explorer draws under this layer's maps.
+  // A basemap (src/globe.mjs writes one) is the land, rivers and lakes the explorer draws under this
+  // layer's maps; rivers.json (src/terrain.mjs) the rivers found in its detailed areas.
   const drawing = name => {
     const f = path.join(LAYERS_DIR, key, name);
     if (!fs.existsSync(f)) return null;
@@ -267,7 +268,7 @@ function readSettings(key) {
       if (!(Array.isArray(img.bbox) && img.bbox.length === 4)) problem(`${rel(reliefFile)}: ${img.file} needs a bbox`);
     }
   }
-  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap: drawing('basemap.json'), relief };
+  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), relief };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -509,10 +510,10 @@ for (const l of shippedLayers) for (const m of usedModels) {
   if (list?.length) write(`layers/${l}/${m.built.graph.graphid}.json`, { business_data: { resources: list } });
 }
 
-for (const l of shippedLayers) for (const k of ['basemap', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
+for (const l of shippedLayers) for (const k of ['basemap', 'rivers', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
 for (const l of shippedLayers) for (const img of layers[l].relief?.images ?? []) fs.copyFileSync(path.join(LAYERS_DIR, l, img.file), path.join(DIST, 'data', 'layers', l, img.file));
 const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
-  ...(l.basemap ? { basemap: `layers/${l.key}/basemap.json` } : {}), ...(l.relief ? { relief: `layers/${l.key}/relief.json` } : {}) });
+  ...Object.fromEntries(['basemap', 'rivers', 'relief'].filter(k => l[k]).map(k => [k, `layers/${l.key}/${k}.json`])) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,

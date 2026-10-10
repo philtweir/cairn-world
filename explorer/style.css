@@ -1,6 +1,6 @@
-:root{--relief-shadow:#3b2f22;--relief-light:#ffffff;--sea:#dde6e8;--land:#f8f5ee;--coast:#c9c2b2;--mention:#a8780f;--c0:#8a3b12;--c1:#3d5a80;--c2:#2f7d4f;--c3:#8e5aa3;--c4:#a8780f;--c5:#257f7f;--c6:#a33d5c;--c7:#5f6b3a;--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
+:root{--river:#6f9fb8;--relief-shadow:#3b2f22;--relief-light:#ffffff;--sea:#dde6e8;--land:#f8f5ee;--coast:#c9c2b2;--mention:#a8780f;--c0:#8a3b12;--c1:#3d5a80;--c2:#2f7d4f;--c3:#8e5aa3;--c4:#a8780f;--c5:#257f7f;--c6:#a33d5c;--c7:#5f6b3a;--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
 [hidden]{display:none !important}
-@media (prefers-color-scheme:dark){:root{--relief-shadow:#000000;--relief-light:#fff3dc;--sea:#0f1416;--land:#2a2622;--coast:#4a443a;--mention:#e2bd5a;--c0:#e0925a;--c1:#8fb3dd;--c2:#7cc79a;--c3:#c39bd6;--c4:#e2bd5a;--c5:#6fcfcf;--c6:#e08aa3;--c7:#b5c27a;--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
+@media (prefers-color-scheme:dark){:root{--river:#3d6f88;--relief-shadow:#000000;--relief-light:#fff3dc;--sea:#0f1416;--land:#2a2622;--coast:#4a443a;--mention:#e2bd5a;--c0:#e0925a;--c1:#8fb3dd;--c2:#7cc79a;--c3:#c39bd6;--c4:#e2bd5a;--c5:#6fcfcf;--c6:#e08aa3;--c7:#b5c27a;--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,serif}
 header{display:flex;align-items:center;gap:1rem;padding:.6rem 1rem;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;position:sticky;top:0;background:var(--bg);z-index:2}
@@ -197,6 +197,10 @@ body>footer{padding:1rem;border-top:1px solid var(--line);font:13px system-ui,sa
 .geomap .sea{fill:var(--sea)}
 .geomap .land{fill:var(--land)}
 .geomap .land.unnamed{fill:color-mix(in srgb,var(--land) 45%,var(--sea))}
+.geomap .water{pointer-events:none}
+.geomap .lake{fill:var(--sea);stroke:var(--river);stroke-width:.6}
+.geomap .river{fill:none;stroke:var(--river);stroke-linecap:round;stroke-linejoin:round}
+.geomap .river.w1{stroke-width:.7}.geomap .river.w2{stroke-width:1.2}.geomap .river.w3{stroke-width:1.9}
 .geomap>svg.base,.geomap>canvas.relief{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .geomap>svg:not(.base){position:relative;background:none}
 .geomap .graticule{fill:none;stroke:var(--coast);stroke-width:.5;opacity:.45}

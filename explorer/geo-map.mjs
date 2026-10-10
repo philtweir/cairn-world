@@ -128,9 +128,13 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const gLand = svg('g', { mask: `url(#${id}-m)` }), gDetail = svg('g', {});
   const gShapes = svg('g', {}), gLines = svg('g', {}), gPoints = svg('g', {}), gLabels = svg('g', { class: 'labels' });
   baseSvg.append(svg('defs', {}, mask), gSea, gLand, gDetail, gGrat);
-  el.append(gShapes, gLines, gPoints, gLabels);
+  // Water over the relief: lakes, then rivers (the coarse ones masked out of detailed areas, where
+  // the rivers found from the finer heights are drawn instead).
+  const gWater = svg('g', { class: 'water' }), gRiversCoarse = svg('g', { mask: `url(#${id}-m)` }), gRiversDetail = svg('g', {});
+  gWater.append(gRiversCoarse, gRiversDetail);
+  el.append(gWater, gShapes, gLines, gPoints, gLabels);
   const KINDS = { land: 'land', unnamed: 'land unnamed' };
-  let coarse = [], holes = [], details = [], relief = null;
+  let coarse = [], holes = [], details = [], water = [], relief = null;
   basemap?.then(b => {
     if (b?.relief?.images?.length) {
       try { relief = reliefLayer(canvas, b.relief); } catch (err) { console.warn('relief:', err); relief = null; }
@@ -164,6 +168,16 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
       details.push({ geom: f.geometry, node });
     }
     holes = [...boxes.values()];
+    // Lakes and rivers, each line or lake kept apart with its bounds so only those in view are drawn.
+    const parts = (g, kind) => (kind === 'lake' ? (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).map(c => ({ c, b: geoBounds({ type: 'Polygon', coordinates: c }), a: geoArea({ type: 'Polygon', coordinates: c }) }))
+      : (g.type === 'LineString' ? [g.coordinates] : g.coordinates).map(c => ({ c, b: geoBounds({ type: 'LineString', coordinates: c }) })));
+    const lakeF = fs.find(f => f.properties.kind === 'lake');
+    if (lakeF) { const node = svg('path', { class: 'lake' }); gWater.prepend(node); water.push({ node, polys: parts(lakeF.geometry, 'lake'), type: 'MultiPolygon' }); }
+    for (const f of fs.filter(f => f.properties.kind === 'river' || f.properties.kind === 'river-detail')) {
+      const node = svg('path', { class: `river w${f.properties.w}` });
+      (f.properties.kind === 'river' ? gRiversCoarse : gRiversDetail).append(node);
+      water.push({ node, polys: parts(f.geometry, 'river'), type: 'MultiLineString', w: f.properties.w });
+    }
     put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
     schedule();
   });
@@ -228,6 +242,15 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const inDetail = holes.some(({ bbox: [x0, y0, x1, y1] }) => cx - span * 1.3 > x0 && cx + span * 1.3 < x1 && cy - span > y0 && cy + span < y1);
     for (const c of coarse) c.node.setAttribute('d', inDetail ? '' : path(near ? { type: 'MultiPolygon', coordinates: c.polys.filter(near).map(p => p.c) } : c.geom) ?? '');
     for (const c of details) c.node.setAttribute('d', path(c.geom) ?? '');
+    // Detail by zoom: the whole globe shows the great rivers and lakes; more appear zoomed in.
+    const minW = span > 40 ? 3 : span > 20 ? 2 : 1, minLake = span > 40 ? 2e-5 : span > 20 ? 4e-6 : 0;
+    // Turning a wide view, water waits until the drag ends: it is detail the eye does not follow.
+    const still = !(moved && drag) || span <= 20;
+    gWater.style.display = still ? '' : 'none';
+    for (const x of still ? water : []) {
+      const show = x.type === 'MultiPolygon' ? x.polys.filter(p => p.a >= minLake) : x.w >= minW ? x.polys : [];
+      x.node.setAttribute('d', show.length ? path({ type: x.type, coordinates: (near ? show.filter(near) : show).map(p => p.c) }) ?? '' : '');
+    }
     relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
     for (const s of shapes) { s.fill.setAttribute('d', path(s.g) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }
@@ -261,7 +284,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     projection.rotate([drag.r[0] + dx * k, Math.max(-90, Math.min(90, drag.r[1] - dy * k)), drag.r[2]]);
     schedule();
   });
-  const end = () => { drag = null; };
+  const end = () => { const was = moved && drag; drag = null; if (was) schedule(); };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   el.addEventListener('click', ev => { if (moved) { ev.preventDefault(); ev.stopPropagation(); moved = false; } }, true);
   const zoom = f => () => { projection.scale(Math.max(base / 4, Math.min(base * 64, projection.scale() * f))); schedule(); };
