@@ -14,9 +14,8 @@ npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 ```
 
-Needs Node 22+. Alizarin is **vendored** as `vendor/alizarin-2.0.0-alpha.137.tgz`, built from
-`flaxandteal/alizarin` `release/2.0` at `ee19641`, because 2.0.0-alpha.137 is not on npm yet (only
-`@alizarin/napi` is). Swap the dependency to `alizarin@2.0.0-alpha.137` once it is published. Alizarin is AGPL-3.0, which applies to
+Needs Node 22+. Alizarin comes from npm, pinned to `2.0.0-alpha.139`; npm's `latest` tag is still
+an old 1.0.0, so upgrade by exact version (`npm install --save-exact alizarin@<version>`). Alizarin is AGPL-3.0, which applies to
 anything that ships it, including this site.
 
 ## Layout
@@ -187,11 +186,10 @@ too: build and upload `dist/`.
 
 - Every layer needs its own tile `uuidNamespace` for multi-valued fields to accumulate; Alizarin
   warns if it sees the same tile id with different data in two layers.
-- `graphManager.get()` is called with the exact class name (`NPC` -> `Npc`): in 2.0.0-alpha.137 any
-  other spelling throws for a model that has not been loaded yet.
 - Warnings about non-CRM properties are suppressed for the `cairn:` namespace only.
 - Earlier workarounds (concept-id translation, patching link targets, pinning publication ids,
-  flattening nested lists by hand, one process per view) were removed when alpha.137 fixed them.
+  flattening nested lists by hand, one process per view, exact-name model lookups) were removed as
+  alpha.137 and alpha.139 fixed them.
 
 ## Using the data elsewhere
 

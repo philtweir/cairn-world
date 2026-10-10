@@ -24,20 +24,11 @@ async function readField(entity, node) {
   }
 }
 
-// Looked up by exact class name: in 2.0.0-alpha.137, get() with any other spelling throws on a
-// model that is not loaded yet (the normalised lookup is not passed through to loadGraph).
-// The ORM names a model after its display name: "Monster Type" -> "MonsterType".
-const ormName = (graphManager, display) => {
-  const flat = display.replace(/[^a-z0-9]/gi, '').toLowerCase();
-  const found = [...graphManager.wkrms.keys()].find(k => k.toLowerCase() === flat);
-  if (!found) throw new Error(`ORM has no model for ${display} (have ${[...graphManager.wkrms.keys()].join(', ')})`);
-  return found;
-};
-
 export async function readEntities(graphManager, manifest, onProgress = () => {}) {
   const entities = [];
   for (const m of manifest.models) {
-    const all = await (await graphManager.get(ormName(graphManager, m.name))).all();
+    // get() accepts the display name ("Monster Type") as well as the class name ("MonsterType").
+    const all = await (await graphManager.get(m.name)).all();
     const entryOf = new Map(m.entries.map(e => [e.id, e]));
     for (const e of all) {
       const entry = entryOf.get(e.id);
