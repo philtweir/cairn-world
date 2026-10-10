@@ -63,6 +63,7 @@ export function loadOntology(root, expand) {
       if (!entry) { problems.push(`ontology/labels.csv:${i + 2} ${r.term} is not a known class or property`); return; }
       entry.display = r.label;
       if (r.comment) entry.displayComment = r.comment;
+      if (r.icon) entry.icon = r.icon;
     });
   }
   return { classes, properties, problems };

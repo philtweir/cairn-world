@@ -47,6 +47,7 @@ const md = nodes => nodes.map(n => {
   if (n.t === 'ref') {
     const t = state.resolve?.(n.target);
     if (!t) return md(n.c);
+    if (!state.author) return h('a', { href: route(t), class: 'ref' }, md(n.c));
     const rel = refRelation(textOf, t, state.back);
     return h('a', { href: route(t), class: `ref ${rel}`, title: REL_TITLE[rel] ?? false }, md(n.c));
   }
@@ -67,7 +68,7 @@ function rollTable(e) {
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, md(inline(c)))))))));
 }
 
-const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, ontology: null, lenses: [], lensOf: {}, root: null, overrides: [] };
+const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, author: (() => { try { return localStorage.getItem('cairn-world:author') === '1'; } catch { return false; } })(), ontology: null, lenses: [], lensOf: {}, root: null, overrides: [] };
 
 const title = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
 const text = e => e.fields.map(f => (typeof f.value === 'string' ? f.value : '')).join(' ').toLowerCase();
@@ -225,10 +226,16 @@ function renderSide(currentId) {
   $('rules-count').textContent = `(${nRules})`;
 
   const rows = state.entities.filter(e => inScope(e) && matches(e))
-    .sort((a, b) => title(a).localeCompare(title(b)));
+    .sort((a, b) => state.models.findIndex(m => m.alias === a.model) - state.models.findIndex(m => m.alias === b.model) || title(a).localeCompare(title(b)));
   const shown = rows.slice(0, LIST_LIMIT);
+  // Grouped by model, each entry marked with its model's colour.
+  const items = [];
+  shown.forEach((e, i) => {
+    if (!i || shown[i - 1].model !== e.model) items.push(h('li', { class: 'grp' }, state.modelOf[e.model].name, h('small', {}, rows.filter(r => r.model === e.model).length)));
+    items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: colourOf(e.model) }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)))));
+  });
   put($('list'), [
-    ...shown.map(e => h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId }, title(e), h('span', { class: 'm' }, state.modelOf[e.model].name)))),
+    ...items,
     rows.length > shown.length && h('li', { class: 'more' }, `${rows.length - shown.length} more — narrow with search or a filter.`),
     !rows.length && h('li', { class: 'more' }, 'Nothing matches.'),
   ]);
@@ -240,22 +247,29 @@ function linkTo(e) {
   return [h('a', { href: route(e) }, title(e)), h('span', { class: 'm' }, state.modelOf[e.model].name)];
 }
 
+// Colour of an entry: its model's place within its lens, as in the lens graphs and legends.
+const colourOf = alias => { const l = lensById(state.lensOf[alias]); return `c${Math.max(0, l?.models.indexOf(alias) ?? 0) % 8}`; };
+const has = f => f.value != null && !(Array.isArray(f.value) && !f.value.length);
+const chip = (t, detail) => h('a', { class: `chip-link ${colourOf(t.model)}`, href: route(t), title: `${title(t)} · ${state.modelOf[t.model].name}` },
+  h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(t)), detail && h('small', {}, detail));
+// Long lists show their first few chips and a button for the rest.
+function chipRow(items, max = 10) {
+  const row = h('div', { class: 'chips-row' }, items.slice(0, max));
+  if (items.length > max) row.append(h('button', { type: 'button', class: 'more-btn', onclick: ev => { ev.target.replaceWith(...items.slice(max)); } }, `+${items.length - max} more`));
+  return row;
+}
+
 function renderDetail(e) {
   textOf = e;
   const model = state.modelOf[e.model];
-  const description = e.fields.find(f => f.alias === 'description')?.value;
-  const present = e.fields.filter(f => !HIDDEN.has(f.alias) && f.value != null && !(Array.isArray(f.value) && !f.value.length));
+  const lens = lensById(state.lensOf[e.model]);
+  const description = field(e, 'description');
+  const present = e.fields.filter(f => !HIDDEN.has(f.alias) && has(f));
 
-  const stats = present.filter(f => f.datatype === 'number');
-  const rest = present.filter(f => f.datatype !== 'number');
-
-  const has = f => f.value != null && !(Array.isArray(f.value) && !f.value.length);
-  const valueOf = f => {
-    if (f.targets.length) return f.value.map(id => state.byId.get(id)).filter(Boolean).flatMap((t, i) => [i ? ', ' : '', ...linkTo(t)]);
-    // A concept mapped to another ontology's term (vocab.csv `match`) links to that term.
-    const term = v => { const uri = state.matches[f.collection]?.[v]; return uri ? h('a', { href: uri, title: uri, class: 'match' }, v) : v; };
-    if (Array.isArray(f.value)) return f.value.flatMap((v, i) => [i ? ', ' : '', term(v)]);
-    if (f.datatype === 'concept') return term(f.value);
+  const term = f => v => { const uri = state.matches[f.collection]?.[v]; return uri ? h('a', { href: uri, title: uri, class: 'match' }, v) : v; };
+  const plainValue = f => {
+    if (Array.isArray(f.value)) return f.value.flatMap((v, i) => [i ? ', ' : '', term(f)(v)]);
+    if (f.datatype === 'concept') return term(f)(f.value);
     if (typeof f.value === 'boolean') return f.value ? 'Yes' : 'No';
     return typeof f.value === 'string' ? md(inline(f.value)) : String(f.value);
   };
@@ -264,44 +278,67 @@ function renderDetail(e) {
     const r = f.rule?.id && state.byId.get(f.rule.id);
     return r ? h('a', { href: route(r), title: `Rule: ${title(r)}` }, f.label) : f.label;
   };
-  const rows = rest.map(f => {
-    if (f.datatype === 'semantic') {
-      // A group: one line per entry, its values joined ("Mentor · Marcos").
-      const lines = f.value.map(item => item.fields.filter(has).flatMap((c, i) => [i ? ' · ' : '', valueOf(c)]));
-      return [h('dt', {}, label(f)), h('dd', {}, lines.length > 1 ? h('ul', { class: 'group' }, lines.map(l => h('li', {}, l))) : lines[0])];
-    }
-    return [h('dt', {}, label(f)), h('dd', {}, valueOf(f))];
-  });
 
-  // Incoming links grouped by the model they come from.
-  const incoming = state.back.get(e.id) ?? [];
-  const groups = new Map();
-  for (const b of incoming) {
-    const g = groups.get(b.from.model) ?? [];
-    g.push(b);
-    groups.set(b.from.model, g);
+  // Facts: numbers as stat chips; short values (kinds, traits, yes/no) as tags; longer text as notes.
+  const isLink = f => f.targets.length || (f.datatype === 'semantic' && f.value.some(i => i.fields.some(c => c.targets.length && has(c))));
+  // A number with a "Max <label>" partner shows as one chip, "STR 9/14".
+  const numbers = present.filter(f => f.datatype === 'number');
+  const maxOf = f => numbers.find(g => g.label === `Max ${f.label}`);
+  const isMax = f => numbers.some(g => f.label === `Max ${g.label}`);
+  const stats = numbers.filter(f => !isMax(f));
+  const short = f => ['concept', 'concept-list', 'boolean'].includes(f.datatype) || (f.datatype === 'string' && !/\n/.test(f.value) && f.value.length <= 48 && f.alias !== 'source');
+  const tags = present.filter(f => !isLink(f) && f.datatype !== 'number' && f.datatype !== 'semantic' && short(f));
+  const notes = present.filter(f => !isLink(f) && f.datatype !== 'number' && !tags.includes(f) && f.alias !== 'source');
+  const source = field(e, 'source');
+
+  // Connections: what this entry links to and what links to it, one chip per entry, grouped by
+  // the relationship. Mentions in text count only where nothing stronger connects the two.
+  const conns = new Map();
+  const conn = id => { if (!conns.has(id)) conns.set(id, { e: state.byId.get(id), out: [], in: [], mention: false }); return conns.get(id); };
+  for (const l of links(e)) if (l.id !== e.id && state.byId.has(l.id)) { if (l.derived) conn(l.id).mention = true; else conn(l.id).out.push(l.label); }
+  for (const b of state.back.get(e.id) ?? []) if (b.from.id !== e.id) { if (b.derived) conn(b.from.id).mention = true; else conn(b.from.id).in.push(b.via); }
+  const groups = new Map();   // title -> [chip]
+  const put1 = (g, c) => { if (!groups.has(g)) groups.set(g, []); groups.get(g).push(c); };
+  const order = [...conns.values()].sort((a, b) => inOrder(a.e, b.e));
+  for (const c of order.filter(c => c.out.length)) {
+    const [g, detail] = c.out[0].split(': ');
+    put1(g, chip(c.e, detail));
   }
-  const incomingEls = [...groups].map(([alias, list]) => [
-    h('div', { class: 'group' }, `${state.modelOf[alias].name} (${list.length})`),
-    h('ul', { class: 'rel' }, list.sort((a, b) => inOrder(a.from, b.from)).slice(0, 80).map(b =>
-      h('li', {}, h('a', { href: route(b.from) }, title(b.from)), h('span', { class: 'm' }, b.via)))),
-  ]);
+  for (const c of order.filter(c => !c.out.length && c.in.length)) {
+    const [via, detail] = c.in[0].split(': ');
+    put1(`${state.modelOf[c.e.model].name}s · ${via}`, chip(c.e, detail));
+  }
+  const mentionsOnly = order.filter(c => !c.out.length && !c.in.length && c.mention);
+  const nConn = conns.size;
 
-  const lens = lensById(state.lensOf[e.model]);
+  const head = h('header', { class: `entry-head ${colourOf(e.model)}` },
+    h('div', { class: 'avatar', 'aria-hidden': 'true' }, lens?.icon || title(e).slice(0, 1)),
+    h('div', {},
+      h('div', { class: 'crumbs' }, lens && h('a', { href: `#/${state.view}/@${lens.id}` }, lens.label), lens && ' › ', h('span', { class: 'type' }, model.name)),
+      h('h1', {}, title(e)),
+      state.author && h('div', { class: 'kind' }, `${provenance(e)} · ${model.ontology.replace(/^.*\//, '').replace(/_/g, ' ')}`)));
+
   put($('detail'),
     h('a', { class: 'back', href: lens ? `#/${state.view}/@${lens.id}` : `#/${state.view}/` }, `← ${lens?.label ?? 'All entries'}`),
-    h('div', { class: 'kind' }, lens && [h('a', { href: `#/${state.view}/@${lens.id}` }, lens.label), ' › '], `${model.name} · ${provenance(e)}`),
-    h('h1', {}, title(e)),
-    description && h('div', { class: 'text' }, md(blocks(description))),
-    description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'Links: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
-      h('a', { class: 'ref rel-in' }, 'related only the other way'), ' · ', h('a', { class: 'ref mention' }, 'mentioned, no relationship')),
+    head,
+    description && h('div', { class: 'text lead' }, md(blocks(description))),
+    state.author && description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'References: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
+      h('a', { class: 'ref rel-in' }, 'related the other way'), ' · ', h('a', { class: 'ref mention' }, 'mention only')),
     e.model === 'rolltable' && field(e, 'entries') && rollTable(e),
-    stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, label(f), h('b', {}, String(f.value))))),
-    rows.length > 0 && h('dl', {}, rows),
-    incoming.length ? [h('h2', {}, 'Linked from'), incomingEls] : null,
-    h('h2', {}, 'Relationships'),
-    graph(e),
-    h('div', { class: 'legend' }, 'Filled = campaign entry · ring = type · click a node to open it'),
+    (stats.length || tags.length) ? h('div', { class: 'facts' },
+      stats.map(f => h('span', { class: 'stat' }, label(f), h('b', {}, String(f.value), maxOf(f) && maxOf(f).value !== f.value ? h('small', {}, `/${maxOf(f).value}`) : null))),
+      tags.map(f => h('span', { class: 'tag' }, h('small', {}, label(f)), plainValue(f)))) : null,
+    notes.map(f => h('section', { class: 'note-block' }, h('h3', {}, label(f)),
+      f.datatype === 'semantic'
+        ? h('ul', {}, f.value.map(item => h('li', {}, item.fields.filter(has).flatMap((c, i) => [i ? ' · ' : '', plainValue(c)]))))
+        : h('div', { class: 'text' }, md(blocks(f.value))))),
+    groups.size ? [h('h2', {}, `Connections`), h('div', { class: 'conn-groups' }, [...groups].map(([g, chips]) =>
+      h('section', { class: 'conn' }, h('h3', {}, g), chipRow(chips))))] : null,
+    mentionsOnly.length ? h('div', { class: `mentions${state.author ? ' author' : ''}` }, h('span', {}, state.author ? 'Mention only:' : 'Also mentioned:'),
+      chipRow(mentionsOnly.map(c => chip(c.e)), 8)) : null,
+    nConn ? h('details', { class: 'graphbox' }, h('summary', {}, `Map of connections (${nConn})`), graph(e),
+      h('div', { class: 'legend' }, 'Filled = entry · ring = kind · click a node to open it')) : null,
+    source && h('p', { class: 'source' }, md(inline(source))),
   );
   document.title = `${title(e)} · Cairn World`;
 }
@@ -355,7 +392,7 @@ function renderLensBar(active) {
     h('a', { href: `#/${state.view}/`, 'aria-current': active === 'home' ? 'page' : false }, 'Home'),
     state.lenses.map(l => {
       const n = state.entities.filter(e => visible(e) && inLens(l, e)).length;
-      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.label, h('small', {}, n)) : null;
+      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.icon && h('span', { class: 'ico', 'aria-hidden': 'true' }, l.icon), l.label, h('small', {}, n)) : null;
     }));
 }
 
@@ -369,13 +406,19 @@ function renderHome() {
     h('div', { class: 'kind' }, `${v.kind} · ${v.stack.map(layerName).join(' › ')}`),
     h('h1', {}, r ? title(r) : v.name),
     v.stack.map(k => state.viewsMeta.layers[k]).filter(l => l?.test).map(l => h('div', { class: 'testbanner' }, `${l.name}: ${l.test}`)),
-    description && h('div', { class: 'text' }, md(blocks(description))),
+    // A long introduction opens with its first paragraph; the rest is a click away.
+    description && (() => {
+      const bs = blocks(description);
+      if (bs.length <= 2) return h('div', { class: 'text lead' }, md(bs));
+      return h('div', { class: 'text lead' }, md(bs.slice(0, 1)), h('details', { class: 'readmore' }, h('summary', {}, 'Read more'), md(bs.slice(1))));
+    })(),
     h('div', { class: 'lenscards' }, state.lenses.map(l => {
       const all = state.entities.filter(e => e !== r && inLens(l, e));
       const here = all.filter(own).length, general = all.filter(isGeneral).length, inherited = all.length - here - general;
       if (!all.length) return null;
       return h('a', { class: 'lenscard', href: `#/${state.view}/@${l.id}` },
-        h('div', { class: 'kind' }, l.class.replace(/^.*\//, '').replace(/_/g, ' ')),
+        h('div', { class: 'cardicon', 'aria-hidden': 'true' }, l.icon),
+        state.author && h('div', { class: 'kind' }, l.class.replace(/^.*\//, '').replace(/_/g, ' ')),
         h('h3', {}, l.label),
         l.summary && h('p', { class: 'summary' }, l.summary),
         h('p', {}, l.models.map(m => state.modelOf[m].name).join(', ')),
@@ -386,7 +429,7 @@ function renderHome() {
       const what = [o.overrides.length && `overrides ${o.overrides.join(', ')}`, o.adds.length && `adds to ${o.adds.join(', ')}`, o.sets.length && `sets ${o.sets.join(', ')}`].filter(Boolean).join('; ');
       return e ? h('li', {}, h('a', { href: route(e) }, title(e)), h('span', { class: 'm' }, `${state.modelOf[e.model].name} · ${what}`)) : null;
     }))] : null,
-    h('p', { class: 'note' }, 'Lenses come from CIDOC-CRM: each is the class a layout is built on, and every model sits in the one nearest its own class.'));
+    state.author && h('p', { class: 'note' }, 'Lenses come from CIDOC-CRM: each is the class a layout is built on, and every model sits in the one nearest its own class.'));
   document.title = `${r ? title(r) : v.name} · Cairn World`;
 }
 
@@ -435,6 +478,14 @@ try {
     renderSide();
   });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
+  const author = $('author');
+  author.setAttribute('aria-pressed', state.author);
+  author.addEventListener('click', () => {
+    state.author = !state.author;
+    try { localStorage.setItem('cairn-world:author', state.author ? '1' : '0'); } catch { /* not remembered */ }
+    author.setAttribute('aria-pressed', state.author);
+    show();
+  });
   addEventListener('hashchange', show);
   addEventListener('keydown', ev => { if (ev.key === '/' && document.activeElement !== $('q')) { ev.preventDefault(); $('q').focus(); } });
   show();

@@ -16,14 +16,17 @@ sevine,Sevine,In the projection: Belgium.,Region,,greater-lands,,
 grunheim,Grunheim,In the projection: Poland.,Region,,greater-lands,,
 rock-of-aphemenosta,The Rock of Aphemenosta,In the projection: Kaliningrad.,Landmark,,greater-lands,,
 zintar,Zintar,In the projection: Germany.,Region,,greater-lands,,
-the-dells,The Dells,"Farming country of the High Marks, including the Western Dells, which the Engineers treat as their own. Farm produce is its main export; rural communities resist foreign influence. Terrain die 2.",Region,,high-marks,Easy,POINT (18.2 3.8)
-the-black-dunes,The Black Dunes,"Volcanic sands, highly rich in ore, once sacred land to the [[True Way|True Church]]. The [[Engineers]] have claimed them. Terrain die 4.
+the-dells,The Dells,"Farming country of the High Marks, including the Western Dells, which the Engineers treat as their own. Farm produce is its main export; rural communities resist foreign influence. Terrain die 2.
+
+- **[[rolltable/setting-seeds-culture-table|Culture]]: Scholarly Conquest.** The [[Engineers]] have quietly colonised the land around the [[Black Dunes|black-sand dunes]] and the [[Ancient Channel|ancient channels]], extracting vast amounts of valuable materials and learning, while the native people of the Dells carry on their lives in the more fertile land around them.
+- **[[rolltable/setting-seeds-resources-table|Resources]]: Much Ore, Little Land.**",Region,,high-marks,Easy,POINT (18.2 3.8)
+the-black-dunes,The Black Dunes,"Volcanic sands, highly rich in ore, once sacred land to the [[True Church]]. The [[Engineers]] have claimed them. Terrain die 4.
 
 On the world globe (pole 50.27°E 10°S, seam 150°E 50°S, south compression 0.5, E/W 0.55), remapped Burgas sits at about 27.4°N 10.6°W. The globe is tilted: climate follows a hot axis, not in-world latitude, and measured from that axis this area sits at a climate latitude of about 46°, much colder than its 27°N suggests. That makes it cold, at the edge of the ice belt, and moderately dry, since much of what lies within 8° is land. On the globe's overlay it reads as pale, cold steppe or moorland, partly whitened by ice. Real east now points west-north-west here, so the real Black Sea coast faces west. Physically, think of the Kamchatka Peninsula: volcanoes, glaciers and black volcanic sand, though drier.",Region,,high-marks,Tough,POINT (9.4 9.4)
 the-enclave,The Enclave,The Committee Exterior's enclave in the dunes.,Site,,the-black-dunes,,
 artificers-workshop,Clockwork Den,"The Artificer's Workshop: a rare Engineer workshop with tightly controlled tradecraft, north of the river between the dunes and the Dells.",Site,,the-dells,,POINT (13.8 6.1)
 hearth,Hearth,"Capital of the region: a stronghold where the rivers meet, hospitable to all comers.",Settlement,,the-dells,,POINT (22.2 6.3)
-the-bonefort,The Bonefort,The [[True Way|True Church]]'s strongest base in the Marks: as close as there is to a True Church capital. On the rocky coast south of the Fist of Glass. Its coast is the remapped Black Sea coast near Burgas.,Site,,high-marks,,POINT (2.9 11.9)
+the-bonefort,The Bonefort,The [[True Church]]'s strongest base in the Marks: as close as there is to a True Church capital. On the rocky coast south of the Fist of Glass. Its coast is the remapped Black Sea coast near Burgas.,Site,,high-marks,,POINT (2.9 11.9)
 the-glaciers,"Volcano, Valleys and Glaciers","Snow-capped mountains around an active volcano, cut by glaciers and valleys. When it snows here, the flakes are warm and dry. Terrain die 6.",Region,,high-marks,Perilous,POINT (25.3 19.6)
 cannerly-hall,Cannerly Hall,"Known locally as Mouldy Manor. East of Hearth, across the river.",Dungeon,,the-dells,,POINT (24.8 9.7)
 tomb-of-incentus,The Tomb of Incentus I,"The tomb of Incentus I, Lord of the Dells.",Site,Location unknown,,,

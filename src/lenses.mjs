@@ -62,6 +62,7 @@ export function assignLenses(ontology, models) {
     ...l, label: ontology.classes[l.class]?.display ?? ontology.classes[l.class]?.label ?? l.class,
     crmLabel: ontology.classes[l.class]?.label ?? l.class,
     summary: ontology.classes[l.class]?.displayComment ?? '',
+    icon: ontology.classes[l.class]?.icon ?? '',
     comment: ontology.classes[l.class]?.comment ?? '',
     models: models.filter(m => lensOf[m.alias] === l.id).map(m => m.alias),
   }));

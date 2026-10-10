@@ -209,6 +209,14 @@ work from links, lens membership and those properties alone: an entry that only 
 is drawn as the line between them, whatever its model, and places with a position (P168, a WKT
 `POINT (x y)`) are drawn as a map at those positions, with the rest laid out around them.
 
+**Entry pages** lead with the description, then facts (stats as chips, a stat and its "Max"
+merged as "STR 9/14", short values as tags, longer text as notes), then **Connections**: one chip
+per related entry, grouped by the relationship, whether this entry links to it or it links here.
+Entries only mentioned in text are collapsed into one line, and the graph sits folded under "Map
+of connections". **Author view** (the ✎ button, remembered per browser) adds the technical layer:
+reference checking, the layers an entry comes from, its CRM class, and the lens classes on the
+home page. Lens icons, like lens names, come from `ontology/labels.csv` (`icon` column).
+
 The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
 changes. Detail pages are as before, with the lens as a breadcrumb. The plain pages group each
