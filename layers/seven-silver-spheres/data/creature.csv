@@ -1,0 +1,7 @@
+ResourceID,name,description,type,hp,location
+the-thing,The Thing in the Tavern,Sealed in the cellar by Archmage Hann. It promises treasure for its freedom but has none; whoever frees it gets only a head start and a cruel smile.,thing-in-the-tavern,12,rising-sun-tavern
+well-ivy,The Ivy on the Well,Creeping ivy smothering the well head.,creeping-ivy,6,secret-well
+wall-sentries,Porcelain Soldiers (1d6),The sentries on the wall and gatehouse.,porcelain-soldier,6,porcelain-gatehouse
+bridge-goblins,Forest Goblins (2d6),"Camped in the ruined village by the bridge, in a drunken revel and contest.",forest-goblin,4,bridge-of-saints
+the-cursed-oak,The Cursed Oak,The Great Oak itself.,cursed-oak,12,great-oak
+the-shadow,The Shadow in the Forest,"A great shadow has lain over the Forest of Dawn since ancient times. Human and animal sacrifice once held it back; the temple's faith made it dormant. The spheres on their pedestals are what still hold it, and each one taken weakens the ward.",,,forest-of-dawn

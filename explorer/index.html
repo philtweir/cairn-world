@@ -12,9 +12,17 @@
   <a class="brand" href="#/">Cairn World</a>
   <select id="view" aria-label="Universe or campaign"></select>
   <input id="q" type="search" placeholder="Search names and text  ( / )" aria-label="Search" autocomplete="off">
+  <button id="lock" type="button" hidden title="Forget the password in this browser">Lock</button>
   <a class="plain" href="pages/index.html">Plain pages</a>
 </header>
 <div id="status" role="status">Loading Alizarin…</div>
+<form id="gate" hidden>
+  <h1>🔒 <span id="gate-title"></span></h1>
+  <p>This campaign is for its Warden. Enter the password to open it; this browser will remember it.</p>
+  <label for="gate-pw">Password</label>
+  <div class="row"><input id="gate-pw" type="password" autocomplete="current-password" required><button type="submit">Open</button></div>
+  <p id="gate-msg" role="alert"></p>
+</form>
 <div id="app" hidden>
   <aside id="side">
     <div id="chips" role="group" aria-label="Filter by model"></div>

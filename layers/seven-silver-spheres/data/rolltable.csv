@@ -1,0 +1,37 @@
+ResourceID,name,die,columns,entries,section,part_of,refers_to,source
+sss-lore,"Lore, Secrets & Rumours",d6,,"1 | St. Rylan followed Statera, goddess of balance, potters and vigilance against evil.
+2 | Statera's worship has long declined; she is no longer in the official Imperial Pantheon.
+3 | A great shadow has covered the Forest of Dawn since ancient times, once held off by human and animal sacrifice.
+4 | The temple's faithful made the shadow dormant, at least while the temple was active.
+5 | Archmage Hann of the Imperial Court visited the temple 33 years ago on his own business, and sealed the Thing in the Tavern.
+6 | The Empire's decline began around then too; nobody knows which came first.",1,seven-silver-spheres,,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-treasures,Treasures,d6,,"1 | Bronze torc and bracelets, centuries old.
+2 | A finely made porcelain vase, somehow intact.
+3 | Rare berries of the mosslope tree, prized by alchemists.
+4 | Stone bas-relief of St. Rylan appearing to the reed gatherers of Welmore Fields.
+5 | A sword-sized onyx shard, with swirling shadows glimpsed inside.
+6 | Ceremonial temple vestments: tattered cloth, gold thread still bright.",2,seven-silver-spheres,,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-relics,Relics,d6,,"1 | **Stone Torch of St. Rylan**
+2 | **Purple Goblin Berserker Mushrooms**
+3 | **Porcelain Mask**
+4 | **Pebble of the Raging River**
+5 | **Clay Cup of Statera**
+6 | **Gauntlet of the Pilgrim**",3,seven-silver-spheres,"stone-torch-of-st-rylan,goblin-berserker-mushrooms,porcelain-mask,pebble-of-the-raging-river,clay-cup-of-statera,gauntlet-of-the-pilgrim",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-spellbooks,Spellbooks,d6,,"1 | **Wheel of St. Rylan**
+2 | **Anger of the Forest**
+3 | **Brushwood Sneak**
+4 | **Summon Wafers**
+5 | **Tavernkeeper's Charade**
+6 | **Shadow Jump**",4,seven-silver-spheres,core-rules-spellbooks,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-minor-loot,Minor Loot,d6,,"1 | 1d6 rations' worth of smoked river salmon.
+2 | 1d10 gold pieces, old enough to bear Statera's face.
+3 | A copy of the scrawled teachings of Goblob, the best goblin.
+4 | A large, sharp tooth from a forest predator.
+5 | A bronze spear from a Porcelain Soldier.
+6 | A wooden symbol of St. Rylan.",5,seven-silver-spheres,,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-encounters,Random Encounters,d6,,"1 | A dead wolf, rotting with black mould.
+2 | The shadow of a large humanoid, keeping pace among the trees.
+3 | A dead bramble thicket grown into the symbol of St. Rylan.
+4 | A small waystone that turns to follow the party.
+5 | 1d6 Forest Goblins on a spider hunt.
+6 | A dryad possessed by the shadow, screaming without a voice.",6,seven-silver-spheres,"forest-goblin,shadow-dryad",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes

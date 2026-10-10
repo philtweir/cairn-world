@@ -15,3 +15,16 @@ Item Kind,Relic
 Item Property,bulky
 Item Property,petty
 Item Property,slow
+Item Kind,Gear
+Item Kind,Service
+Item Kind,Spellbook
+Rule Category,Principles
+Rule Category,Core Rules
+Rule Category,Character Creation
+Rule Category,Procedures
+Rule Category,Marketplace
+Rule Category,Warden's Guide
+Route Kind,Road
+Route Kind,Trail
+Route Kind,Passage
+Route Kind,Crossing

@@ -182,8 +182,12 @@ for (const key of layerKeys.filter(k => k !== GENERAL)) {
   const own = roots.filter(x => x.row.cells[0] === key);
   if (own.length !== 1) { problem(`layers/${key}/ needs exactly one Universe or Campaign row with ResourceID "${key}" (found ${own.length})`); continue; }
   const { kind, row } = own[0];
+  // layers/<key>/layer.json may hold a password gate for the explorer (see src/set-password.mjs).
+  const settingsFile = path.join(LAYERS_DIR, key, 'layer.json');
+  const settings = fs.existsSync(settingsFile) ? JSON.parse(fs.readFileSync(settingsFile, 'utf8')) : {};
+  if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(settingsFile)} gate needs "salt" and a hex "sha256"`);
   layers[key] = {
-    key, kind, name: row.get.name || key, published: row.get.published === 'true', row,
+    key, kind, name: row.get.name || key, published: row.get.published === 'true', row, gate: settings.gate ?? null,
     parents: kind === 'universe' ? [GENERAL] : [GENERAL, ...splitKeys(row.get.universes)],
   };
 }
@@ -374,9 +378,10 @@ for (const l of shippedLayers) for (const m of usedModels) {
   if (list?.length) write(`layers/${l}/${m.built.graph.graphid}.json`, { business_data: { resources: list } });
 }
 
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack });
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, ...(l.gate ? { gate: l.gate } : {}) });
+const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
-  default: viewKeys.find(v => layers[v].kind === 'campaign') ?? viewKeys[0] ?? null,
+  default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,
   views: viewKeys.map(v => describe(layers[v])),
   layers: Object.fromEntries(shippedLayers.map(l => [l, describe(layers[l])])),
 });
@@ -425,7 +430,8 @@ for (const v of viewKeys) {
   const gm = new A.GraphManager(client, store);
   await gm.initialize();
   const entities = await readEntities(gm, manifest);
-  renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v) });
+  // A gated view gets no plain pages: they would sit, unasked-for, next to the open ones.
+  if (!layers[v].gate) renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v) });
 }
 renderViewIndex({ viewsMeta, outDir: path.join(DIST, 'pages') });
 await buildExplorer(ROOT, DIST);

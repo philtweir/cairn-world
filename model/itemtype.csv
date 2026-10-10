@@ -5,6 +5,12 @@ kind,Kind,concept,1,E55_Type,P2_has_type,,Item Kind,
 damage,Damage,string,1,E62_String,P3_has_note,,,
 armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,
 slots,Slots,number,1,E54_Dimension,P43_has_dimension,,,
+uses,Uses,number,1,E54_Dimension,P43_has_dimension,,,
+charges,Charges,number,1,E54_Dimension,P43_has_dimension,,,
 properties,Properties,concept-list,n,E55_Type,P2_has_type,,Item Property,
+recharge,Recharge,string,1,E62_String,P3_has_note,,,
 price,Price (gp),number,1,E54_Dimension,P43_has_dimension,,,
+spell,Spell,resource-instance-list,n,E55_Type,cairn:holds_spell,,,spellbook
+listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable
+refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling
 source,Source,string,1,E62_String,P3_has_note,,,

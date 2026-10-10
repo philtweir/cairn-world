@@ -1,0 +1,13 @@
+ResourceID,name,description,wage,listed_in,source
+alchemist,Alchemist,,30,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+animal-handler,Animal Handler,,5,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+blacksmith,Blacksmith,,15,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+bodyguard,Bodyguard,,10,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+local-guide,Local Guide,,5,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+lockpick,Lockpick,,10,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+navigator,Navigator,,10,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+sailor,Sailor,,5,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+scholar,Scholar,,20,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+tracker,Tracker,,5,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+trapper,Trapper,,5,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"
+veteran-bodyguard,Veteran Bodyguard,,20,marketplace-hirelings-per-day,"Cairn 2e Player's Guide: Marketplace, CC-BY-SA 4.0"

@@ -12,6 +12,7 @@ npm run build          # write dist/: explorer, plain pages, tile store (publish
 npm run build -- --all # also include unpublished universes/campaigns, for local preview
 npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
+npm run set-password -- <layer>            # put a password in front of one view (see Layers)
 ```
 
 Needs Node 22+. Alizarin comes from npm, pinned to `2.0.0-alpha.139`; npm's `latest` tag is still
@@ -27,30 +28,47 @@ anything that ships it, including this site.
 | `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label` |
 | `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
+| `layers/<key>/layer.json` | Optional: layer settings; today only a password `gate` |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin into the site root |
-| `src/` | Build script, rules importer, CSV helpers, HTML renderer, shared ORM reader |
+| `src/` | Build script, rules importer, CSV helpers, HTML and markdown renderers, shared ORM reader |
 
 ## Ontology
 
-A deliberately small CIDOC-CRM subset. Models come in two kinds: *instances* (your campaign) and
-*types* (the rules), and instances point at their type with `P2 has type`.
+A deliberately small CIDOC-CRM subset. Models come in three kinds: *instances* (your campaign),
+*types* (kinds of thing the rules define), and *propositions* (the rules text itself).
 
-| Instances | CRM class | Types | CRM class |
+| Instances | CRM class | Types | CRM class | Rules text | CRM class |
+|---|---|---|---|---|---|
+| Place, Route | E53 Place | Background | E55 Type | Rule | E89 Propositional Object |
+| Faction | E74 Group | Monster Type, Monster Group | E55 Type | Roll Table | E89 Propositional Object |
+| NPC | E21 Person | Item Type, Spellbook | E55 Type | Universe | E89 Propositional Object |
+| Creature | E20 Biological Object | Hireling Role | E55 Type | Campaign | E7 Activity |
+| Relic | E22 Human-Made Object | Vocabularies (SKOS) | E55 Type | | |
+| Event | E5 Event | | | | |
+
+Typed relationships:
+
+| From | Field | Property | To |
 |---|---|---|---|
-| Place | E53 Place | Background | E55 Type |
-| Faction | E74 Group | Monster Type | E55 Type |
-| NPC | E21 Person | Item Type | E55 Type |
-| Creature | E20 Biological Object | Vocabularies (SKOS) | E55 Type |
-| Relic | E22 Human-Made Object | Universe | E89 Propositional Object |
-| Event | E5 Event | Campaign | E7 Activity |
+| Rule, Roll Table | Part of | P148i is component of | Rule (Roll Tables also Background or Campaign) |
+| Rule, Roll Table, Item Type, Spellbook, Monster Type, Background | Refers to | P67 refers to | any rules model |
+| Item Type, Spellbook, Monster Type/Group, Background, Hireling Role | Listed in | P67i is referred to by | the Rule or Roll Table that lists it |
+| Monster Type | Group | P127 has broader term | Monster Group |
+| Monster Type | Spells | `cairn:wields` | Spellbook |
+| Item Type | Spell | `cairn:holds_spell` | Spellbook |
+| Background | Starting gear | `cairn:starts_with` | Item Type, Spellbook |
+| Route | Connects | `cairn:connects` | Place (both ends) |
+| Route | Hazards | P67 refers to | Creature, Monster Type, Place |
+| NPC | Background, Stat block | P2 has type | Background, Monster Type |
+| Creature / Relic | Type / Item type | P2 has type | Monster Type / Item Type |
+| Faction | Allies, Enemies | `cairn:allied_with`, `cairn:hostile_to` | Faction |
+| Campaign | Set in | `cairn:set_in` | Universe |
 
-Links: NPC -> Background and Stat block (Monster Type); Creature -> Monster Type; Relic -> Item
-Type. Every type page lists the campaign entries that use it ("Linked from"). Other CRM properties
-used: P89 falls within, P7 took place at, P11 had participant, P55 has current location, P52 has
-current owner, P107i member of, P74 residence. Faction alliances and enmities have no CRM
-equivalent, so they use `cairn:allied_with` / `cairn:hostile_to`. Cairn stats are plain number
-fields; no ontology covers game mechanics.
+Also used: P89 falls within, P7 took place at, P11 had participant, P55 has current location, P52
+has current owner, P107i member of, P74 residence. Cairn stats are plain number fields; no ontology
+covers game mechanics. Every page lists what links to it ("Linked from"), so a Rule shows its
+sections and tables, a Monster Group its monsters, a Spellbook the monsters that carry it.
 
 ## Layers
 
@@ -89,25 +107,47 @@ in two layers shares a tile id and composition silently keeps only the topmost l
 views, and only the layers they stand on, so unpublished data never reaches `dist/`.
 `npm run build -- --all` includes everything for a local GM preview: never deploy that output.
 
+**Password gate.** `npm run set-password -- <layer>` writes a random salt and the salted SHA-256
+of a password to `layers/<layer>/layer.json`. The explorer then asks for that password before it
+loads the view, and remembers it in that browser (`Lock` in the header forgets it). Gated views get
+no plain pages and are never the default view. This keeps players from wandering into the
+Warden's notes; it is not security. The layer's CSVs are in this public repository, and its data
+files are on the site like any other view's. `--remove` takes the gate off.
+
 Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
 models in `layers/<key>/model/`, and Alizarin's `LayeredGraph` supports overlays, but the build does
 not create overlay graphs yet.
 
 ## Rules data (`rules/`)
 
-`npm run import-rules -- --rules <path>` reads a checkout of the Cairn rules repo and writes:
+`npm run import-rules -- --rules <path>` reads a checkout of the Cairn rules repo and regenerates
+the General layer's data from it:
 
-| File | Source | Rows |
+| Model | Source | Rows |
 |---|---|---|
-| `monstertype.csv` | `resources/monsters/*.md` (1st-edition stat lines) | 145 |
-| `background.csv` | `second-edition/backgrounds/*.md` (names, starting gear) | 20 |
-| `itemtype.csv` | `second-edition/players-guide/marketplace.md` (armor, weapons, transport) | 27 |
+| Rule | Player's Guide (principles, character creation, core rules, procedures, marketplace) and Warden's Guide: one per page and per heading, nested with `part_of`, in reading order (`section`) | 396 |
+| Roll Table | every table in those pages and in the backgrounds (traits, bonds, omens, scars, weather, seeds, naming, NPCs...) | 125 |
+| Item Type | the whole Marketplace (armor, weapons, transport, upkeep, gear), the Reliquary (kind Relic, with uses, charges, recharge), and background starting gear not sold in the Marketplace | 166 |
+| Spellbook | Warden's Guide spellbooks (effect and quirk), plus spells only found in backgrounds | 100 |
+| Monster Type | the 2e Bestiary, then 1st-edition monsters; where both have one, the 1e entry is `<key>-1e` | 229 |
+| Monster Group | the Bestiary's Monster Categories | 20 |
+| Hireling Role | Marketplace hirelings, with daily wage | 12 |
+| Background | `second-edition/backgrounds/`: names, gear as written, gear as links, d20 roll | 20 |
 
-Not imported: the d6 origin tables, 2e bestiary prose, spells, services and hirelings. Gear is kept
-as text on Background, not linked to Item Types. The source text is CC-BY-SA 4.0; each row has a
-`source` field, and anything you publish built from it must credit and share alike.
+Links come from the text, not from a hand-made list. Markdown links resolve to the page, heading or
+background they point at. **Bold** and _italic_ terms resolve through a short glossary in the
+importer (_fatigue_, _deprived_, _enhanced_, _blast_, _petty_, _bulky_, STR/DEX/WIL...) to the rule
+that defines them, then by name to a spellbook, monster, item, background or heading. So a monster
+that carries the _Charm_ spellbook links to it, and a relic that leaves you _deprived_ links to
+Deprivation & Fatigue. Starting gear matches Marketplace items by name ("Iron Dagger" is a
+Dagger); anything else becomes its own Item Type.
 
-Setting- or campaign-specific types (a "Bell" item) go in that layer's `data/itemtype.csv`.
+Left out on purpose: Vald (the 2e default setting is world, not rules, so it belongs in a Universe
+layer), the bibliography, and the note about the example party. The source text is CC-BY-SA 4.0;
+each row has a `source` field, and anything you publish built from it must credit and share alike.
+
+Setting- or campaign-specific types (a "Bell" item, a module's monsters and spells) go in that
+layer's `data/`, using the same General models.
 
 ## Authoring
 
@@ -141,14 +181,16 @@ label exactly.
 | Path | What |
 |---|---|
 | `index.html`, `app.js`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
-| `pages/` | Every view as plain HTML, readable without JavaScript |
+| `pages/` | Every view without a password gate, as plain HTML, readable without JavaScript |
 | `data/` | The tile store |
 
 The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
 per entry saying which layers it comes from ("Defined in The Weeping Wood · changed in Ashes of
 Hollowmere"), "Linked from" backlinks, and a 1-hop relationship graph. URLs look like
 `/#/<view>/<model>/<key>`. Switching view reloads the page, so each view starts with a clean ORM:
-the same entity differs between views. General-only entries (the 192 rules) are hidden until asked for.
+the same entity differs between views. General-only entries (about 1,070 rules entries) are hidden
+until asked for. Rule text renders its markdown (lists, bold, italics), and Roll Tables render as
+tables, in both the explorer and the plain pages.
 
 The build reads each view back through the ORM with its own `GraphManager` and `StaticStore`, and
 renders the plain pages from that; the explorer reads the same way, through `src/world-read.mjs`.
@@ -164,8 +206,8 @@ renders the plain pages from that; the explorer reads the same way, through `src
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
 
 A resource is `{ resourceinstance, tiles: [{ nodegroup_id, data: { <node id>: value } }] }`. Output is
-deterministic: the same CSVs give the same bytes. About 13 MB with three views, mostly the WASM and
-each view's copy of the rules.
+deterministic: the same CSVs give the same bytes. About 63 MB and 10,000 files with five views,
+mostly each view's copy of the rules, one file per resource.
 
 ## Deploying
 
@@ -174,13 +216,26 @@ each view's copy of the rules.
 GitHub Actions**. The site is then at `https://<user>.github.io/<repo>/`. Any static host works
 too: build and upload `dist/`.
 
-- **Pages sites are public.** Everything in `data/` is readable on the site, JSON included. Do not
-  put GM-only secrets in a world you publish.
-- **Size.** About 7 MB, most of it Alizarin's 4.4 MB WASM, fetched once per visitor.
+- **Pages sites are public.** Everything in `data/` is readable on the site, JSON included, gated
+  views too. Do not put GM-only secrets in a world you publish.
+- **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
   and the adapted data is share-alike. Alizarin is AGPL-3.0. Add your own licence for `layers/`.
-- **Tested** over plain HTTP in Chromium at desktop and phone widths. The deploy workflow itself has
-  not been run.
+- **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
+
+## Campaigns in this repository
+
+| Layer | Kind | Notes |
+|---|---|---|
+| `weeping-wood` | Universe | Small test world |
+| `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
+| `the-empire` | Universe | Player-facing background for Seven Silver Spheres |
+| `seven-silver-spheres` | Campaign, password gate | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events |
+
+*Seven Silver Spheres* is © Martin Orchard and is not openly licensed. The layer condenses and
+paraphrases it as running notes and credits the author; it is not a substitute for the booklet.
+Because this repository is public, those notes are public too, password or not. Make the
+repository private, or keep that layer out of it, if that matters.
 
 ## Alizarin notes
 

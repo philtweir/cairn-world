@@ -4,6 +4,7 @@
 
 import * as A from 'alizarin';
 import { readEntities, backlinks } from '../src/world-read.mjs';
+import { blocks, inline, tableRows } from '../src/md.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
 const LIST_LIMIT = 200;
@@ -29,6 +30,23 @@ const svg = (tag, attrs = {}, ...kids) => {
   for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
 };
+
+// Markdown tree (src/md.mjs) to DOM, as text nodes only.
+const md = nodes => nodes.map(n => (typeof n === 'string' ? n : h(n.t, {}, md(n.c))));
+const field = (e, alias) => e.fields.find(f => f.alias === alias)?.value;
+const section = e => field(e, 'section') ?? Infinity;
+const inOrder = (a, b) => section(a) - section(b) || title(a).localeCompare(title(b));
+const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die']);
+
+function rollTable(e) {
+  const head = [field(e, 'die') || 'Roll', ...(field(e, 'columns') ? field(e, 'columns').split(' | ') : [])];
+  const rows = tableRows(field(e, 'entries'));
+  const width = Math.max(...rows.map(r => r.length));
+  return h('div', { class: 'wrap' }, h('table', {},
+    head.length === width ? h('thead', {}, h('tr', {}, head.map(c => h('th', {}, c))))
+      : field(e, 'die') && h('caption', {}, `Roll ${field(e, 'die')}`),
+    h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, md(inline(c)))))))));
+}
 
 const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '' };
 
@@ -59,6 +77,9 @@ async function load() {
     state.view = state.viewsMeta.default ?? keys[0];
     history.replaceState(null, '', `#/${[state.view, ...(first ? [first, ...rest] : [])].map(encodeURIComponent).join('/')}`);
   }
+  fillViews();
+  const v = state.viewsMeta.views.find(x => x.key === state.view);
+  if (v.gate) await unlock(v);
   const [manifest, index] = await Promise.all([
     fetch(`${DATA}/views/${state.view}/manifest.json`).then(r => r.json()),
     fetch(`${DATA}/views/${state.view}/index.json`).then(r => r.json()),
@@ -82,6 +103,54 @@ async function load() {
   state.entities = await readEntities(A.graphManager, manifest, (m, n) => status(`Reading ${m.name}… (${n} entries)`));
   for (const e of state.entities) { state.byId.set(e.id, e); state.byRoute.set(`${e.model}/${e.key}`, e); }
   state.back = backlinks(state.entities);
+}
+
+// ---- Password gate ----------------------------------------------------------------------------
+// A campaign can ask for a password before it loads. This only keeps casual visitors (players!)
+// out: the data is in the public repository and on the site for anyone who goes looking.
+// The salted SHA-256 of the right password is remembered in this browser.
+
+const gateKey = v => `cairn-world:gate:${v.key}`;
+const remembered = v => { try { return localStorage.getItem(gateKey(v)) === v.gate.sha256; } catch { return false; } };
+const remember = v => { try { localStorage.setItem(gateKey(v), v.gate.sha256); } catch { /* private mode: ask again next time */ } };
+const forget = v => { try { localStorage.removeItem(gateKey(v)); } catch { /* nothing stored */ } };
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function unlock(v) {
+  if (remembered(v)) return Promise.resolve();
+  status('');
+  const form = $('gate');
+  put($('gate-title'), v.name);
+  form.hidden = false;
+  $('gate-pw').focus();
+  return new Promise(resolve => {
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const ok = (await sha256(`${v.gate.salt}:${$('gate-pw').value}`)) === v.gate.sha256;
+      if (!ok) { $('gate-msg').textContent = 'That is not the password.'; $('gate-pw').select(); return; }
+      remember(v);
+      form.hidden = true;
+      $('lock').hidden = false;
+      status('Loading…');
+      resolve();
+    });
+  });
+}
+
+function fillViews() {
+  put($('view'), state.viewsMeta.views.map(v => h('option', { value: v.key, selected: v.key === state.view }, `${v.gate ? '🔒 ' : ''}${v.name} (${v.kind})`)));
+  // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
+  $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
+  document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
+  const v = state.viewsMeta.views.find(x => x.key === state.view);
+  const plain = document.querySelector('a.plain');
+  plain.setAttribute('href', v.gate ? 'pages/index.html' : `pages/${state.view}/index.html`);
+  const lock = $('lock');
+  lock.hidden = !(v.gate && remembered(v));
+  lock.onclick = () => { forget(v); location.reload(); };
 }
 
 // ---- Sidebar --------------------------------------------------------------------------------
@@ -123,7 +192,7 @@ function linkTo(e) {
 function renderDetail(e) {
   const model = state.modelOf[e.model];
   const description = e.fields.find(f => f.alias === 'description')?.value;
-  const present = e.fields.filter(f => f.alias !== 'name' && f.alias !== 'description' && f.value != null && !(Array.isArray(f.value) && !f.value.length));
+  const present = e.fields.filter(f => !HIDDEN.has(f.alias) && f.value != null && !(Array.isArray(f.value) && !f.value.length));
 
   const stats = present.filter(f => f.datatype === 'number');
   const rest = present.filter(f => f.datatype !== 'number');
@@ -132,7 +201,7 @@ function renderDetail(e) {
     let value;
     if (f.targets.length) {
       value = f.value.map(id => state.byId.get(id)).filter(Boolean).flatMap((t, i) => [i ? ', ' : '', ...linkTo(t)]);
-    } else value = Array.isArray(f.value) ? f.value.join(', ') : f.value;
+    } else value = Array.isArray(f.value) ? f.value.join(', ') : typeof f.value === 'string' ? md(inline(f.value)) : f.value;
     return [h('dt', {}, f.label), h('dd', {}, value)];
   });
 
@@ -146,7 +215,7 @@ function renderDetail(e) {
   }
   const incomingEls = [...groups].map(([alias, list]) => [
     h('div', { class: 'group' }, `${state.modelOf[alias].name} (${list.length})`),
-    h('ul', { class: 'rel' }, list.sort((a, b) => title(a.from).localeCompare(title(b.from))).slice(0, 60).map(b =>
+    h('ul', { class: 'rel' }, list.sort((a, b) => inOrder(a.from, b.from)).slice(0, 80).map(b =>
       h('li', {}, h('a', { href: route(b.from) }, title(b.from)), h('span', { class: 'm' }, b.via)))),
   ]);
 
@@ -154,7 +223,8 @@ function renderDetail(e) {
     h('a', { class: 'back', href: `#/${state.view}/` }, '← All entries'),
     h('div', { class: 'kind' }, `${model.name} · ${provenance(e)}`),
     h('h1', {}, title(e)),
-    description && h('p', {}, description),
+    description && h('div', { class: 'text' }, md(blocks(description))),
+    e.model === 'rolltable' && field(e, 'entries') && rollTable(e),
     stats.length > 0 && h('div', { class: 'stats' }, stats.map(f => h('span', { class: 'stat' }, f.label, h('b', {}, String(f.value))))),
     rows.length > 0 && h('dl', {}, rows),
     incoming.length ? [h('h2', {}, 'Linked from'), incomingEls] : null,
@@ -233,10 +303,6 @@ try {
   await load();
   status('');
   $('app').hidden = false;
-  put($('view'), state.viewsMeta.views.map(v => h('option', { value: v.key, selected: v.key === state.view }, `${v.name} (${v.kind})`)));
-  $('view').addEventListener('change', ev => { location.hash = `#/${ev.target.value}/`; });
-  document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
-  document.querySelector('a.plain').setAttribute('href', `pages/${state.view}/index.html`);
   $('q').addEventListener('input', ev => { state.q = ev.target.value.trim().toLowerCase(); renderSide(); });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
   addEventListener('hashchange', show);

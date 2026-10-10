@@ -1,0 +1,16 @@
+ResourceID,name,description,hp,armor,str,dex,wil,attacks,group,refers_to,source
+thing-in-the-tavern,The Thing in the Tavern,"- A dried-out corpse to look at; moves like a trained killer.
+- **Critical Damage**: drains blood (d6 STR damage).",12,,14,14,14,bite with fangs (d10),,core-rules-critical-damage,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+creeping-ivy,Creeping Ivy,"*Hedera sinister.*
+
+- Looks like a thick, vivid covering of ivy.
+- **Critical Damage**: paralyses its victim and drags them down the well.",6,,10,12,8,poison tendrils (d8),plant,"creeping-vines,core-rules-critical-damage",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+porcelain-soldier,Porcelain Soldier,"- Stand sentry on the Porcelain Wall, smooth white porcelain faces patched with moss and lichen.
+- Attack only those who cross the battlements.",6,,12,6,12,tarnished bronze polearm (d8),construct,,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+forest-goblin,Forest Goblin,"- Superstitious in general, and of the statue's power in particular.
+- Usually found mid-revel: drinking and competing.",4,,8,12,8,wooden spear (d6),goblinoid,goblin,Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+cursed-oak,Cursed Oak,"- Once a venerable titan of the forest, now a dark shape in the swamp.
+- Vulnerable to fire: the wood is dead, kept moving by unnatural life.
+- Deaf, but senses everything except the slightest movement.",12,,14,3,12,"lashing branches (d8, _blast_)",plant,"treant,core-rules-attack-modifiers",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+shadow-dryad,Shadow-Possessed Dryad,"- As the Cursed Oak, but 8 HP and able to move.
+- Screams in pain without a voice.",8,,14,3,12,"lashing branches (d8, _blast_)",fey,"dryad,cursed-oak",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes

@@ -1,0 +1,6 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+kind,Kind,concept,1,E55_Type,P2_has_type,,Route Kind,
+connects,Connects,resource-instance-list,n,E53_Place,cairn:connects,,,place
+hazards,Hazards,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,creature|monstertype|place

@@ -1,0 +1,8 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Text,string,1,E62_String,P3_has_note,,,
+category,Category,concept,1,E55_Type,P2_has_type,,Rule Category,
+section,Section,number,1,E60_Number,P3_has_note,,,
+part_of,Part of,resource-instance-list,1,E89_Propositional_Object,P148i_is_component_of,,,rule
+refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling
+source,Source,string,1,E62_String,P3_has_note,,,
