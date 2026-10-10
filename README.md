@@ -252,7 +252,8 @@ positions per value. The explorer does not need that extension, so it is not in 
 `layer.json`, `globe.remap` gives the remap (the pole that becomes the globe's north pole, the
 point on its seam, and the south and east-west squeeze), and `globe.maps` pins regional maps to it.
 `globe.csv` says, for each place, what it is on Earth (Natural Earth country names joined by `|`,
-each optionally cut to a band of longitude, `Russia@24:60`, for a realm that is part of a country;
+each optionally cut to a band of longitude, `Russia@24:60`, for a realm that is part of a country,
+with longitudes past 180 continuing on, so `Russia@105:200` runs through Chukotka;
 or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
 that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
 `geometry` column of the layer's `place.csv` (each realm's countries unioned into one outline, with
@@ -270,7 +271,8 @@ Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukrain
 assumption, as the notes say only "the remaining countries of Central and Eastern Europe". Russia
 is divided arbitrarily along meridians: Miurna is European Russia west of the Urals (24°E to 60°E),
 Leantis Siberia from the Urals to Lake Baikal (60°E to 105°E), and Cofrey Mongolia with Russia east
-of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. Countries no realm
+of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. (Natural Earth counts
+Crimea as Russian, so it falls in Miurna.) Countries no realm
 names (Turkey, Greece, the United Kingdom, the Americas and so on) are sea.
 
 The Dells map is drawn north-up at 5 km to a map unit, with the Bonefort pinned at Earth 27.67°E

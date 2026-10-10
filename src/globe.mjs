@@ -134,8 +134,8 @@ function mapToGlobe(map, remap, [x, y]) {
 }
 
 // A realm's shape on Earth, from Natural Earth countries: "France|Italy", or "Russia@24:60" for the
-// part of a country between two longitudes. Unioned into one outline (planar, in degrees: fine
-// away from the poles and the 180th meridian, which no band here crosses). Returns MultiPolygon
+// part of a country between two longitudes (east of 180 continues past it: "Russia@105:200").
+// Unioned into one outline (planar, in degrees: fine away from the poles). Returns MultiPolygon
 // coordinates wound as GeoJSON has them (outer rings anticlockwise).
 function earthShape(topo, spec, where) {
   const byName = new Map(topo.objects.countries.geometries.map(g => [g.properties.name, g]));
@@ -143,7 +143,12 @@ function earthShape(topo, spec, where) {
     const m = /^(.+?)(?:@(-?[\d.]+):(-?[\d.]+))?$/.exec(part);
     const g = byName.get(m[1]);
     if (!g) throw new Error(`${where}: no country "${m[1]}" in Natural Earth (world-atlas)`);
-    const coords = feature(topo, g).geometry.coordinates;
+    // A ring that crosses the 180th meridian (Russia's, through Chukotka) jumps from +180 to
+    // -180: nothing on the sphere, but an edge right across the plane. Unwrap it first, so its
+    // longitudes run on past 180 (Chukotka is 180 to 190); bands are written that way too.
+    const unwrap = ring => (Math.max(...ring.map(p => p[0])) - Math.min(...ring.map(p => p[0])) > 180 ? ring.map(([x, y]) => [x < 0 ? x + 360 : x, y]) : ring);
+    const geom = feature(topo, g).geometry;
+    const coords = (geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates).map(poly => poly.map(unwrap));
     if (m[2] === undefined) return coords;
     const [x0, x1] = [Number(m[2]), Number(m[3])];
     return polygonClipping.intersection(coords, [[[x0, -90], [x1, -90], [x1, 90], [x0, 90], [x0, -90]]]);
