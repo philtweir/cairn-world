@@ -8,6 +8,7 @@ import { readEntities, backlinks, links, resolverFor, refRelation } from '../src
 import { blocks, inline, tableRows } from '../src/md.mjs';
 import { assignLenses } from '../src/lenses.mjs';
 import { drawLens } from './lens-views.mjs';
+import { geoMap, locate } from './geo-map.mjs';
 import { groupViews } from '../src/views.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
@@ -203,7 +204,13 @@ function fillViews() {
 const visible = e => (state.rules || !isGeneral(e)) && e !== state.root;
 const lensById = id => state.lenses.find(l => l.id === id);
 const inLens = (lens, e) => state.lensOf[e.model] === lens.id;
-const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral });
+// The land under maps: from the topmost layer in this view's stack that has a basemap.
+const basemap = () => (state.basemap ??= (() => {
+  const view = state.viewsMeta.views.find(v => v.key === state.view);
+  const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.basemap);
+  return key ? fetch(`${DATA}/${state.viewsMeta.layers[key].basemap}${V}`).then(r => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+})());
+const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
 const matches = e => {
   if (state.filter.size && !state.filter.has(e.model)) return false;
   return !state.q || title(e).toLowerCase().includes(state.q) || text(e).includes(state.q);
@@ -264,7 +271,8 @@ function renderDetail(e) {
   const model = state.modelOf[e.model];
   const lens = lensById(state.lensOf[e.model]);
   const description = field(e, 'description');
-  const present = e.fields.filter(f => !HIDDEN.has(f.alias) && has(f));
+  // A geometry is drawn as the map above the entry, not listed.
+  const present = e.fields.filter(f => !HIDDEN.has(f.alias) && has(f) && f.datatype !== 'geojson-feature-collection');
 
   const term = f => v => { const uri = state.matches[f.collection]?.[v]; return uri ? h('a', { href: uri, title: uri, class: 'match' }, v) : v; };
   const plainValue = f => {
@@ -318,8 +326,24 @@ function renderDetail(e) {
       h('h1', {}, title(e)),
       state.author && h('div', { class: 'kind' }, `${provenance(e)} · ${model.ontology.replace(/^.*\//, '').replace(/_/g, ' ')}`)));
 
+  // Where it is, across the top: its own place on the map, or the places it links to.
+  const where = locate(ctx(), e);
+  // The caption says how each place was found: "Home: Hearth", "Home: Candlesham, somewhere in
+  // Miurna" (Candlesham has no location of its own), "Within it: Godrastan, Cofrey".
+  const said = new Map();
+  for (const x of where.items.filter(x => x.role === 'focus' && x.how !== 'Here')) {
+    const a = p => h('a', { href: route(p) }, title(p));
+    const k = x.approx && !x.at ? 'Somewhere in' : x.how;
+    said.set(k, [...(said.get(k) ?? []), x.at ? [a(x.at), ', somewhere in ', a(x.e)] : a(x.e)]);
+  }
+  for (const m of where.missing) said.set(m.how, [...(said.get(m.how) ?? []), [h('a', { href: route(m.e) }, title(m.e)), h('span', { class: 'nomap' }, ' (no location yet)')]]);
+  const map = where.items.length ? h('figure', { class: 'where' },
+    geoMap(ctx(), { items: where.items, lines: where.lines, basemap: basemap(), cls: 'geomap banner', label: `Where ${title(e)} is` }),
+    said.size ? h('figcaption', {}, [...said].map(([k, v], i) => [i ? ' · ' : '', `${k}: `, v.map((x, j) => [j ? ', ' : '', x])])) : null) : null;
+
   put($('detail'),
     h('a', { class: 'back', href: lens ? `#/${state.view}/@${lens.id}` : `#/${state.view}/` }, `← ${lens?.label ?? 'All entries'}`),
+    map,
     head,
     description && h('div', { class: 'text lead' }, md(blocks(description))),
     state.author && description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'References: ', h('a', { class: 'ref rel' }, 'related'), ' · ',

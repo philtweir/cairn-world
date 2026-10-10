@@ -23,6 +23,8 @@ import { buildExplorer } from './build-explorer.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
 import { makeResolver, refsIn } from './refs.mjs';
+import { validateGeojson } from '@alizarin/geo';
+import { cellToFeatureCollection } from './geometry.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -201,7 +203,7 @@ for (const key of layerKeys) {
       const m = modelByAlias[alias];
       if (!m) { problem(`${rel(t.file)} is not a model (no "${alias}" in any models.csv)`); continue; }
       if (t.header[0] !== 'ResourceID') problem(`${rel(t.file)} first column must be ResourceID`);
-      const into = (tables[key][alias] ??= { header: ['ResourceID'], rows: [] });
+      const into = (tables[key][alias] ??= { alias, header: ['ResourceID'], rows: [] });
       for (const c of t.header.slice(1)) {
         if (!m.nodes.some(n => n.alias === c)) problem(`${rel(t.file)} unknown column "${c}" (not in ${rel(m.file)})`);
         else if (!into.header.includes(c)) into.header.push(c);
@@ -211,6 +213,21 @@ for (const key of layerKeys) {
   }
   for (const t of Object.values(tables[key])) {
     for (const r of t.rows) r.cells = t.header.map(c => r.get[c] ?? '');
+    // Geometry cells may be WKT; Alizarin takes a GeoJSON FeatureCollection, checked by
+    // @alizarin/geo (its CSV loader parses GeoJSON but does not check coordinates or rings).
+    const m = modelByAlias[t.alias];
+    for (const [j, col] of t.header.entries()) {
+      if (m.nodes.find(n => n.alias === col)?.datatype !== 'geojson-feature-collection') continue;
+      for (const r of t.rows) {
+        if (!r.cells[j]) continue;
+        try {
+          const fc = cellToFeatureCollection(r.cells[j]);
+          const v = validateGeojson(fc);
+          if (!v.valid) throw new Error(v.errors.join('; '));
+          r.cells[j] = JSON.stringify(fc);
+        } catch (e) { problem(`${rel(r.file)}:${r.line} "${col}" is not a geometry: ${e.message}`); }
+      }
+    }
     // Alizarin wants a resource's rows together; authors may add a repeat row anywhere.
     const order = [...new Set(t.rows.map(r => r.cells[0]))];
     t.rows = order.flatMap(k => t.rows.filter(r => r.cells[0] === k));
@@ -229,7 +246,17 @@ function readSettings(key) {
   if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
   if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
-  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null };
+  // A basemap (src/globe.mjs writes one) is the land the explorer draws under this layer's maps.
+  const bm = path.join(LAYERS_DIR, key, 'basemap.json');
+  let basemap = null;
+  if (fs.existsSync(bm)) {
+    basemap = JSON.parse(fs.readFileSync(bm, 'utf8'));
+    // Checked like a geometry value, except for @alizarin/geo's cap on coordinates per value:
+    // the basemap is a published file, not a value stored in a tile.
+    const errors = validateGeojson(basemap).errors.filter(e => !/coordinates \(limit is \d+\)/.test(e));
+    if (errors.length) problem(`${rel(bm)} is not a valid FeatureCollection: ${errors.join('; ')}`);
+  }
+  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -471,7 +498,9 @@ for (const l of shippedLayers) for (const m of usedModels) {
   if (list?.length) write(`layers/${l}/${m.built.graph.graphid}.json`, { business_data: { resources: list } });
 }
 
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}) });
+for (const l of shippedLayers) if (layers[l].basemap) write(`layers/${l}/basemap.json`, layers[l].basemap);
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
+  ...(l.basemap ? { basemap: `layers/${l.key}/basemap.json` } : {}) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,

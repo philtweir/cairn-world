@@ -13,6 +13,7 @@ npm run build -- --all # also include unpublished universes/campaigns, for local
 npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 npm run set-password -- <layer>            # put a password in front of one view (see Layers)
+npm run globe -- <layer>                   # place a universe's places on its globe (see Maps)
 ```
 
 Needs Node 22+. Alizarin comes from npm, pinned to `2.0.0-alpha.139`; npm's `latest` tag is still
@@ -28,11 +29,12 @@ anything that ships it, including this site.
 | `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label[,match]` (`rules/vocab.csv` adds the ones generated from the rules' tables) |
 | `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
-| `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note. `layers/general/layer.json` is General's |
+| `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
+| `layers/<key>/globe.csv`, `basemap.json` | Optional: what each place is on Earth or on a regional map, and the globe's land, for `npm run globe` (see Maps) |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
-| `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin and d3-force into the site root |
-| `src/` | Build script, rules importer, CSV helpers, HTML and markdown renderers, shared ORM reader |
+| `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin, d3-force and d3-geo into the site root |
+| `src/` | Build script, rules importer, globe script, CSV, markdown and geometry helpers, shared ORM reader |
 
 ## Ontology
 
@@ -77,7 +79,7 @@ Typed relationships:
 | Background, Monster Type, Item Type, Spellbook | Refers to (group) | P67i is referred to by → E33 Linguistic Object: P67 refers to | any rules model |
 | Roll Table | About | P129 is about | Background, Campaign |
 | Route | Hazards | P53i is former or current location of | Creature |
-| Place | Terrain; Position | P2 has type (Terrain Difficulty: Easy, Tough, Perilous); P168 place is defined by (a WKT point) | |
+| Place | Terrain; Geometry | P2 has type (Terrain Difficulty: Easy, Tough, Perilous); P168 place is defined by (E94 Space Primitive, a GeoJSON FeatureCollection; see Maps) | |
 | Faction | Member of | P107i is current or former member of | Faction |
 | PC | Faction; Home | P107i is current or former member of; P74 has current or former residence | Faction; Place |
 
@@ -206,8 +208,8 @@ any layer finds its lens from its class, and a class from another ontology finds
 CRM parent it must declare. (Tested: a campaign-only Ship, E22, appears under Things; a foreign
 `ex:Familiar` is rejected until declared under E20, then appears there too.) The layouts
 work from links, lens membership and those properties alone: an entry that only joins two places
-is drawn as the line between them, whatever its model, and places with a position (P168, a WKT
-`POINT (x y)`) are drawn as a map at those positions, with the rest laid out around them.
+is drawn as the line between them, whatever its model, and places with a geometry (P168) are drawn
+on the world's globe (see Maps).
 
 **Entry pages** lead with the description, then facts (stats as chips, a stat and its "Max"
 merged as "STR 9/14", short values as tags, longer text as notes), then **Connections**: one chip
@@ -223,6 +225,51 @@ line icons drawn in the text colour.
 The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
 changes. Detail pages are as before, with the lens as a breadcrumb.
+
+## Maps
+
+**Only places have geometry.** That is CIDOC-CRM's own position: a Place is defined by an E94
+Space Primitive (P168), and everything else is somewhere by way of a place. An event took place at
+one (P7), a thing has a current location (P55), a person or group a residence (P74). So the Place
+model has one `geometry` field (Alizarin's `geojson-feature-collection`), and nothing else does.
+
+**An entry's map** sits across the top of its page. The explorer finds it from the ontology, not
+from field names: its own geometry if it is a place; else every place it links to by a property
+whose other end is an E53 Place (in either direction); and the places of the events it took part
+in. A linked place with no geometry is drawn as the nearest place it falls within that has one,
+marked as rough ("The Raven of Carrowmore, somewhere in Linos"); one with none at all is named in
+the caption as having no location yet. A place's map also shows, dashed, what it lies within and
+what lies within it, and a route is drawn as the line between its two places. The Places lens
+shows every place with a geometry on one globe. The globe turns by dragging; the buttons zoom.
+
+**Writing geometry.** In a CSV cell, as WKT in longitude and latitude (`POINT (-9.84 27.765)`;
+also LINESTRING, POLYGON and their MULTI forms) or as GeoJSON. The build turns it into a GeoJSON
+FeatureCollection and checks it with `@alizarin/geo` (Alizarin's geometry extension, which
+Alizarin's CSV loader does not call itself): coordinates in range, rings closed, at most 1,500
+positions per value. The explorer does not need that extension, so it is not in the site bundle.
+
+**Globes.** A universe whose world is Earth remapped can be placed on its globe. In its
+`layer.json`, `globe.remap` gives the remap (the pole that becomes the globe's north pole, the
+point on its seam, and the south and east-west squeeze), and `globe.maps` pins regional maps to it.
+`globe.csv` says, for each place, what it is on Earth (Natural Earth country names joined by `|`,
+or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
+that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
+`geometry` column of the layer's `place.csv` (countries dissolved into one outline per realm), and
+`basemap.json`, the globe's land: Natural Earth 1:110m for the whole globe and 1:50m around each
+regional map, which the explorer draws in place of the coarse coast there. The script needs the
+Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
+publishes the basemap with the views that stand on the layer.
+
+**Bith na Bró** uses its world globe's remap (pole 50.27°E 10°S, seam 150°E 50°S, south 0.5,
+east-west 0.55). Realms are their countries ("In the projection: Sweden"). The High Marks are read
+as Austria, Czechia, Slovakia, Hungary, Slovenia, Croatia, Bosnia and Herzegovina, Serbia,
+Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukraine and Belarus: an
+assumption, as the notes say only "the remaining countries of Central and Eastern Europe". Miurna
+and Leantis ("part of Russia") have no shape until it is settled which part, and Cofrey is drawn as
+Mongolia alone. The Dells map is pinned with the Bonefort at remapped Burgas, drawn north-up, at
+5 km to a map unit: the scale at which its land and sea best agree with the globe's coast (14 of
+its 15 places; the Fist of Glass, rocks off the coast, is too small for the coastline data). That
+makes the Dells about 130 by 100 km, and Hearth to the Trading Post about one 30 km watch.
 
 ## Rules data (`rules/`)
 
@@ -335,6 +382,7 @@ does not come back.
 | `views/<view>/bundles/<graphid>.json`, `resources/<id>.json` | Composed resources, per model and one by one |
 | `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
+| `layers/<layer>/basemap.json` | A universe's land on its globe, for maps (see Maps) |
 
 `views.json` carries `build`, a hash of the rest of `data/`. The explorer fetches `views.json`
 fresh and requests every other file, and the page its script and stylesheet, with `?v=<build>`,
@@ -358,7 +406,9 @@ too: build and upload `dist/`.
 - **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
   and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
-  `data/ontology.json`) is CC BY 4.0 and credited in the footer. d3-force and the Lucide icons are ISC. Add your own licence for `layers/`.
+  `data/ontology.json`) is CC BY 4.0 and credited in the footer. `@alizarin/geo` is AGPL-3.0, like
+  Alizarin. d3-force, d3-geo and the Lucide icons are ISC. Natural Earth data (basemaps and realm
+  outlines) is public domain. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository
@@ -367,7 +417,7 @@ too: build and upload `dist/`.
 |---|---|---|
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
-| `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map, with positions |
+| `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map; places on the world globe (see Maps) |
 | `ravens-in-the-dells` | Campaign (solo) | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
 | `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |

@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 // Icons: Lucide (lucide-static, ISC), monochrome line icons that take the text colour. Lens icons
 // are named in ontology/labels.csv (`icon`); the interface's own are listed here. Only those used
 // go into dist/icons.svg, one <symbol id="i-<name>"> each; an unknown name fails the build.
-const UI_ICONS = ['pencil', 'lock', 'circle'];
+const UI_ICONS = ['pencil', 'lock', 'circle', 'plus', 'minus', 'locate-fixed'];
 function buildIconSprite(root, dist) {
   const ontology = JSON.parse(fs.readFileSync(path.join(dist, 'data', 'ontology.json'), 'utf8'));
   const names = [...new Set([...UI_ICONS, ...Object.values(ontology.classes).map(c => c.icon).filter(Boolean)])].sort();

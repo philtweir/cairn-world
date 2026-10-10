@@ -4,6 +4,7 @@
 
 import { forceSimulation, forceLink, forceManyBody, forceCollide, forceX, forceY } from 'd3-force';
 import { parentsOf } from '../src/lenses.mjs';
+import { geoMap, geometryOf } from './geo-map.mjs';
 
 export function drawLens(ctx, lens, entries) {
   const draw = { network, places, timeline, things, tree, list }[lens.layout] ?? list;
@@ -121,26 +122,23 @@ function places(ctx, lens, entries) {
     const via = ctx.state.byId.get(id);
     edges.push({ source: a, target: b, label: ctx.title(via), kind: 'link', via });
   }
-  // Where places are defined by a position (P168, a WKT point), the graph is a map: those places
-  // sit where they are and everything else is laid out around them. Otherwise it shows only what
-  // connects, and unconnected places are in the tree alone.
-  const P168 = 'http://www.cidoc-crm.org/cidoc-crm/P168_place_is_defined_by';
-  const fixed = new Map();
-  for (const e of entries) {
-    const f = e.fields.find(x => x.property === P168 && typeof x.value === 'string');
-    const m = f && /POINT\s*\(\s*(-?[\d.]+)\s+(-?[\d.]+)\s*\)/i.exec(f.value);
-    if (m) fixed.set(e.id, { x: Number(m[1]), y: Number(m[2]) });
-  }
-  const mapped = fixed.size >= 2;
+  // Places with a geometry (P168 place is defined by) are drawn on the world's globe, with the
+  // entries that join two of them as lines. Without any, the graph shows only what connects, and
+  // unconnected places are in the tree alone.
+  const geo = entries.filter(e => !connectors.has(e.id) && geometryOf(e));
+  const byId = id => ctx.state.byId.get(id);
+  const lines = [...connectors].filter(([, ends]) => ends.every(id => byId(id) && geometryOf(byId(id))))
+    .map(([id, [a, b]]) => ({ e: byId(id), a: geometryOf(byId(a)), b: geometryOf(byId(b)) }));
   const linked = new Set(edges.flatMap(x => [x.source, x.target]));
-  const nodes = entries.filter(e => !connectors.has(e.id) && (linked.has(e.id) || (mapped && fixed.has(e.id))));
+  const nodes = entries.filter(e => !connectors.has(e.id) && linked.has(e.id));
   return [
+    geo.length ? [h('h2', {}, 'Map'),
+      geoMap(ctx, { items: geo.map(e => ({ e, geom: geometryOf(e), role: 'focus' })), lines, basemap: ctx.basemap(), cls: 'geomap big', label: `${lens.label}: map` }),
+      h('p', { class: 'note' }, `${geo.length} of ${entries.length} places have a location (P168 place is defined by); the rest are in the list below. Drag to turn the globe; lines are routes between two places.`)] : null,
     h('h2', {}, 'Within'),
     hierarchy(ctx, lens, entries.filter(e => !connectors.has(e.id))),
-    edges.length || mapped ? [h('h2', {}, mapped ? 'Map' : 'Connections'), forceGraph(ctx, lens, nodes, edges, mapped ? fixed : new Map()), legend(ctx, lens, nodes),
-      h('p', { class: 'note' }, mapped
-        ? `${fixed.size} places drawn at their positions (P168 place is defined by); the rest are placed by their links. Lines are entries that join two places; click one to open it.`
-        : 'Lines are entries that join two places (routes, passages); click one to open it.')] : null,
+    !geo.length && edges.length ? [h('h2', {}, 'Connections'), forceGraph(ctx, lens, nodes, edges), legend(ctx, lens, nodes),
+      h('p', { class: 'note' }, 'Lines are entries that join two places (routes, passages); click one to open it.')] : null,
   ];
 }
 

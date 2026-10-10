@@ -2,5 +2,15 @@
   "rights": {
     "holder": "philtweir",
     "statement": "Bith na Bró setting notes."
+  },
+  "globe": {
+    "remap": { "pole": [50.27, -10], "seam": [150, -50], "south": 0.5, "eastWest": 0.55 },
+    "maps": {
+      "dells": {
+        "name": "The Dells and Surrounds",
+        "anchor": { "at": [2.9, 11.9], "earth": [27.47, 42.5], "place": "the-bonefort" },
+        "kmPerUnit": 5
+      }
+    }
   }
 }

@@ -24,6 +24,7 @@ async function readField(entity, node) {
   switch (node.datatype) {
     case 'number': return Number(v);
     case 'boolean': return v === true || v === 'true';
+    case 'geojson-feature-collection': return await v.forJson();
     case 'concept-list': return (await items(v)).map(String);
     case 'resource-instance': return [(await v).id];
     case 'resource-instance-list': return (await items(v)).map(x => x.id).filter(id => typeof id === 'string');
@@ -120,13 +121,13 @@ export function links(e) {
   return out;
 }
 
-// Reverse edges: id -> [{ from: entity, via: field label }].
+// Reverse edges: id -> [{ from: entity, via: field label, property }].
 export function backlinks(entities) {
   const out = new Map();
   for (const e of entities) {
-    for (const { id, label, derived } of links(e)) {
+    for (const { id, label, property, derived } of links(e)) {
       if (!out.has(id)) out.set(id, []);
-      out.get(id).push({ from: e, via: label, derived });
+      out.get(id).push({ from: e, via: label, property, derived });
     }
   }
   return out;
