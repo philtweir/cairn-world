@@ -21,7 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { geoProjection, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
+import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
 import { feature, merge } from 'topojson-client';
 import polygonClipping from 'polygon-clipping';
@@ -39,7 +39,7 @@ const deg = Math.PI / 180;
 // crosses it is drawn the long way round.
 export function makeRemap({ pole, seam, south, eastWest }) {
   const rotate = solveRotation(pole, seam);
-  const mercator = geoProjection((l, p) => [l, Math.log(Math.tan(Math.PI / 4 + p / 2))]).rotate(rotate).scale(100).translate([0, 0]);
+  const mercator = geoMercator().rotate(rotate).scale(100).translate([0, 0]);
   // The land's extent in that Mercator sets the scale (as the globe page measures it).
   const land = feature(atlas('countries-110m.json'), atlas('countries-110m.json').objects.countries);
   const sing = geoRotation(rotate).invert([0, 90]);
@@ -57,16 +57,25 @@ export function makeRemap({ pole, seam, south, eastWest }) {
   // Rotated Earth (radians) -> globe (radians).
   const raw = (l, p) => {
     const x = 100 * l, y = -100 * Math.log(Math.tan(Math.PI / 4 + p / 2));
-    const lon = ((((x / RX) / deg) + 540) % 360 - 180) * eastWest;
+    // d3 cuts geometry at the seam in the rotated frame (exactly 180 degrees), which this scale
+    // puts a hair past 180 (100 / RX is about 1.0005). Clamp that sliver onto the seam, as the
+    // globe page clips it; wrapping it round would throw cut edges right across the globe.
+    const lon = Math.max(-180, Math.min(180, (x / RX) / deg)) * eastWest;
     let lat = (2 * Math.atan(Math.exp(-y / RY)) - Math.PI / 2) / deg;
     if (lat < 0) lat *= south;
     return [lon * deg, lat * deg];
   };
   const projection = geoProjection(raw).rotate(rotate).scale(1 / deg).translate([0, 0]).precision(0);
   const toGlobe = ([lon, lat]) => { const [x, y] = projection([lon, lat]); return [x, -y]; };
+  // The globe -> Earth: undo the squeezes, re-read as Mercator, and turn back.
+  const toEarth = ([lon, lat]) => {
+    const l = lon / eastWest * deg, p = (lat < 0 ? lat / south : lat) * deg;
+    const x = l * RX, y = -RY * Math.log(Math.tan(Math.PI / 4 + p / 2));
+    return mercator.invert([x, y]);
+  };
   // A GeoJSON object in Earth's coordinates -> the same in the globe's.
   const project = obj => flipY(geoProject(obj, projection));
-  return { rotate, toGlobe, project };
+  return { rotate, toGlobe, toEarth, project };
 }
 
 // The rotation that takes `pole` to the north pole and `seam` to longitude 180.
@@ -247,7 +256,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
     for (const [kind, g] of Object.entries(detailed)) {
       // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
-      const clipped = geomOf(flipY(geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]))));
+      // (Nothing of a kind inside the box comes back as null.)
+      const cut = geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]));
+      const clipped = cut && geomOf(flipY(cut));
       if (clipped) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry: round(clipped, 3) });
     }
   }

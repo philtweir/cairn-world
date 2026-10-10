@@ -122,7 +122,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const gShapes = svg('g', {}), gLines = svg('g', {}), gPoints = svg('g', {}), gLabels = svg('g', { class: 'labels' });
   el.append(svg('defs', {}, mask), gSea, gLand, gDetail, gGrat, gShapes, gLines, gPoints, gLabels);
   const KINDS = { land: 'land', unnamed: 'land unnamed' };
-  let coarse = [], holes = [], details = [];
+  let coarse = [], holes = [], details = [], clipPaths = [], reliefG = null, reliefSpan = 0;
   basemap?.then(b => {
     const fs = b?.features ?? [];
     coarse = Object.entries(KINDS).map(([k, cls]) => ({ geom: fs.find(f => f.properties.kind === k)?.geometry, node: svg('path', { class: cls }) })).filter(c => c.geom);
@@ -147,6 +147,23 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     }
     holes = [...boxes.values()];
     put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
+    // Relief: elevation bands (src/terrain.mjs), each "at least this high", stacked so the land
+    // darkens with height; clipped to the detailed coast, which they were not drawn against.
+    const relief = fs.filter(f => f.properties.kind === 'relief').sort((a, b) => a.properties.min - b.properties.min);
+    if (relief.length) {
+      const clip = svg('clipPath', { id: `${id}-c` }, details.map(d => { const n = svg('path', {}); clipPaths.push({ geom: d.geom, node: n }); return n; }));
+      el.querySelector('defs').append(clip);
+      const g = svg('g', { 'clip-path': `url(#${id}-c)`, class: 'relief' });
+      for (const f of relief) {
+        const node = svg('path', {}, svg('title', {}, `Above ${f.properties.min} m`));
+        g.append(node); details.push({ geom: f.geometry, node });
+      }
+      gDetail.append(g);
+      // Shown only while the view is about as small as the area it covers: wider out, it would read
+      // as a patch.
+      reliefG = g;
+      reliefSpan = Math.min(...relief.map(f => (f.bbox[2] - f.bbox[0]) / 2));
+    }
     draw();
   });
 
@@ -162,8 +179,12 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
           points.push({ node, c }); gPoints.append(node);
         }
       } else {
-        const node = svg('a', { href: route(x.e), class: `shape ${roleCls}` }, svg('path', {}), t);
-        shapes.push({ node, g: f.geometry }); gShapes.append(node);
+        // Fill and outline apart: the outline is drawn from the rings as lines, so where the globe's
+        // horizon cuts a shape, the cut is not stroked as if it were a border.
+        const fill = svg('path', { class: 'fill' }), edge = svg('path', { class: 'edge' });
+        const node = svg('a', { href: route(x.e), class: `shape ${roleCls}` }, fill, edge, t);
+        const rings = f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates.flat() : [];
+        shapes.push({ fill, edge, g: f.geometry, lines: { type: 'MultiLineString', coordinates: rings } }); gShapes.append(node);
       }
     }
     const node = svg('text', { class: `lbl ${x.role}` }, title(x.e));
@@ -183,9 +204,10 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const span = 180 / Math.PI * (W / 2) / projection.scale();   // degrees across half the width, roughly
     const step = span > 40 ? 15 : span > 12 ? 5 : span > 4 ? 1 : 0.5;
     gGrat.setAttribute('d', path(geoGraticule().step([step, step])()));
-    for (const c of [...coarse, ...details]) c.node.setAttribute('d', path(c.geom) ?? '');
+    for (const c of [...coarse, ...details, ...clipPaths]) c.node.setAttribute('d', path(c.geom) ?? '');
+    if (reliefG) reliefG.style.display = span > reliefSpan ? 'none' : '';
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
-    for (const s of shapes) s.node.firstChild.setAttribute('d', path(s.g) ?? '');
+    for (const s of shapes) { s.fill.setAttribute('d', path(s.g) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }
     for (const r of routes) r.node.firstChild.setAttribute('d', path(r.g) ?? '');
     for (const p of points) {
       const on = visible(p.c), xy = projection(p.c);

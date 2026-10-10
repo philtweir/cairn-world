@@ -246,17 +246,19 @@ function readSettings(key) {
   if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
   if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
-  // A basemap (src/globe.mjs writes one) is the land the explorer draws under this layer's maps.
-  const bm = path.join(LAYERS_DIR, key, 'basemap.json');
-  let basemap = null;
-  if (fs.existsSync(bm)) {
-    basemap = JSON.parse(fs.readFileSync(bm, 'utf8'));
+  // A basemap (src/globe.mjs writes one) is the land the explorer draws under this layer's maps;
+  // relief (src/terrain.mjs) the elevation bands over it.
+  const drawing = name => {
+    const f = path.join(LAYERS_DIR, key, name);
+    if (!fs.existsSync(f)) return null;
+    const fc = JSON.parse(fs.readFileSync(f, 'utf8'));
     // Checked like a geometry value, except for @alizarin/geo's cap on coordinates per value:
-    // the basemap is a published file, not a value stored in a tile.
-    const errors = validateGeojson(basemap).errors.filter(e => !/coordinates \(limit is \d+\)/.test(e));
-    if (errors.length) problem(`${rel(bm)} is not a valid FeatureCollection: ${errors.join('; ')}`);
-  }
-  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap };
+    // these are published files, not values stored in a tile.
+    const errors = validateGeojson(fc).errors.filter(e => !/coordinates \(limit is \d+\)/.test(e));
+    if (errors.length) problem(`${rel(f)} is not a valid FeatureCollection: ${errors.join('; ')}`);
+    return fc;
+  };
+  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap: drawing('basemap.json'), relief: drawing('relief.json') };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -498,9 +500,9 @@ for (const l of shippedLayers) for (const m of usedModels) {
   if (list?.length) write(`layers/${l}/${m.built.graph.graphid}.json`, { business_data: { resources: list } });
 }
 
-for (const l of shippedLayers) if (layers[l].basemap) write(`layers/${l}/basemap.json`, layers[l].basemap);
+for (const l of shippedLayers) for (const k of ['basemap', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
 const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
-  ...(l.basemap ? { basemap: `layers/${l.key}/basemap.json` } : {}) });
+  ...(l.basemap ? { basemap: `layers/${l.key}/basemap.json` } : {}), ...(l.relief ? { relief: `layers/${l.key}/relief.json` } : {}) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,

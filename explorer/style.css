@@ -197,15 +197,18 @@ body>footer{padding:1rem;border-top:1px solid var(--line);font:13px system-ui,sa
 .geomap .sea{fill:var(--sea)}
 .geomap .land{fill:var(--land)}
 .geomap .land.unnamed{fill:color-mix(in srgb,var(--land) 45%,var(--sea))}
+.geomap .relief path{fill:var(--fg);fill-opacity:.055;stroke:var(--fg);stroke-opacity:.12;stroke-width:.5}
 .geomap .graticule{fill:none;stroke:var(--coast);stroke-width:.5;opacity:.45}
-.geomap .shape path{fill:color-mix(in srgb,var(--accent) 16%,transparent);stroke:var(--accent);stroke-width:1.4}
-.geomap .shape.context path{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
-.geomap .shape.approx path{stroke-dasharray:5 3}
+.geomap .shape .fill{fill:color-mix(in srgb,var(--accent) 16%,transparent);stroke:none}
+.geomap .shape .edge{fill:none;stroke:var(--accent);stroke-width:1.4}
+.geomap .shape.context .fill{fill:none}
+.geomap .shape.context .edge{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.geomap .shape.approx .edge{stroke-dasharray:5 3}
 .geomap .route path{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:6 4}
 .geomap .pt circle{fill:var(--accent);stroke:var(--bg);stroke-width:2}
 .geomap .pt.context circle{fill:var(--muted);stroke-width:1.5}
 .geomap .pt.approx circle{fill:var(--bg);stroke:var(--accent);stroke-width:2;stroke-dasharray:3 2}
-.geomap a:hover path,.geomap a:focus path{stroke-width:2.4}
+.geomap a:hover .edge,.geomap a:focus .edge,.geomap .route:hover path{stroke-width:2.4}
 .geomap a:hover circle,.geomap a:focus circle{stroke:var(--fg)}
 .geomap .lbl{font:600 12px system-ui,sans-serif;fill:var(--fg);paint-order:stroke;stroke:var(--land);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
 .geomap .lbl.context{font-weight:400;fill:var(--muted)}

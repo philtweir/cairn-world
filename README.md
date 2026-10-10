@@ -14,6 +14,7 @@ npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 npm run set-password -- <layer>            # put a password in front of one view (see Layers)
 npm run globe -- <layer>                   # place a universe's places on its globe (see Maps)
+npm run terrain -- <layer>                 # its relief: remapped real elevation plus story edits (see Maps)
 ```
 
 Needs Node 22+. Alizarin comes from npm, pinned to `2.0.0-alpha.139`; npm's `latest` tag is still
@@ -31,6 +32,7 @@ anything that ships it, including this site.
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
 | `layers/<key>/globe.csv`, `basemap.json` | Optional: what each place is on Earth or on a regional map, and the globe's land, for `npm run globe` (see Maps) |
+| `layers/<key>/terrain.csv`, `relief.json` | Optional: story edits to the relief, and the relief itself, for `npm run terrain` (see Maps) |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
 | `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv`, `labels.csv` (display labels) |
 | `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin, d3-force and d3-geo into the site root |
@@ -271,8 +273,9 @@ publishes the basemap with the views that stand on the layer.
 **Bith na Bró** uses its world globe's remap (pole 50.27°E 10°S, seam 150°E 50°S, south 0.5,
 east-west 0.55). Realms are their countries ("In the projection: Sweden"). The High Marks are read
 as Austria, Czechia, Slovakia, Hungary, Slovenia, Croatia, Bosnia and Herzegovina, Serbia,
-Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukraine and Belarus: an
-assumption, as the notes say only "the remaining countries of Central and Eastern Europe". Russia
+Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukraine and Belarus (an
+assumption, as the notes say only "the remaining countries of Central and Eastern Europe"), with
+Greece and Turkey (Anatolia and East Thrace). Russia
 is divided arbitrarily along meridians: Miurna is European Russia west of the Urals (24°E to 60°E),
 Leantis Siberia from the Urals to Lake Baikal (60°E to 105°E), and Cofrey Mongolia with Russia east
 of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. (Natural Earth counts
@@ -295,6 +298,30 @@ are where its land and sea best agree with the named lands' coast: all 15 of its
 the right side, and still do if the scale or anchor shifts a little. (At Burgas itself, the Dells'
 northern places fell in Turkey, which no realm names.) That makes the Dells about 130 by 100 km, and
 Hearth to the Trading Post about one 30 km watch.
+
+**Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
+inverse of the one above: each point of the globe is looked up on Earth) for each regional map's
+detailed area, applies the layer's story edits, and writes `relief.json`: elevation bands from
+250 m to 3,500 m as contours on the globe, which the explorer stacks over the land, darker with
+height, when a map is zoomed in to that area. Elevation is from the Terrain Tiles open dataset
+(Mapzen/Tilezen on AWS: SRTM, GMTED2010, ETOPO1, EU-DEM and others), fetched once into
+`.cache/terrain/`; the site's footer carries its attribution. `terrain.csv` holds the edits, in
+order: `volcano` (a cone rising to a height), `raise` (add metres, fading out), `scale` (multiply
+heights, fading out), each at a place, a globe `POINT`, or an `EARTH POINT`, with a radius in km.
+
+Bith na Bró's Balkan interior is volcanic and more mountainous than Earth's, by four edits: its
+relief raised by up to 40%, and volcanoes on Rila, Pirin and the central Balkan range; a fifth
+puts a 3,400 m volcano at Volcano, Valleys and Glaciers, south of the Dells. So far only the Dells'
+area (about 700 km across) has relief.
+
+How far real terrain survives the remap: on the globe's northern half (the Greater Lands, Africa,
+Asia, Australia) ground is squeezed about 1.45 to 1, east-west against north-south, and its area
+roughly halved, the same everywhere, with no local shearing; mountain chains and river networks
+keep their shape and continuity, as a uniformly narrower world. Heights are Earth's, so slopes
+are about 1.2 times steeper on average (up to 1.7 across the squeeze). The Americas, on the
+southern half with its extra 0.5, are squeezed up to 2.3 to 1, and will look it. Real landforms
+also carry Earth's climate history (fjords, dune seas, glacial valleys) where the globe's climate
+differs.
 
 ## Rules data (`rules/`)
 
@@ -432,8 +459,11 @@ too: build and upload `dist/`.
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
   and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
   `data/ontology.json`) is CC BY 4.0 and credited in the footer. `@alizarin/geo` is AGPL-3.0, like
-  Alizarin. d3-force, d3-geo and the Lucide icons are ISC. Natural Earth data (basemaps and realm
-  outlines) is public domain; `polygon-clipping` (MIT) is used only by the globe script. Add your own licence for `layers/`.
+  Alizarin. d3-force, d3-geo and the Lucide icons are ISC. Elevation is from Terrain Tiles
+  (Mapzen/Tilezen on AWS Open Data), whose sources ask for attribution: SRTM and GMTED2010 (USGS),
+  ETOPO1 (NOAA), EU-DEM (produced using Copernicus data and information funded by the European
+  Union) and others; check its attribution list before covering other regions. Natural Earth data (basemaps and realm
+  outlines) is public domain; `polygon-clipping` (MIT), `pngjs` (MIT) and `d3-contour` (ISC) are used only by the globe and terrain scripts. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository

@@ -204,11 +204,15 @@ function fillViews() {
 const visible = e => (state.rules || !isGeneral(e)) && e !== state.root;
 const lensById = id => state.lenses.find(l => l.id === id);
 const inLens = (lens, e) => state.lensOf[e.model] === lens.id;
-// The land under maps: from the topmost layer in this view's stack that has a basemap.
+// The land under maps, and its relief: from the topmost layer in this view's stack that has each,
+// as one FeatureCollection.
 const basemap = () => (state.basemap ??= (() => {
   const view = state.viewsMeta.views.find(v => v.key === state.view);
-  const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.basemap);
-  return key ? fetch(`${DATA}/${state.viewsMeta.layers[key].basemap}${V}`).then(r => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null);
+  const get = what => {
+    const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.[what]);
+    return key ? fetch(`${DATA}/${state.viewsMeta.layers[key][what]}${V}`).then(r => (r.ok ? r.json() : null)).catch(() => null) : null;
+  };
+  return Promise.all([get('basemap'), get('relief')]).then(([b, r]) => (b ? { ...b, features: [...b.features, ...(r?.features ?? [])] } : null));
 })());
 const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
 const matches = e => {

@@ -13,7 +13,8 @@
     "import-rules": "node src/import-rules.mjs",
     "serve": "python3 -m http.server 8000 --directory dist",
     "set-password": "node src/set-password.mjs",
-    "globe": "node src/globe.mjs"
+    "globe": "node src/globe.mjs",
+    "terrain": "node src/terrain.mjs"
   },
   "dependencies": {
     "@alizarin/geo": "2.0.0-alpha.139",
@@ -22,9 +23,11 @@
     "d3-geo": "3.1.1"
   },
   "devDependencies": {
+    "d3-contour": "4.0.2",
     "d3-geo-projection": "4.0.0",
     "esbuild": "0.28.2",
     "lucide-static": "1.48.0",
+    "pngjs": "7.0.0",
     "polygon-clipping": "0.15.7",
     "topojson-client": "3.1.0",
     "world-atlas": "2.0.2"
