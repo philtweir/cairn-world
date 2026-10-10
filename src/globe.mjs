@@ -21,10 +21,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
 import { feature, merge } from 'topojson-client';
 import polygonClipping from 'polygon-clipping';
+import { topology } from 'topojson-server';
+import { presimplify, quantile, simplify } from 'topojson-simplify';
 import { parseCsv, toCsv } from './csv.mjs';
 import { wktToGeometry } from './geometry.mjs';
 
@@ -120,10 +123,13 @@ function round(geom, places) {
   }
 }
 // Only polygons above a minimum area (steradians) survive: specks of islands are noise at this scale.
+// A polygon over half the sphere is one read inside out (a near-zero crumb whose winding d3 cannot
+// tell), so it goes too.
 function dropSpecks(geom, min) {
-  if (geom.type === 'Polygon') return geoArea(geom) >= min ? geom : null;
+  const ok = coordinates => { const a = geoArea({ type: 'Polygon', coordinates }); return a >= min && a < 2 * Math.PI; };
+  if (geom.type === 'Polygon') return ok(geom.coordinates) ? geom : null;
   if (geom.type !== 'MultiPolygon') return geom;
-  const keep = geom.coordinates.filter(p => geoArea({ type: 'Polygon', coordinates: p }) >= min);
+  const keep = geom.coordinates.filter(ok);
   return keep.length ? { type: 'MultiPolygon', coordinates: keep } : null;
 }
 
@@ -148,24 +154,85 @@ function mapToGlobe(map, remap, [x, y]) {
 // optionally two latitudes: "Norway@-20:40/74:85" is Svalbard.
 // Unioned into one outline (planar, in degrees: fine away from the poles). Returns MultiPolygon
 // coordinates wound as GeoJSON has them (outer rings anticlockwise).
+const unwrapRing = ring => (Math.max(...ring.map(p => p[0])) - Math.min(...ring.map(p => p[0])) > 180 ? ring.map(([x, y]) => [x < 0 ? x + 360 : x, y]) : ring);
+const polysOf = geom => (geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : []);
+
 function earthShape(topo, spec, where) {
   const byName = new Map(topo.objects.countries.geometries.map(g => [g.properties.name, g]));
   const parts = spec.split('|').map(s => s.trim()).map(part => {
-    const m = /^(.+?)(?:@(-?[\d.]+):(-?[\d.]+)(?:\/(-?[\d.]+):(-?[\d.]+))?)?$/.exec(part);
+    const m = /^([^@#]+?)(?:@(-?[\d.]+):(-?[\d.]+)(?:\/(-?[\d.]+):(-?[\d.]+))?|#(.+))?$/.exec(part);
+    if (!m) throw new Error(`${where}: cannot read "${part}"`);
     const g = byName.get(m[1]);
     if (!g) throw new Error(`${where}: no country "${m[1]}" in Natural Earth (world-atlas)`);
     // A ring that crosses the 180th meridian (Russia's, through Chukotka) jumps from +180 to
     // -180: nothing on the sphere, but an edge right across the plane. Unwrap it first, so its
     // longitudes run on past 180 (Chukotka is 180 to 190); bands are written that way too.
-    const unwrap = ring => (Math.max(...ring.map(p => p[0])) - Math.min(...ring.map(p => p[0])) > 180 ? ring.map(([x, y]) => [x < 0 ? x + 360 : x, y]) : ring);
-    const geom = feature(topo, g).geometry;
-    const coords = (geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates).map(poly => poly.map(unwrap));
+    const coords = polysOf(feature(topo, g).geometry).map(poly => poly.map(unwrapRing));
+    if (m[6] !== undefined) return regionsOf(topo, m[1], coords.map(poly => poly.map(snapRing)), m[6], where);
     if (m[2] === undefined) return coords;
     const [x0, x1] = [Number(m[2]), Number(m[3])], [y0, y1] = m[4] === undefined ? [-90, 90] : [Number(m[4]), Number(m[5])];
     return polygonClipping.intersection(coords, [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]);
   });
   const out = polygonClipping.union(...parts);
   if (!out.length) throw new Error(`${where}: "${spec}" is empty`);
+  return out;
+}
+
+// A country's first-level regions (states, provinces, Russia's federal subjects), from Natural
+// Earth 1:10m admin-1, used to divide the country's own outline at this scale: its coast stays the
+// country's, only the borders inside it come from the regions. The regions are made a topology and
+// simplified together (so neighbours keep one shared border) and dissolved per selection; where the
+// two datasets disagree along a coast, each leftover sliver goes to the nearest region.
+// "Russia#Urals+Siberian-Buryat" is the regions named, by federal district (`region`) or by name,
+// less those after "-".
+const ADMIN1 = 'ne_10m_admin_1_states_provinces.geojson';
+let admin1 = null;
+const partitions = new Map();
+function regionsOf(topo, country, coords, select, where) {
+  const key = `${topo.arcs.length}:${country}`;
+  if (!partitions.has(key)) {
+    if (!admin1) {
+      const file = path.join(ROOT, '.cache', 'natural-earth', ADMIN1);
+      if (!fs.existsSync(file)) {
+        fs.mkdirSync(path.dirname(file), { recursive: true });
+        execFileSync('curl', ['-sfL', '--retry', '3', '-o', file, `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/${ADMIN1}`]);
+      }
+      admin1 = JSON.parse(fs.readFileSync(file, 'utf8')).features;
+    }
+    const units = admin1.filter(f => f.properties.admin === country);
+    if (!units.length) throw new Error(`${where}: no admin-1 regions for "${country}"`);
+    let t = topology({ units: { type: 'FeatureCollection', features: units } }, 1e6);
+    t = presimplify(t);
+    t = simplify(t, quantile(t, 0.02));   // keep the most significant 2% of points: borders to a few km
+    const geoms = t.objects.units.geometries;
+    // A dissolved selection as plane coordinates, unwrapped across 180 like the country.
+    const plane = gs => snapPolys(polysOf(merge(t, gs)).map(poly => poly.map(unwrapRing)));
+    const all = plane(geoms);
+    // Slivers of the country that no region covers, each with the region nearest to it.
+    const near = geoms.map(g => ({ g, pts: polysOf(merge(t, [g])).flat(2).map(p => [p[0] < -90 ? p[0] + 360 : p[0], p[1]]).filter((_, i) => i % 4 === 0) }));
+    const slivers = polygonClipping.difference(coords, all).map(poly => {
+      const c = poly[0][Math.floor(poly[0].length / 2)];
+      let best = null, bd = Infinity;
+      for (const { g, pts } of near) for (const p of pts) { const d = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2; if (d < bd) { bd = d; best = g; } }
+      return { poly, unit: best.properties.name };
+    });
+    partitions.set(key, { geoms, plane, slivers });
+  }
+  const { geoms, plane, slivers } = partitions.get(key);
+  const [inc, ...exc] = select.split('-');
+  const match = n => { const hit = geoms.filter(g => g.properties.region === n || g.properties.name === n); if (!hit.length) throw new Error(`${where}: no region or district "${n}" in ${country}`); return hit; };
+  const chosen = new Set(inc.split('+').flatMap(n => match(n.trim())));
+  for (const n of exc) for (const g of match(n.trim())) chosen.delete(g);
+  const names = new Set([...chosen].map(g => g.properties.name));
+  return polygonClipping.union(polygonClipping.intersection(coords, plane([...chosen])), ...slivers.filter(x => names.has(x.unit)).map(x => [x.poly]));
+}
+const snapPolys = polys => polys.map(poly => poly.map(snapRing).filter(r => r.length >= 4)).filter(poly => poly.length);
+// Coordinates snapped to a 1e-4 degree grid, with the repeats that makes dropped and the ring
+// closed: polygon-clipping fails on near-coincident points otherwise.
+function snapRing(ring) {
+  const out = [];
+  for (const [x, y] of ring) { const p = [Math.round(x * 1e4) / 1e4, Math.round(y * 1e4) / 1e4]; const q = out[out.length - 1]; if (!q || q[0] !== p[0] || q[1] !== p[1]) out.push(p); }
+  if (out.length && (out[0][0] !== out[out.length - 1][0] || out[0][1] !== out[out.length - 1][1])) out.push(out[0]);
   return out;
 }
 // d3-geo takes a ring's inside to be on its right (outer rings clockwise): the reverse of GeoJSON.
@@ -175,14 +242,16 @@ const forD3 = mp => ({ type: 'MultiPolygon', coordinates: mp.map(poly => poly.ma
 // works on the sphere), and what is left of a country only parts of which are named (Russia once
 // its realms are cut out). Returns d3-wound geometries in Earth's coordinates.
 function unnamedLand(topo, spec) {
-  const parts = spec.split('|').map(s => s.trim()).map(part => /^(.+?)(?:@(.*))?$/.exec(part));
+  const parts = spec.split('|').map(s => s.trim()).map(part => /^([^@#]+?)(?:[@#](.*))?$/.exec(part));
   const whole = new Set(parts.filter(m => m[2] === undefined).map(m => m[1]));
   const banded = new Set(parts.filter(m => m[2] !== undefined).map(m => m[1]).filter(n => !whole.has(n)));
   const all = topo.objects.countries.geometries;
   const out = [merge(topo, all.filter(g => !whole.has(g.properties.name) && !banded.has(g.properties.name)))];
   for (const name of banded) {
     const own = parts.filter(m => m[1] === name).map(m => m[0]).join('|');
-    const rest = polygonClipping.difference(earthShape(topo, name, 'unnamed land'), earthShape(topo, own, 'unnamed land'));
+    // Crumbs where the parts' borders and the country's disagree by a hair are not land.
+    const planar = poly => Math.abs(poly[0].reduce((a, p, i, r) => (i ? a + (r[i - 1][0] * p[1] - p[0] * r[i - 1][1]) : a), 0)) / 2;
+    const rest = polygonClipping.difference(earthShape(topo, name, 'unnamed land'), earthShape(topo, own, 'unnamed land')).filter(poly => planar(poly) > 0.01);
     if (rest.length) out.push(forD3(rest));
   }
   return out;
@@ -259,7 +328,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       // (Nothing of a kind inside the box comes back as null.)
       const cut = geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]));
       const clipped = cut && geomOf(flipY(cut));
-      if (clipped) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry: round(clipped, 3) });
+      const geometry = clipped && dropSpecks(round(clipped, 3), 0);
+      if (geometry) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry });
     }
   }
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));

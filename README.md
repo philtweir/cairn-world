@@ -256,7 +256,9 @@ point on its seam, and the south and east-west squeeze), and `globe.maps` pins r
 `globe.csv` says, for each place, what it is on Earth (Natural Earth country names joined by `|`,
 each optionally cut to a band of longitude, `Russia@24:60`, or a box, `Norway@-20:40/74:85`
 (Svalbard), for a realm that is part of a country, with longitudes past 180 continuing on, so
-`Russia@105:200` runs through Chukotka;
+`Russia@105:200` runs through Chukotka; or a set of the country's own regions,
+`Russia#Central+Northwestern+Volga-Kaliningrad`, by Natural Earth's admin-1 district or region name,
+less those after `-`;
 or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
 that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
 `geometry` column of the layer's `place.csv` (each realm's countries unioned into one outline, with
@@ -276,10 +278,15 @@ as Austria, Czechia, Slovakia, Hungary, Slovenia, Croatia, Bosnia and Herzegovin
 Montenegro, Kosovo, North Macedonia, Albania, Bulgaria, Romania, Moldova, Ukraine and Belarus (an
 assumption, as the notes say only "the remaining countries of Central and Eastern Europe"), with
 Greece and Turkey (Anatolia and East Thrace). Russia
-is divided arbitrarily along meridians: Miurna is European Russia west of the Urals (24°E to 60°E),
-Leantis Siberia from the Urals to Lake Baikal (60°E to 105°E), and Cofrey Mongolia with Russia east
-of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. (Natural Earth counts
-Crimea as Russian, so it falls in Miurna.)
+is divided along its federal districts, an arbitrary but realistic choice: Miurna is European
+Russia (the Central, Northwestern and Volga districts as Natural Earth groups them), Leantis western
+and central Siberia (the Urals and Siberian districts), and Cofrey Mongolia with the Russian Far East
+and Buryatia and Zabaykalsky, which border Mongolia (in the Far Eastern district since 2018); the
+Rock of Aphemenosta is the Kaliningrad exclave. (Natural Earth counts Crimea as Russian, so it falls
+in Miurna.) The regions come from Natural Earth 1:10m admin-1, fetched once into
+`.cache/natural-earth/`, made a topology and simplified together (so neighbours share one border,
+to a few km), and used only to divide Russia's own outline: the coast stays the country's, and a
+sliver where the two datasets disagree along a coast goes to the nearest region.
 
 The other powers each have a territory place, "Lands of …", as their faction's Base: the Engineers
 (the United Kingdom and Ireland), the Sapphire Throne (Yemen, Djibouti, Eritrea), the Eastern
@@ -463,7 +470,7 @@ too: build and upload `dist/`.
   (Mapzen/Tilezen on AWS Open Data), whose sources ask for attribution: SRTM and GMTED2010 (USGS),
   ETOPO1 (NOAA), EU-DEM (produced using Copernicus data and information funded by the European
   Union) and others; check its attribution list before covering other regions. Natural Earth data (basemaps and realm
-  outlines) is public domain; `polygon-clipping` (MIT), `pngjs` (MIT) and `d3-contour` (ISC) are used only by the globe and terrain scripts. Add your own licence for `layers/`.
+  outlines) is public domain; `polygon-clipping` (MIT), `topojson-server` and `topojson-simplify` (ISC), `pngjs` (MIT) and `d3-contour` (ISC) are used only by the globe and terrain scripts. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository

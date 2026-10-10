@@ -1,8 +1,8 @@
 ResourceID,earth,map,note
-miurna,Russia@24:60,,"European Russia, west of the Urals: an arbitrary division of Russia."
-leantis,Russia@60:105,,Siberia from the Urals to Lake Baikal: an arbitrary division of Russia.
+miurna,Russia#Central+Northwestern+Volga-Kaliningrad,,"European Russia: the Central, Northwestern and Volga federal districts as Natural Earth groups them (so with Crimea, which Natural Earth counts as Russian), less Kaliningrad."
+leantis,Russia#Urals+Siberian-Buryat-Chita,,"Western and central Siberia: the Urals and Siberian federal districts, less Buryatia and Zabaykalsky (Chita), which border Mongolia."
 godrastan,France@-10:20|Italy|Spain|Portugal,,Metropolitan France: French Guiana (part of France in Natural Earth) is in South America.
-cofrey,Mongolia|Russia@105:200,,"Mongolia, and Russia east of Lake Baikal to the Pacific: an arbitrary division of Russia."
+cofrey,Mongolia|Russia#Far Eastern+Buryat+Chita,,"Mongolia, and the Russian Far East with Buryatia and Zabaykalsky (in the Far Eastern federal district since 2018)."
 palatinate,Kazakhstan,,
 high-marks,Austria|Czechia|Slovakia|Hungary|Slovenia|Croatia|Bosnia and Herz.|Serbia|Montenegro|Kosovo|Macedonia|Albania|Bulgaria|Romania|Moldova|Ukraine|Belarus|Greece|Turkey,,"""The remaining countries of Central and Eastern Europe"", read as these, an assumption; with Greece and Turkey (Anatolia and East Thrace) added."
 ievure,Sweden,,
@@ -13,7 +13,7 @@ aphinos,Latvia,,
 caryes,Finland,,
 sevine,Belgium,,
 grunheim,Poland,,
-rock-of-aphemenosta,Russia@19:24,,Kaliningrad: the Russian exclave.
+rock-of-aphemenosta,Russia#Kaliningrad,,Kaliningrad: the Russian exclave.
 zintar,Germany,,
 the-dells,,dells POINT (18.2 3.8),
 the-black-dunes,,dells POINT (9.4 9.4),
