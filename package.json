@@ -14,7 +14,7 @@
     "serve": "python3 -m http.server 8000 --directory dist"
   },
   "dependencies": {
-    "alizarin": "file:vendor/alizarin-2.0.0-alpha.135.tgz"
+    "alizarin": "file:vendor/alizarin-2.0.0-alpha.137.tgz"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

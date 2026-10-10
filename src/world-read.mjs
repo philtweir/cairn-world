@@ -5,16 +5,11 @@
 
 const isNull = v => v === null || v === undefined;
 
-// Cardinality-n nodes come back as one list per tile, each item possibly a list itself.
-async function leaves(v, isLeaf) {
-  const out = [];
-  for (const item of Array.from(v)) {
-    const x = await item;
-    if (isNull(x)) continue;
-    if (isLeaf(x)) out.push(x);
-    else if (typeof x[Symbol.iterator] === 'function') out.push(...await leaves(x, isLeaf));
-  }
-  return out;
+// All values of a list field. A cardinality-n field is a PseudoList of per-tile entries, which
+// Alizarin flattens; a single-valued list field is already a plain list.
+async function items(v) {
+  const list = typeof v.flattened === 'function' ? await v.flattened() : await Promise.all(Array.from(v, x => x));
+  return list.filter(x => x !== null && x !== undefined);
 }
 
 async function readField(entity, node) {
@@ -22,13 +17,15 @@ async function readField(entity, node) {
   if (isNull(v)) return null;
   switch (node.datatype) {
     case 'number': return Number(v);
-    case 'concept-list': return (await leaves(v, x => typeof x === 'string' || x instanceof String)).map(String);
+    case 'concept-list': return (await items(v)).map(String);
     case 'resource-instance': return [(await v).id];
-    case 'resource-instance-list': return (await leaves(v, x => typeof x.id === 'string')).map(x => x.id);
+    case 'resource-instance-list': return (await items(v)).map(x => x.id).filter(id => typeof id === 'string');
     default: { const s = String(v); return s === '' ? null : s; }
   }
 }
 
+// Looked up by exact class name: in 2.0.0-alpha.137, get() with any other spelling throws on a
+// model that is not loaded yet (the normalised lookup is not passed through to loadGraph).
 // The ORM names a model after its display name: "Monster Type" -> "MonsterType".
 const ormName = (graphManager, display) => {
   const flat = display.replace(/[^a-z0-9]/gi, '').toLowerCase();

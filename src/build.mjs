@@ -16,12 +16,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import * as A from 'alizarin/inline-full';
 import { parseCsv, toCsv } from './csv.mjs';
 import { renderSite, renderViewIndex } from './render.mjs';
 import { buildExplorer } from './build-explorer.mjs';
+import { readEntities } from './world-read.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -33,7 +33,7 @@ const RDM_NAMESPACE = 'http://cairn-world.example/rdm/';
 const CRM = 'http://www.cidoc-crm.org/cidoc-crm/';
 const CAIRN = 'http://cairn-world.example/ns/';
 const NODE_COLS = ['alias', 'name', 'datatype', 'cardinality', 'ontology_class',
-  'parent_property', 'parent_alias', 'collection_name'];
+  'parent_property', 'parent_alias', 'collection_name', 'graphs'];
 const LINK_TYPES = new Set(['resource-instance', 'resource-instance-list']);
 const ROOT_MODELS = ['universe', 'campaign'];
 const GENERAL = 'general';
@@ -50,7 +50,7 @@ const bail = () => {
 // "E21_Person" -> CIDOC-CRM URI, "cairn:allied_with" -> our namespace, URIs pass through.
 const expand = s => (!s ? s : /^https?:/.test(s) ? s : s.startsWith('cairn:') ? CAIRN + s.slice(6) : CRM + s);
 
-// Deterministic UUID from a string, for ids we mint ourselves (layer namespaces, pinned publications).
+// Deterministic UUID from a string, for the per-layer tile namespaces.
 const stableUuid = seed => {
   const b = crypto.createHash('sha1').update(seed).digest();
   b[6] = (b[6] & 0x0f) | 0x50; b[8] = (b[8] & 0x3f) | 0x80;
@@ -120,8 +120,11 @@ for (const m of models) {
     for (const t of n.targets) if (!modelByAlias[t]) problem(`${rel(m.file)}:${n.line} unknown target_model "${t}"`);
   }
   const graphCsv = toCsv([['name', 'alias', 'ontology_class'], [m.name, m.alias, m.ontology]]);
-  const nodesCsv = toCsv([NODE_COLS, ...m.nodes.map(n => NODE_COLS.map(c =>
-    (c === 'ontology_class' || c === 'parent_property') ? expand(n[c]) : n[c]))]);
+  // Authors name link targets by model alias (target_model); Alizarin's `graphs` column wants
+  // model names, from which it derives each target's graph id.
+  const cell = (n, c) => (c === 'ontology_class' || c === 'parent_property') ? expand(n[c])
+    : c === 'graphs' ? n.targets.map(t => modelByAlias[t]?.name ?? t).join('|') : n[c];
+  const nodesCsv = toCsv([NODE_COLS, ...m.nodes.map(n => NODE_COLS.map(c => cell(n, c)))]);
   report(rel(m.file), A.validateModelCsvs(graphCsv, nodesCsv, vocabCsv));
   try {
     m.built = A.buildGraphFromModelCsvs(graphCsv, nodesCsv, RDM_NAMESPACE, vocabCsv);
@@ -131,21 +134,15 @@ for (const m of models) {
 }
 if (problems.length) bail();
 
-for (const m of models) {
-  // Link nodes must declare which graphs they point at, or the ORM can't follow them.
-  for (const n of m.nodes) {
-    if (!LINK_TYPES.has(n.datatype)) continue;
-    m.built.graph.nodes.find(x => x.alias === n.alias).config = {
-      graphs: n.targets.map(t => ({
-        graphid: modelByAlias[t].built.graph.graphid, name: modelByAlias[t].name,
-        ontologyProperty: '', inverseOntologyProperty: '', relationshipType: '',
-      })),
-    };
-  }
-  // Alizarin stamps a random publication id and the current time; pin both so rebuilds are byte-identical.
-  const pub = m.built.graph.publication;
-  if (pub) { pub.publicationid = stableUuid(`publication:${m.built.graph.graphid}`); pub.published_time = '2000-01-01T00:00:00.000'; }
+// Alizarin derives each link's target graph id from the model name; check it agrees with the
+// graph ids it actually built, so a renamed model can't leave links pointing nowhere.
+for (const m of models) for (const n of m.nodes) {
+  if (!LINK_TYPES.has(n.datatype)) continue;
+  const got = (m.built.graph.nodes.find(x => x.alias === n.alias).config?.graphs ?? []).map(g => g.graphid).sort();
+  const want = n.targets.map(t => modelByAlias[t].built.graph.graphid).sort();
+  if (JSON.stringify(got) !== JSON.stringify(want)) problem(`${rel(m.file)}:${n.line} link "${n.alias}" targets graph ids ${got.join(', ') || 'none'}, expected ${want.join(', ')}`);
 }
+if (problems.length) bail();
 
 // ---- 3. Tables per layer and model -------------------------------------------------
 
@@ -281,26 +278,27 @@ for (const key of layerKeys) {
 }
 if (problems.length) bail();
 
-// The CSV loader stores SKOS concept ids in concept tiles, but the ORM (like Arches itself)
-// looks concepts up by value id. Translate, or every concept field reads back empty.
-const valueIdOfConcept = new Map();
-for (const m of models) for (const c of m.built.collections) {
-  for (const [conceptId, concept] of Object.entries(c.__allConcepts ?? {})) valueIdOfConcept.set(conceptId, Object.values(concept.prefLabels)[0].id);
-}
-for (const key of layerKeys) for (const [alias, list] of Object.entries(built[key])) {
-  const conceptNodes = modelByAlias[alias].built.graph.nodes.filter(n => n.datatype === 'concept' || n.datatype === 'concept-list').map(n => n.nodeid);
-  for (const res of list) for (const tile of res.tiles) for (const nodeid of conceptNodes) {
-    const v = tile.data?.[nodeid];
-    if (v == null) continue;
-    const swap = id => valueIdOfConcept.get(id) ?? id;
-    tile.data[nodeid] = Array.isArray(v) ? v.map(swap) : swap(v);
-  }
-}
-
 // ---- 6. Compose each view's stack with Alizarin ----------------------------------------
 
 const viewKeys = Object.values(layers).filter(l => l.kind !== 'general' && (l.published || INCLUDE_UNPUBLISHED)).map(l => l.key);
 const views = {};   // key -> { model -> { resources, entries } , overrides: [...] }
+
+// What the upper layers do to an entry, by field: replace a single-valued group, add to a
+// multi-valued one, or set one the lower layers left empty. `list` is topmost-first.
+function layerChanges(m, list) {
+  const g = m.built.graph;
+  const card = new Map(g.nodegroups.map(ng => [ng.nodegroupid, ng.cardinality]));
+  const alias = ng => g.nodes.find(n => n.nodeid === ng)?.alias ?? g.nodes.find(n => n.nodegroup_id === ng)?.alias ?? ng;
+  const groups = res => new Set(res.tiles.map(t => t.nodegroup_id));
+  const below = new Set(list.slice(1).flatMap(x => [...groups(x.res)]));
+  const overrides = [], adds = [], sets = [];
+  for (const { res } of list.slice(0, -1)) for (const ng of groups(res)) {
+    if (card.get(ng) === 'n') adds.push(alias(ng));
+    else if (below.has(ng)) overrides.push(alias(ng));
+    else sets.push(alias(ng));
+  }
+  return { overrides, adds, sets };
+}
 for (const v of viewKeys) {
   const stack = layers[v].stack;
   const view = { models: {}, overrides: [] };
@@ -318,8 +316,9 @@ for (const v of viewKeys) {
       let res = list[0].res;
       if (list.length > 1) {
         const out = A.composeResourceLayers(list.map(x => x.res), m.built.graph, [], false);
+        for (const w of out.warnings) console.warn(`warning: ${v}: ${m.alias}/${keyOfId.get(id)}: ${w}`);
         res = out.resource;
-        view.overrides.push({ model: m.alias, key: keyOfId.get(id), layers: list.map(x => x.layer).reverse(), changes: out.warnings.length });
+        view.overrides.push({ model: m.alias, key: keyOfId.get(id), layers: list.map(x => x.layer).reverse(), ...layerChanges(m, list) });
       }
       resources.push(res);
       entries.push({ id, key: keyOfId.get(id), layers: list.map(x => x.layer).reverse() });
@@ -336,7 +335,8 @@ for (const v of viewKeys) {
 const totalOwn = layerKeys.reduce((n, k) => n + Object.values(built[k]).reduce((x, l) => x + l.length, 0), 0);
 console.log(`ok: ${models.length} models, ${layerKeys.length} layers, ${totalOwn} layer entries, ${viewKeys.length} view(s): ${viewKeys.join(', ') || 'none'}`);
 for (const v of viewKeys) for (const o of views[v].overrides) {
-  console.log(`  ${v}: ${o.model}/${o.key} composed from ${o.layers.join(' > ')}${o.changes ? ` (${o.changes} single-valued override${o.changes > 1 ? 's' : ''})` : ''}`);
+  const what = [o.overrides.length && `overrides ${o.overrides.join(', ')}`, o.adds.length && `adds to ${o.adds.join(', ')}`, o.sets.length && `sets ${o.sets.join(', ')}`].filter(Boolean).join('; ');
+  console.log(`  ${v}: ${o.model}/${o.key} (${o.layers.join(' > ')}): ${what}`);
 }
 const hidden = Object.values(layers).filter(l => l.kind !== 'general' && !viewKeys.includes(l.key)).map(l => l.key);
 if (hidden.length) console.log(`  not published (use --all to preview): ${hidden.join(', ')}`);
@@ -404,17 +404,27 @@ for (const v of viewKeys) {
 }
 
 // ---- 8. Read each view back through the ORM, and render -------------------------------
-// One process per view: the ORM's caches are global, and the same resource id carries
-// different data in different views.
+// The same resource id carries different data in different views, so each view gets its own
+// GraphManager and StaticStore. Vocabularies (RDM) are shared and identical across views.
 
 const viewsMeta = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));
+const dataPath = f => path.join(DIST, 'data', f);
 for (const v of viewKeys) {
-  const out = path.join(DIST, `.entities-${v}.json`);
-  execFileSync(process.execPath, [path.join(ROOT, 'src/read-view.mjs'), path.join(DIST, 'data'), v, out], {
-    env: { ...process.env, NODE_OPTIONS: '--experimental-wasm-modules' }, stdio: ['ignore', 'ignore', 'inherit'],
+  const index = JSON.parse(fs.readFileSync(dataPath(`views/${v}/index.json`), 'utf8'));
+  const manifest = JSON.parse(fs.readFileSync(dataPath(`views/${v}/manifest.json`), 'utf8'));
+  const client = new A.client.ArchesClientLocal({
+    allGraphFile: () => dataPath('graphs.json'),
+    graphIdToGraphFile: id => dataPath(`graphs/${id}.json`),
+    graphIdToResourcesFiles: id => (index[id] ?? []).map(dataPath),
+    resourceIdToFile: id => dataPath(`views/${v}/resources/${id}.json`),
+    collectionIdToFile: id => dataPath(`collections/${id}.json`),
   });
-  const { manifest, entities } = JSON.parse(fs.readFileSync(out, 'utf8'));
-  fs.rmSync(out);
+  const store = new A.StaticStore();
+  store.archesClient = client;
+  A.RDM.archesClient = client;
+  const gm = new A.GraphManager(client, store);
+  await gm.initialize();
+  const entities = await readEntities(gm, manifest);
   renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v) });
 }
 renderViewIndex({ viewsMeta, outDir: path.join(DIST, 'pages') });

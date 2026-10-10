@@ -14,10 +14,9 @@ npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 ```
 
-Needs Node 22+. Alizarin is **vendored** as `vendor/alizarin-2.0.0-alpha.135.tgz`, built from
-`flaxandteal/alizarin` `release/2.0` at `5b2d33c`, because that is the first build with
-`composeResourceLayers` (and a WASM fix for `uuidNamespace`) and it is not on npm yet. Swap the
-dependency back to the npm release once one includes them. Alizarin is AGPL-3.0, which applies to
+Needs Node 22+. Alizarin is **vendored** as `vendor/alizarin-2.0.0-alpha.137.tgz`, built from
+`flaxandteal/alizarin` `release/2.0` at `ee19641`, because 2.0.0-alpha.137 is not on npm yet (only
+`@alizarin/napi` is). Swap the dependency to `alizarin@2.0.0-alpha.137` once it is published. Alizarin is AGPL-3.0, which applies to
 anything that ships it, including this site.
 
 ## Layout
@@ -83,8 +82,8 @@ a campaign with the key of a universe entry *is* that entry. Each Universe and C
 | Multi-valued | Adds to it; can never remove an entry | `faction.csv`: the Ferrymen gain an enemy |
 
 To end something (an alliance, a life), use a single-valued status or an Event, not deletion. The
-build prints every composed entry and how many single-valued overrides it took, as an audit of what
-each campaign changes. Each layer is built with its own tile namespace; without that, the same field
+build prints every composed entry and what each upper layer does to it ("overrides status,
+description", "adds to enemies"), as an audit of what each campaign changes. Each layer is built with its own tile namespace; without that, the same field
 in two layers shares a tile id and composition silently keeps only the topmost list.
 
 **Publishing.** Universe and Campaign rows have `published`. `npm run build` writes only published
@@ -131,8 +130,9 @@ errors on unknown or ambiguous keys.
 | `collection_name` | For concept fields: which vocabulary in `vocab.csv` |
 | `target_model` | For links: model alias, or `npc\|faction` for several |
 
-Declare every link as `resource-instance-list`, even single-valued ones: with the CSV loader the
-single `resource-instance` type stores a bare string that the ORM does not follow.
+The build passes `target_model` to Alizarin as model names in its `graphs` column, and checks that
+the graph ids Alizarin derives from those names match the models it built. Link cells are resolved
+by the build itself, because a link may only reach entries visible from its layer.
 
 **Add a vocabulary term:** add a row to `model/vocab.csv`. Concept cells in the data must match a
 label exactly.
@@ -148,11 +148,11 @@ label exactly.
 The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
 per entry saying which layers it comes from ("Defined in The Weeping Wood · changed in Ashes of
 Hollowmere"), "Linked from" backlinks, and a 1-hop relationship graph. URLs look like
-`/#/<view>/<model>/<key>`. Switching view reloads the page: the ORM's caches are global and the same
-entity differs between views. General-only entries (the 192 rules) are hidden until asked for.
+`/#/<view>/<model>/<key>`. Switching view reloads the page, so each view starts with a clean ORM:
+the same entity differs between views. General-only entries (the 192 rules) are hidden until asked for.
 
-The build reads each view back through the ORM in its own process, for the same reason, and
-renders the plain pages from that, so both share `src/world-read.mjs`.
+The build reads each view back through the ORM with its own `GraphManager` and `StaticStore`, and
+renders the plain pages from that; the explorer reads the same way, through `src/world-read.mjs`.
 
 ### Tile store (`dist/data/`)
 
@@ -183,16 +183,15 @@ too: build and upload `dist/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths. The deploy workflow itself has
   not been run.
 
-## Gotchas found while building this
+## Alizarin notes
 
-- The CSV loader stores SKOS *concept* ids in tiles; the ORM looks up *value* ids (as Arches
-  does). `build.mjs` translates, otherwise every concept field reads back empty.
-- Link nodes need `config.graphs` set to their target graph(s); `build.mjs` does it from `target_model`.
-- The `ArchesClientLocal` graph index (`graphs.json`) wants trimmed metadata, not full graphs.
-- Cardinality-`n` fields come back from the ORM as a list of lists; the reader flattens them.
-- The ORM names models in PascalCase (`NPC` -> `Npc`).
+- Every layer needs its own tile `uuidNamespace` for multi-valued fields to accumulate; Alizarin
+  warns if it sees the same tile id with different data in two layers.
+- `graphManager.get()` is called with the exact class name (`NPC` -> `Npc`): in 2.0.0-alpha.137 any
+  other spelling throws for a model that has not been loaded yet.
 - Warnings about non-CRM properties are suppressed for the `cairn:` namespace only.
-- This is beta software; expect to re-check these when bumping the version.
+- Earlier workarounds (concept-id translation, patching link targets, pinning publication ids,
+  flattening nested lists by hand, one process per view) were removed when alpha.137 fixed them.
 
 ## Using the data elsewhere
 
