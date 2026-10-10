@@ -196,6 +196,7 @@ body>footer{padding:1rem;border-top:1px solid var(--line);font:13px system-ui,sa
 .geomap.big>svg{height:min(68vh,560px)}
 .geomap .sea{fill:var(--sea)}
 .geomap .land{fill:var(--land)}
+.geomap .land.unnamed{fill:color-mix(in srgb,var(--land) 45%,var(--sea))}
 .geomap .graticule{fill:none;stroke:var(--coast);stroke-width:.5;opacity:.45}
 .geomap .shape path{fill:color-mix(in srgb,var(--accent) 16%,transparent);stroke:var(--accent);stroke-width:1.4}
 .geomap .shape.context path{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}

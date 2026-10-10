@@ -12,7 +12,8 @@
 //     places' Earth shapes together, and nothing else, so the world is only its named lands.
 //
 // globe.csv columns: ResourceID, earth (Natural Earth country names joined by "|", each with an
-// optional band of longitude, "Russia@24:60", for a realm that is part of a country; or WKT in
+// optional box of longitude and latitude, "Russia@24:60" or "Norway@-20:40/74:85", for a realm
+// that is part of a country; or WKT in
 // Earth's longitude and latitude), map ("<map> POINT (x y)" in that map's units, x east and y
 // south), note. A place with neither keeps no geometry. Natural Earth data is public domain;
 // it comes from the world-atlas package (a dev dependency: the site never needs it).
@@ -22,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { geoProjection, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
-import { feature } from 'topojson-client';
+import { feature, merge } from 'topojson-client';
 import polygonClipping from 'polygon-clipping';
 import { parseCsv, toCsv } from './csv.mjs';
 import { wktToGeometry } from './geometry.mjs';
@@ -134,13 +135,14 @@ function mapToGlobe(map, remap, [x, y]) {
 }
 
 // A realm's shape on Earth, from Natural Earth countries: "France|Italy", or "Russia@24:60" for the
-// part of a country between two longitudes (east of 180 continues past it: "Russia@105:200").
+// part of a country between two longitudes (east of 180 continues past it: "Russia@105:200"), and
+// optionally two latitudes: "Norway@-20:40/74:85" is Svalbard.
 // Unioned into one outline (planar, in degrees: fine away from the poles). Returns MultiPolygon
 // coordinates wound as GeoJSON has them (outer rings anticlockwise).
 function earthShape(topo, spec, where) {
   const byName = new Map(topo.objects.countries.geometries.map(g => [g.properties.name, g]));
   const parts = spec.split('|').map(s => s.trim()).map(part => {
-    const m = /^(.+?)(?:@(-?[\d.]+):(-?[\d.]+))?$/.exec(part);
+    const m = /^(.+?)(?:@(-?[\d.]+):(-?[\d.]+)(?:\/(-?[\d.]+):(-?[\d.]+))?)?$/.exec(part);
     const g = byName.get(m[1]);
     if (!g) throw new Error(`${where}: no country "${m[1]}" in Natural Earth (world-atlas)`);
     // A ring that crosses the 180th meridian (Russia's, through Chukotka) jumps from +180 to
@@ -150,8 +152,8 @@ function earthShape(topo, spec, where) {
     const geom = feature(topo, g).geometry;
     const coords = (geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates).map(poly => poly.map(unwrap));
     if (m[2] === undefined) return coords;
-    const [x0, x1] = [Number(m[2]), Number(m[3])];
-    return polygonClipping.intersection(coords, [[[x0, -90], [x1, -90], [x1, 90], [x0, 90], [x0, -90]]]);
+    const [x0, x1] = [Number(m[2]), Number(m[3])], [y0, y1] = m[4] === undefined ? [-90, 90] : [Number(m[4]), Number(m[5])];
+    return polygonClipping.intersection(coords, [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]);
   });
   const out = polygonClipping.union(...parts);
   if (!out.length) throw new Error(`${where}: "${spec}" is empty`);
@@ -159,6 +161,25 @@ function earthShape(topo, spec, where) {
 }
 // d3-geo takes a ring's inside to be on its right (outer rings clockwise): the reverse of GeoJSON.
 const forD3 = mp => ({ type: 'MultiPolygon', coordinates: mp.map(poly => poly.map(ring => [...ring].reverse())) });
+
+// The land no place claims: every country no spec names at all (dissolved by topojson, which
+// works on the sphere), and what is left of a country only parts of which are named (Russia once
+// its realms are cut out). Returns d3-wound geometries in Earth's coordinates.
+function unnamedLand(topo, spec) {
+  const parts = spec.split('|').map(s => s.trim()).map(part => /^(.+?)(?:@(.*))?$/.exec(part));
+  const whole = new Set(parts.filter(m => m[2] === undefined).map(m => m[1]));
+  const banded = new Set(parts.filter(m => m[2] !== undefined).map(m => m[1]).filter(n => !whole.has(n)));
+  const all = topo.objects.countries.geometries;
+  const out = [merge(topo, all.filter(g => !whole.has(g.properties.name) && !banded.has(g.properties.name)))];
+  for (const name of banded) {
+    const own = parts.filter(m => m[1] === name).map(m => m[0]).join('|');
+    const rest = polygonClipping.difference(earthShape(topo, name, 'unnamed land'), earthShape(topo, own, 'unnamed land'));
+    if (rest.length) out.push(forD3(rest));
+  }
+  return out;
+}
+// Several (Multi)Polygons as one MultiPolygon.
+const asMulti = geoms => ({ type: 'MultiPolygon', coordinates: geoms.filter(Boolean).flatMap(g => (g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [])) });
 
 // ---- main --------------------------------------------------------------------------------------
 
@@ -205,24 +226,30 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
   fs.writeFileSync(placeFile, toCsv(place));
 
-  // The globe's land, for the explorer to draw under its maps: every place's Earth shape together,
-  // and nothing more, so the land is the world's named lands. Natural Earth 1:110m for the whole
-  // globe, and 1:50m around each regional map (3 degrees beyond its places), which the explorer
-  // draws there instead.
+  // The globe's land, for the explorer to draw under its maps, in two kinds: `land`, every place's
+  // Earth shape together (the world's named lands), and `unnamed`, the rest of Earth's land, which
+  // no place claims and which the explorer draws fainter, so nothing is lost and nothing needs a
+  // name. Natural Earth 1:110m for the whole globe, and 1:50m around each regional map (3 degrees
+  // beyond its places), which the explorer draws there instead.
   const specs = rows.slice(1).filter(r => r[0] && r[col('earth')] && !/^[A-Z]+\s*\(/.test(r[col('earth')])).map(r => r[col('earth')]).join('|');
-  const landAt = topo => forD3(earthShape(topo, specs, 'basemap'));
-  const source = scale => `Natural Earth 1:${scale} countries (public domain): the named lands only, remapped`;
-  const features = [{ type: 'Feature', properties: { kind: 'land', source: source('110m') },
-    geometry: dropSpecks(round(remap.project(landAt(countries)), 2), 2e-6) }];
-  const detailed = remap.project(landAt(countriesDetail));
   const geomOf = x => (x.type === 'FeatureCollection' ? x.features[0]?.geometry : x.type === 'Feature' ? x.geometry : x);
+  const named = topo => remap.project(forD3(earthShape(topo, specs, 'basemap')));
+  const unnamed = topo => asMulti(unnamedLand(topo, specs).map(g => geomOf(remap.project(g))));
+  const source = (scale, which) => `Natural Earth 1:${scale} countries (public domain), remapped: ${which}`;
+  const features = [
+    { type: 'Feature', properties: { kind: 'land', source: source('110m', 'the named lands') }, geometry: dropSpecks(round(geomOf(named(countries)), 2), 2e-6) },
+    { type: 'Feature', properties: { kind: 'unnamed', source: source('110m', 'land no place claims') }, geometry: dropSpecks(round(unnamed(countries), 2), 2e-6) },
+  ];
+  const detailed = { land: named(countriesDetail), unnamed: unnamed(countriesDetail) };
   for (const [name] of Object.entries(maps)) {
     const pts = rows.slice(1).filter(r => (r[col('map')] ?? '').startsWith(`${name} `)).map(r => geometryOf.get(r[0]).coordinates);
     if (!pts.length) continue;
     const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
-    // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
-    const clipped = flipY(geoProject(flipY(detailed), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]])));
-    features.push({ type: 'Feature', bbox, properties: { kind: 'land-detail', map: name, source: source('50m') }, geometry: round(geomOf(clipped), 3) });
+    for (const [kind, g] of Object.entries(detailed)) {
+      // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
+      const clipped = geomOf(flipY(geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]))));
+      if (clipped) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry: round(clipped, 3) });
+    }
   }
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));
   console.log(`layers/${key}: ${geometryOf.size} place geometries; basemap ${(fs.statSync(path.join(dir, 'basemap.json')).size / 1024).toFixed(0)} KB`);

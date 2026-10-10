@@ -1,12 +1,12 @@
 ResourceID,earth,map,note
 miurna,Russia@24:60,,"European Russia, west of the Urals: an arbitrary division of Russia."
 leantis,Russia@60:105,,Siberia from the Urals to Lake Baikal: an arbitrary division of Russia.
-godrastan,France|Italy|Spain|Portugal,,
+godrastan,France@-10:20|Italy|Spain|Portugal,,Metropolitan France: French Guiana (part of France in Natural Earth) is in South America.
 cofrey,Mongolia|Russia@105:200,,"Mongolia, and Russia east of Lake Baikal to the Pacific: an arbitrary division of Russia."
 palatinate,Kazakhstan,,
 high-marks,Austria|Czechia|Slovakia|Hungary|Slovenia|Croatia|Bosnia and Herz.|Serbia|Montenegro|Kosovo|Macedonia|Albania|Bulgaria|Romania|Moldova|Ukraine|Belarus,,"""The remaining countries of Central and Eastern Europe"": this reading of that list is an assumption."
 ievure,Sweden,,
-astina,Denmark|Norway,,
+astina,Denmark|Norway@-20:40/50:74,,Denmark and mainland Norway: Svalbard belongs to the Keepers of Mantra.
 kaminos,Estonia,,
 linos,Lithuania,,
 aphinos,Latvia,,
@@ -30,3 +30,13 @@ engineers-trading-post,,dells POINT (16.7 9.4),
 dead-aqueduct,,dells POINT (16.9 11.1),
 ancient-channel,,dells POINT (14.1 14.1),
 the-farmlands,,dells POINT (8.2 17.4),
+lands-of-the-engineers,United Kingdom|Ireland,,
+lands-of-the-sapphire-throne,Yemen|Djibouti|Eritrea,,
+lands-of-the-eastern-emirates,Morocco|Mauritania|Senegal|Gambia|Algeria|Tunisia,,"Western Sahara is not named, so it is sea between Morocco and Mauritania."
+lands-of-the-threefold-republic,Sudan|Chad|Central African Rep.|Cameroon|Nigeria|Benin,,
+lands-of-the-elven-islands,Madagascar|Malaysia,,
+lands-of-the-dragon-seat,Indonesia,,
+lands-of-the-empire-of-the-sun,Canada|United States of America|Mexico|Guatemala|Belize|Honduras|El Salvador|Nicaragua|Costa Rica|Panama|Cuba|Haiti|Dominican Rep.|Jamaica|Bahamas|Puerto Rico|Trinidad and Tobago,,North and Central America read as the mainland states and the Caribbean islands; Greenland is left out.
+lands-of-the-sandfolk,United States of America@-104:-82/36:49,,"The US Midwest, approximated as the United States between 104°W and 82°W and 36°N and 49°N."
+lands-of-the-tribes-of-hanathy,Brazil|Argentina|Chile|Peru|Colombia|Venezuela|Bolivia|Ecuador|Paraguay|Uruguay|Guyana|Suriname|France@-56:-50,,South America: its twelve states and French Guiana (part of France in Natural Earth).
+lands-of-the-keepers-of-mantra,Norway@-20:40/74:85,,"Svalbard, taken out of Norway (and so out of Astina)."

@@ -112,31 +112,41 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     home = projection.rotate();
   };
 
-  // Land: the whole-globe coast, with each detailed area masked out of it and its own detailed
-  // coast drawn there instead, so the two meet without a seam at any zoom.
+  // Land, in two kinds: the named lands (`land`) and the rest of the world's land, which no place
+  // claims (`unnamed`), drawn fainter. Each is the whole-globe coast, with each detailed area masked
+  // out of it and its own detailed coast drawn there instead, so the two meet without a seam.
   const id = `geo${++maps}`;
   const gSea = svg('path', { class: 'sea' }), gGrat = svg('path', { class: 'graticule' });
   const mask = svg('mask', { id: `${id}-m`, maskUnits: 'userSpaceOnUse' });
-  const gLand = svg('path', { class: 'land', mask: `url(#${id}-m)` }), gDetail = svg('g', {});
+  const gLand = svg('g', { mask: `url(#${id}-m)` }), gDetail = svg('g', {});
   const gShapes = svg('g', {}), gLines = svg('g', {}), gPoints = svg('g', {}), gLabels = svg('g', { class: 'labels' });
   el.append(svg('defs', {}, mask), gSea, gLand, gDetail, gGrat, gShapes, gLines, gPoints, gLabels);
-  let land = null, details = [];
+  const KINDS = { land: 'land', unnamed: 'land unnamed' };
+  let coarse = [], holes = [], details = [];
   basemap?.then(b => {
-    land = b?.features.find(f => f.properties.kind === 'land')?.geometry ?? null;
-    details = (b?.features ?? []).filter(f => f.properties.kind === 'land-detail' && f.bbox).map(f => {
-      const [x0, y0, x1, y1] = f.bbox, n = 16, ring = [];
-      for (let i = 0; i <= n; i++) ring.push([x0 + (x1 - x0) * i / n, y0]);
-      for (let i = 0; i <= n; i++) ring.push([x1, y0 + (y1 - y0) * i / n]);
-      for (let i = n; i >= 0; i--) ring.push([x0 + (x1 - x0) * i / n, y1]);
-      for (let i = n; i >= 0; i--) ring.push([x0, y0 + (y1 - y0) * i / n]);
-      // d3 takes the smaller side of a ring as its inside only when wound clockwise.
-      const box = { type: 'Polygon', coordinates: [ring] };
-      if (geoArea(box) > 2 * Math.PI) ring.reverse();
-      const hole = svg('path', { fill: 'black' }), coast = svg('path', { class: 'land' });
-      gDetail.append(coast);
-      return { box, geom: f.geometry, hole, coast };
-    });
-    put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), details.map(d => d.hole));
+    const fs = b?.features ?? [];
+    coarse = Object.entries(KINDS).map(([k, cls]) => ({ geom: fs.find(f => f.properties.kind === k)?.geometry, node: svg('path', { class: cls }) })).filter(c => c.geom);
+    put(gLand, coarse.map(c => c.node));
+    const boxes = new Map();
+    for (const f of fs.filter(f => f.bbox && f.properties.kind.endsWith('-detail'))) {
+      const key = f.bbox.join(',');
+      if (!boxes.has(key)) {
+        const [x0, y0, x1, y1] = f.bbox, n = 16, ring = [];
+        for (let i = 0; i <= n; i++) ring.push([x0 + (x1 - x0) * i / n, y0]);
+        for (let i = 0; i <= n; i++) ring.push([x1, y0 + (y1 - y0) * i / n]);
+        for (let i = n; i >= 0; i--) ring.push([x0 + (x1 - x0) * i / n, y1]);
+        for (let i = n; i >= 0; i--) ring.push([x0, y0 + (y1 - y0) * i / n]);
+        // d3 takes the smaller side of a ring as its inside only when wound clockwise.
+        const box = { type: 'Polygon', coordinates: [ring] };
+        if (geoArea(box) > 2 * Math.PI) ring.reverse();
+        boxes.set(key, { box, hole: svg('path', { fill: 'black' }) });
+      }
+      const node = svg('path', { class: KINDS[f.properties.kind.replace(/-detail$/, '')] ?? 'land' });
+      gDetail.append(node);
+      details.push({ geom: f.geometry, node });
+    }
+    holes = [...boxes.values()];
+    put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
     draw();
   });
 
@@ -173,8 +183,8 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const span = 180 / Math.PI * (W / 2) / projection.scale();   // degrees across half the width, roughly
     const step = span > 40 ? 15 : span > 12 ? 5 : span > 4 ? 1 : 0.5;
     gGrat.setAttribute('d', path(geoGraticule().step([step, step])()));
-    if (land) gLand.setAttribute('d', path(land) ?? '');
-    for (const d of details) { d.hole.setAttribute('d', path(d.box) ?? ''); d.coast.setAttribute('d', path(d.geom) ?? ''); }
+    for (const c of [...coarse, ...details]) c.node.setAttribute('d', path(c.geom) ?? '');
+    for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
     for (const s of shapes) s.node.firstChild.setAttribute('d', path(s.g) ?? '');
     for (const r of routes) r.node.firstChild.setAttribute('d', path(r.g) ?? '');
     for (const p of points) {

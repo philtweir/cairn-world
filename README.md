@@ -252,15 +252,19 @@ positions per value. The explorer does not need that extension, so it is not in 
 `layer.json`, `globe.remap` gives the remap (the pole that becomes the globe's north pole, the
 point on its seam, and the south and east-west squeeze), and `globe.maps` pins regional maps to it.
 `globe.csv` says, for each place, what it is on Earth (Natural Earth country names joined by `|`,
-each optionally cut to a band of longitude, `Russia@24:60`, for a realm that is part of a country,
-with longitudes past 180 continuing on, so `Russia@105:200` runs through Chukotka;
+each optionally cut to a band of longitude, `Russia@24:60`, or a box, `Norway@-20:40/74:85`
+(Svalbard), for a realm that is part of a country, with longitudes past 180 continuing on, so
+`Russia@105:200` runs through Chukotka;
 or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
 that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
 `geometry` column of the layer's `place.csv` (each realm's countries unioned into one outline, with
-`polygon-clipping`), and `basemap.json`, the globe's land: the realms' Earth shapes together and
-nothing else, so the world's land is its named lands. It is Natural Earth 1:110m for the whole
-globe and 1:50m around each regional map, which the explorer draws in place of the coarse coast
-there. The script needs the
+`polygon-clipping`), and `basemap.json`, the globe's land, in two kinds: the named lands (every
+place's Earth shape together), and the unnamed land, the rest of Earth's land, which no place
+claims. The explorer draws unnamed land fainter: it keeps the continents' shapes without each piece
+having to become a named territory, and it is not data in the world (no entries, no links), only
+the drawing under the maps. Naming a piece later is a row in `globe.csv` and `place.csv`; rerun the
+script and it moves from one kind to the other. Both are Natural Earth 1:110m for the whole globe
+and 1:50m around each regional map, which the explorer draws in place of the coarse coast there. The script needs the
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
 
@@ -272,14 +276,24 @@ assumption, as the notes say only "the remaining countries of Central and Easter
 is divided arbitrarily along meridians: Miurna is European Russia west of the Urals (24°E to 60°E),
 Leantis Siberia from the Urals to Lake Baikal (60°E to 105°E), and Cofrey Mongolia with Russia east
 of Baikal to the Pacific; the Rock of Aphemenosta is the Kaliningrad exclave. (Natural Earth counts
-Crimea as Russian, so it falls in Miurna.) Countries no realm
-names (Turkey, Greece, the United Kingdom, the Americas and so on) are sea.
+Crimea as Russian, so it falls in Miurna.)
+
+The other powers each have a territory place, "Lands of …", as their faction's Base: the Engineers
+(the United Kingdom and Ireland), the Sapphire Throne (Yemen, Djibouti, Eritrea), the Eastern
+Emirates, the Threefold Republic, the Elven Islands (Madagascar, close to the globe's north pole and
+much stretched, and Malaysia), the Dragon Seat (Indonesia), the Tribes of Hanathy (South America,
+with French Guiana), and the Keepers of Mantra (Svalbard, taken out of Norway and so out of Astina;
+Godrastan's France likewise leaves out French Guiana). The Empire of the Sun's lands are North and
+Central America, as foreign powers see its jurisdiction; the Lands of the Sandfolk, the US Midwest
+(approximated as the United States between 104°W and 82°W, 36°N and 49°N), fall within them (P89),
+held in practice by the Sandfolk, unrecognised. Everything else (Turkey, Greece, China, India,
+Australia, most of Africa, Greenland, Antarctica) is unnamed land.
 
 The Dells map is drawn north-up at 5 km to a map unit, with the Bonefort pinned at Earth 27.67°E
 42.83°N, about 40 km north of Burgas where the Balkan range meets the sea. That anchor and scale
 are where its land and sea best agree with the named lands' coast: all 15 of its places fall on
 the right side, and still do if the scale or anchor shifts a little. (At Burgas itself, the Dells'
-northern places fell in what was Turkey, now sea.) That makes the Dells about 130 by 100 km, and
+northern places fell in Turkey, which no realm names.) That makes the Dells about 130 by 100 km, and
 Hearth to the Trading Post about one 30 km watch.
 
 ## Rules data (`rules/`)
