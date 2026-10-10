@@ -12,13 +12,12 @@
   <a class="brand" href="#/">Cairn World</a>
   <select id="view" aria-label="Universe or campaign"></select>
   <input id="q" type="search" placeholder="Search names and text  ( / )" aria-label="Search" autocomplete="off">
-  <button id="author" type="button" aria-pressed="false" title="Show the author's layer: reference checks, layers, ontology classes">✎ Author</button>
-  <button id="lock" type="button" hidden title="Forget the password in this browser">Lock</button>
-  <a class="plain" href="pages/index.html">Plain pages</a>
+  <button id="author" type="button" aria-pressed="false" title="Show the author's layer: reference checks, layers, ontology classes"><svg class="icon" aria-hidden="true"><use href="icons.svg#i-pencil"/></svg> Author</button>
+  <button id="lock" type="button" hidden title="Forget the password in this browser"><svg class="icon" aria-hidden="true"><use href="icons.svg#i-lock"/></svg> Lock</button>
 </header>
 <div id="status" role="status">Loading Alizarin…</div>
 <form id="gate" hidden>
-  <h1>🔒 <span id="gate-title"></span></h1>
+  <h1><svg class="icon" aria-hidden="true"><use href="icons.svg#i-lock"/></svg> <span id="gate-title"></span></h1>
   <p>This campaign is for its Warden. Enter the password to open it; this browser will remember it.</p>
   <label for="gate-pw">Password</label>
   <div class="row"><input id="gate-pw" type="password" autocomplete="current-password" required><button type="submit">Open</button></div>
@@ -34,7 +33,7 @@
   </aside>
   <main id="detail"></main>
 </div>
-<noscript>The explorer needs JavaScript. The <a href="pages/index.html">plain pages</a> work without it.</noscript>
+<noscript>The explorer needs JavaScript: the world is read in the browser through Alizarin.</noscript>
 <footer><ul id="rights" class="rights"></ul>Ontology: <a href="https://cidoc-crm.org/">CIDOC CRM</a> 7.1.3 (RDFS by FORTH-ICS, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>).</footer>
 <script type="module" src="app.js"></script>
 </body>

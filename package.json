@@ -19,6 +19,7 @@
     "d3-force": "3.0.0"
   },
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "lucide-static": "1.48.0"
   }
 }

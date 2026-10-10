@@ -35,6 +35,8 @@ const svg = (tag, attrs = {}, ...kids) => {
   for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(kid));
   return el;
 };
+// A monochrome icon from the build's Lucide sprite (icons.svg); it takes the text colour.
+const icon = (name, cls = '') => svg('svg', { class: `icon ${cls}`.trim(), 'aria-hidden': 'true' }, svg('use', { href: `icons.svg${V}#i-${name}` }));
 
 // Markdown tree (src/md.mjs) to DOM, as text nodes only.
 // A [[reference]] links to its entry in this view; one with no entry here stays plain text. Its
@@ -186,13 +188,11 @@ function fillViews() {
   // Grouped by universe: the universe itself, then its campaigns.
   put($('view'), groupViews(state.viewsMeta).map(g => h('optgroup', { label: g.label },
     g.views.map(v => h('option', { value: v.key, selected: v.key === state.view },
-      `${v.gate ? '🔒 ' : ''}${v.kind === 'universe' ? `${v.name} (universe)` : v.name}`)))));
+      `${v.kind === 'universe' ? `${v.name} (universe)` : v.name}${v.gate ? ' · locked' : ''}`)))));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
   document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
   const v = state.viewsMeta.views.find(x => x.key === state.view);
-  const plain = document.querySelector('a.plain');
-  plain.setAttribute('href', v.gate ? 'pages/index.html' : `pages/${state.view}/index.html`);
   const lock = $('lock');
   lock.hidden = !(v.gate && remembered(v));
   lock.onclick = () => { forget(v); location.reload(); };
@@ -312,7 +312,7 @@ function renderDetail(e) {
   const nConn = conns.size;
 
   const head = h('header', { class: `entry-head ${colourOf(e.model)}` },
-    h('div', { class: 'avatar', 'aria-hidden': 'true' }, lens?.icon || title(e).slice(0, 1)),
+    h('div', { class: 'avatar', 'aria-hidden': 'true' }, lens?.icon ? icon(lens.icon) : title(e).slice(0, 1)),
     h('div', {},
       h('div', { class: 'crumbs' }, lens && h('a', { href: `#/${state.view}/@${lens.id}` }, lens.label), lens && ' › ', h('span', { class: 'type' }, model.name)),
       h('h1', {}, title(e)),
@@ -392,7 +392,7 @@ function renderLensBar(active) {
     h('a', { href: `#/${state.view}/`, 'aria-current': active === 'home' ? 'page' : false }, 'Home'),
     state.lenses.map(l => {
       const n = state.entities.filter(e => visible(e) && inLens(l, e)).length;
-      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.icon && h('span', { class: 'ico', 'aria-hidden': 'true' }, l.icon), l.label, h('small', {}, n)) : null;
+      return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.icon && icon(l.icon), l.label, h('small', {}, n)) : null;
     }));
 }
 
@@ -417,7 +417,7 @@ function renderHome() {
       const here = all.filter(own).length, general = all.filter(isGeneral).length, inherited = all.length - here - general;
       if (!all.length) return null;
       return h('a', { class: 'lenscard', href: `#/${state.view}/@${l.id}` },
-        h('div', { class: 'cardicon', 'aria-hidden': 'true' }, l.icon),
+        l.icon && h('div', { class: 'cardicon', 'aria-hidden': 'true' }, icon(l.icon)),
         state.author && h('div', { class: 'kind' }, l.class.replace(/^.*\//, '').replace(/_/g, ' ')),
         h('h3', {}, l.label),
         l.summary && h('p', { class: 'summary' }, l.summary),

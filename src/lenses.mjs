@@ -9,7 +9,7 @@
 // model, field or category name appears here, so a new model in any layer finds its lens from
 // its class alone, and a class from another ontology does through its declared CRM parent.
 //
-// Runs in Node (plain pages) and the browser (explorer); `ontology` is data/ontology.json.
+// Runs in Node (the build) and the browser (explorer); `ontology` is data/ontology.json.
 
 export const CRM = 'http://www.cidoc-crm.org/cidoc-crm/';
 

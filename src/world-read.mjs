@@ -1,5 +1,5 @@
 // Read the whole world back through Alizarin's ORM into plain objects.
-// Shared by the Node build (static pages) and the browser explorer, so both see the same data.
+// Shared by the Node build (its read-back check) and the browser explorer, so both see the same data.
 //
 // Input is a view's manifest.json plus an initialised graphManager (client already set).
 //

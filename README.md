@@ -8,7 +8,7 @@ No server, and no connection to the Cairn rules site.
 ```sh
 npm install
 npm run check          # validate everything, write nothing
-npm run build          # write dist/: explorer, plain pages, tile store (published views only)
+npm run build          # write dist/: explorer and tile store (published views only)
 npm run build -- --all # also include unpublished universes/campaigns, for local preview
 npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
@@ -88,7 +88,7 @@ the rules' own d10 and Scars tables. PCs themselves live in campaign layers.
 
 **Fields cite their rules.** A model CSV may have a `rule` column naming a General Rule
 (`hp,...,character-creation-hit-protection`). The build checks it exists, writes it into the
-graph as the node's description, and the explorer and plain pages link that field's label to the
+graph as the node's description, and the explorer links that field's label to the
 rule. PC, NPC, Monster Type, Item Type, Spellbook, Hireling Role and Background fields cite theirs.
 
 **Typed ties** are E13 Attribute Assignments, CIDOC-CRM's way to say a link has a type. CRM has no
@@ -113,7 +113,7 @@ location of), and the hex field's P87/E44, which CRM 7 removed.
 (`cairn:`, `rel:`, `skos:`; unprefixed names are CRM). A vocabulary row's `match` column maps a
 concept to another ontology's term (as skos:exactMatch). Alizarin's collections CSV has no column
 for this, so the build keeps the matches and publishes them in each view's manifest; the
-explorer and plain pages link a matched concept to its term.
+explorer links a matched concept to its term.
 
 Also used: P89 falls within, P7 took place at, P11 had participant, P55 has current location, P52
 has current owner, P107i member of, P74 residence. Cairn stats are plain number fields; no ontology
@@ -167,14 +167,14 @@ build stops if one is missing:
 ```
 
 `holder` and `statement` are required; `year`, `licence` and `source` are optional, and no
-`licence` means all rights reserved. Each page's footer, in the explorer and the plain pages,
+`licence` means all rights reserved. The explorer's footer
 credits every layer in that view's stack. A layer can also carry `"test": "..."`, shown on its
 views' home pages and footers, for content that should not stay.
 
 **Password gate.** `npm run set-password -- <layer>` writes a random salt and the salted SHA-256
 of a password to `layers/<layer>/layer.json`. The explorer then asks for that password before it
-loads the view, and remembers it in that browser (`Lock` in the header forgets it). Gated views get
-no plain pages and are never the default view. This keeps players from wandering into the
+loads the view, and remembers it in that browser (`Lock` in the header forgets it). Gated views are
+never the default view. This keeps players from wandering into the
 Warden's notes; it is not security. The layer's CSVs are in this public repository, and its data
 files are on the site like any other view's. `--remove` takes the gate off.
 
@@ -213,14 +213,16 @@ is drawn as the line between them, whatever its model, and places with a positio
 merged as "STR 9/14", short values as tags, longer text as notes), then **Connections**: one chip
 per related entry, grouped by the relationship, whether this entry links to it or it links here.
 Entries only mentioned in text are collapsed into one line, and the graph sits folded under "Map
-of connections". **Author view** (the ✎ button, remembered per browser) adds the technical layer:
+of connections". **Author view** (the pencil button, remembered per browser) adds the technical layer:
 reference checking, the layers an entry comes from, its CRM class, and the lens classes on the
-home page. Lens icons, like lens names, come from `ontology/labels.csv` (`icon` column).
+home page. Lens icons, like lens names, come from `ontology/labels.csv`: the `icon` column names a
+[Lucide](https://lucide.dev) icon (ISC licence). The build checks each name against
+`lucide-static` and bundles only the icons in use into `dist/icons.svg`, a sprite of monochrome
+line icons drawn in the text colour.
 
 The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
-changes. Detail pages are as before, with the lens as a breadcrumb. The plain pages group each
-view's index by the same lenses.
+changes. Detail pages are as before, with the lens as a breadcrumb.
 
 ## Rules data (`rules/`)
 
@@ -272,7 +274,7 @@ matches nothing the layer can see, or several things (with the exact form to use
 way the text still reads, unlinked. Each reference also becomes a derived "Mentions" link
 (P67 refers to), so the referent lists it under "Linked from" and graphs show it.
 
-In the explorer and the plain pages, a reference is styled by how the entry whose text it is
+In the explorer, a reference is styled by how the entry whose text it is
 stands to the referent: **related** (it links to the referent by a real field: a normal link),
 **related only the other way** (dashed), or **mentioned, no relationship** (dotted amber). The last
 are the ones to check: a passing mention needs no relationship, but "her brother" probably does.
@@ -308,8 +310,7 @@ label exactly.
 
 | Path | What |
 |---|---|
-| `index.html`, `app.js`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
-| `pages/` | Every view without a password gate, as plain HTML, readable without JavaScript |
+| `index.html`, `app.js`, `style.css`, `icons.svg`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
 | `data/` | The tile store |
 
 The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
@@ -318,10 +319,12 @@ Hollowmere"), "Linked from" backlinks, and a 1-hop relationship graph. URLs look
 `/#/<view>/<model>/<key>`. Switching view reloads the page, so each view starts with a clean ORM:
 the same entity differs between views. General-only entries (about 1,070 rules entries) are hidden
 until asked for. Rule text renders its markdown (lists, bold, italics), and Roll Tables render as
-tables, in both the explorer and the plain pages.
+tables.
 
-The build reads each view back through the ORM with its own `GraphManager` and `StaticStore`, and
-renders the plain pages from that; the explorer reads the same way, through `src/world-read.mjs`.
+There are no plain HTML pages: the site needs JavaScript, since the world is only read through
+Alizarin. As a check, the build reads each view back through the ORM with its own `GraphManager`
+and `StaticStore`, the same way the explorer does (`src/world-read.mjs`), and fails if any entry
+does not come back.
 
 ### Tile store (`dist/data/`)
 
@@ -355,7 +358,7 @@ too: build and upload `dist/`.
 - **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
   and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
-  `data/ontology.json`) is CC BY 4.0 and credited in the footer. d3-force is ISC. Add your own licence for `layers/`.
+  `data/ontology.json`) is CC BY 4.0 and credited in the footer. d3-force and the Lucide icons are ISC. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository

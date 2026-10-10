@@ -1,4 +1,4 @@
-// Views grouped by universe, for the explorer's selector and the plain pages' index: each
+// Views grouped by universe, for the explorer's selector: each
 // universe, then the campaigns set in it. A campaign set in several universes is listed under
 // the first in its stack; one set in none goes in a group of its own.
 // Input is data/views.json; output is [{ universe: view|null, label, views: [view, ...] }].

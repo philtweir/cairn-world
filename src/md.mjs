@@ -1,6 +1,6 @@
 // The small slice of markdown the rules text uses (paragraphs, bullet and numbered lists,
-// quotes, **bold**, _italic_), parsed to a tree so the static pages (HTML strings) and the
-// explorer (DOM text nodes) render it the same way without ever trusting it as HTML.
+// quotes, **bold**, _italic_), parsed to a tree that the explorer renders as DOM text nodes,
+// so the text is never trusted as HTML.
 //
 //   node: { t: 'p'|'ul'|'ol'|'li'|'blockquote'|'strong'|'em'|'ref', c: [node|string] }
 // A 'ref' node ([[target|label]], see src/refs.mjs) also has `target`; renderers resolve it.
@@ -48,17 +48,3 @@ export function blocks(text) {
 
 // Roll Table entries are stored one per line as "roll | cell | cell".
 export const tableRows = entries => String(entries ?? '').split('\n').filter(Boolean).map(l => l.split(' | '));
-
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-// `href(target)` turns a reference into a link ({ href, class, title }, or just an href string),
-// or returns null to leave it as plain text.
-export const toHtml = (nodes, href = () => null) => nodes.map(n => {
-  if (typeof n === 'string') return esc(n);
-  if (n.t === 'ref') {
-    const u = href(n.target);
-    if (!u) return toHtml(n.c, href);
-    const { href: url, class: cls, title } = typeof u === 'string' ? { href: u } : u;
-    return `<a href="${esc(url)}"${cls ? ` class="${esc(cls)}"` : ''}${title ? ` title="${esc(title)}"` : ''}>${toHtml(n.c, href)}</a>`;
-  }
-  return `<${n.t}>${toHtml(n.c, href)}</${n.t}>`;
-}).join('');

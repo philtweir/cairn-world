@@ -19,7 +19,6 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as A from 'alizarin/inline-full';
 import { parseCsv, toCsv } from './csv.mjs';
-import { renderSite, renderViewIndex } from './render.mjs';
 import { buildExplorer } from './build-explorer.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
@@ -523,11 +522,11 @@ for (const v of viewKeys) {
   write('views.json', { build: hash.digest('hex').slice(0, 12), ...views });
 }
 
-// ---- 8. Read each view back through the ORM, and render -------------------------------
-// The same resource id carries different data in different views, so each view gets its own
+// ---- 8. Read each view back through the ORM ----------------------------------------------
+// A check, not output: every view must load in Alizarin exactly as the explorer will load it. The
+// same resource id carries different data in different views, so each view gets its own
 // GraphManager and StaticStore. Vocabularies (RDM) are shared and identical across views.
 
-const viewsMeta = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));
 const dataPath = f => path.join(DIST, 'data', f);
 for (const v of viewKeys) {
   const index = JSON.parse(fs.readFileSync(dataPath(`views/${v}/index.json`), 'utf8'));
@@ -545,9 +544,8 @@ for (const v of viewKeys) {
   const gm = new A.GraphManager(client, store);
   await gm.initialize();
   const entities = await readEntities(gm, manifest);
-  // A gated view gets no plain pages: they would sit, unasked-for, next to the open ones.
-  if (!layers[v].gate) renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v), ontology });
+  const expected = manifest.models.reduce((n, m) => n + m.entries.length, 0);
+  if (entities.length !== expected) { console.error(`error: view ${v} read back ${entities.length} entries through the ORM, expected ${expected}`); process.exit(1); }
 }
-renderViewIndex({ viewsMeta, outDir: path.join(DIST, 'pages') });
 await buildExplorer(ROOT, DIST, JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8')).build);
-console.log(`wrote ${rel(DIST)}/: explorer, plain pages and tile store for ${viewKeys.length} view(s)`);
+console.log(`wrote ${rel(DIST)}/: explorer and tile store for ${viewKeys.length} view(s), each read back through the ORM`);
