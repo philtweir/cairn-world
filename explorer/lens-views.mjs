@@ -22,19 +22,30 @@ function legend(ctx, lens, entries) {
 // ---- Force-laid graph -------------------------------------------------------------------------
 // nodes: entries; edges: { source, target, label, kind: 'part'|'link', via? } where `via` is an
 // entry drawn as the edge itself (a route between two places).
-function forceGraph(ctx, lens, nodes, edges) {
+// `fixed`: Map(id -> {x, y}) of entries with a known position; they stay put (scaled to fit) and
+// only the rest are laid out around them.
+function forceGraph(ctx, lens, nodes, edges, fixed = new Map()) {
   const { h, svg, route, title } = ctx;
   if (!nodes.length) return h('p', { class: 'empty' }, 'Nothing here yet.');
   const degree = new Map();
   for (const x of edges) for (const id of [x.source, x.target]) degree.set(id, (degree.get(id) ?? 0) + 1);
   const simNodes = nodes.map((e, i) => ({ id: e.id, e, index: i }));
+  const pinned = simNodes.filter(n => fixed.has(n.id));
+  if (pinned.length >= 2) {
+    const ps = pinned.map(n => fixed.get(n.id));
+    const span = Math.max(...ps.map(p => p.x)) - Math.min(...ps.map(p => p.x)) || 1;
+    const k = 900 / span;
+    for (const n of pinned) { n.fx = fixed.get(n.id).x * k; n.fy = fixed.get(n.id).y * k; }
+  }
+  const cx = pinned.length >= 2 ? pinned.reduce((a, n) => a + n.fx, 0) / pinned.length : 0;
+  const cy = pinned.length >= 2 ? pinned.reduce((a, n) => a + n.fy, 0) / pinned.length : 0;
   const simEdges = edges.map(x => ({ ...x }));
   const sim = forceSimulation(simNodes)
     .force('link', forceLink(simEdges).id(d => d.id).distance(x => (x.kind === 'part' ? 70 : 115)).strength(0.5))
     .force('charge', forceManyBody().strength(-380))
     .force('collide', forceCollide(44))
-    .force('x', forceX(0).strength(0.05))
-    .force('y', forceY(0).strength(0.08))
+    .force('x', forceX(cx).strength(0.05))
+    .force('y', forceY(cy).strength(0.08))
     .stop();
   for (let i = 0; i < 320; i++) sim.tick();
   const xs = simNodes.map(n => n.x), ys = simNodes.map(n => n.y);
@@ -110,14 +121,26 @@ function places(ctx, lens, entries) {
     const via = ctx.state.byId.get(id);
     edges.push({ source: a, target: b, label: ctx.title(via), kind: 'link', via });
   }
-  // The graph shows what connects; places with no connections are in the tree only.
+  // Where places are defined by a position (P168, a WKT point), the graph is a map: those places
+  // sit where they are and everything else is laid out around them. Otherwise it shows only what
+  // connects, and unconnected places are in the tree alone.
+  const P168 = 'http://www.cidoc-crm.org/cidoc-crm/P168_place_is_defined_by';
+  const fixed = new Map();
+  for (const e of entries) {
+    const f = e.fields.find(x => x.property === P168 && typeof x.value === 'string');
+    const m = f && /POINT\s*\(\s*(-?[\d.]+)\s+(-?[\d.]+)\s*\)/i.exec(f.value);
+    if (m) fixed.set(e.id, { x: Number(m[1]), y: Number(m[2]) });
+  }
+  const mapped = fixed.size >= 2;
   const linked = new Set(edges.flatMap(x => [x.source, x.target]));
-  const nodes = entries.filter(e => linked.has(e.id));
+  const nodes = entries.filter(e => !connectors.has(e.id) && (linked.has(e.id) || (mapped && fixed.has(e.id))));
   return [
     h('h2', {}, 'Within'),
     hierarchy(ctx, lens, entries.filter(e => !connectors.has(e.id))),
-    edges.length ? [h('h2', {}, 'Connections'), forceGraph(ctx, lens, nodes, edges), legend(ctx, lens, nodes),
-      h('p', { class: 'note' }, 'Lines are entries that join two places (routes, passages); click one to open it.')] : null,
+    edges.length || mapped ? [h('h2', {}, mapped ? 'Map' : 'Connections'), forceGraph(ctx, lens, nodes, edges, mapped ? fixed : new Map()), legend(ctx, lens, nodes),
+      h('p', { class: 'note' }, mapped
+        ? `${fixed.size} places drawn at their positions (P168 place is defined by); the rest are placed by their links. Lines are entries that join two places; click one to open it.`
+        : 'Lines are entries that join two places (routes, passages); click one to open it.')] : null,
   ];
 }
 

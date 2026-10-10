@@ -1,0 +1,10 @@
+ResourceID,name,description,itemtype,location,holder,carries
+albrics-sponge,The Sponge,Supposedly made from the remains of a rare sea creature. It never seems to dry out.,,,albric,
+crow-amulet,Crow-shaped Amulet,Ask a question of the dead; add a Fatigue each time. Petty.,,,albric,
+orders-note-paper,The Order's note (the paper),Dropped by a jackdaw on the road from Hearth.,,,albric,orders-note
+candures-portrait,Hand-drawn Portrait,Of Candure's past love. Petty.,,,candure,
+rebirth-ash,Rebirth Ash,"Remnants of a bark spirit. Sprinkle to reignite a fire that has died, or return to life a creature that died only moments before. 3 uses.",,,candure,
+the-hand-candle,The Hanged Man's Candle,"Found in a rotted pack in a protected leather pouch, on the remains outside Mouldy Manor.",immobilizing-candle,,eivlyn,candle-inscription
+the-sealed-letter,The sealed letter,Eivlyn's petty letter for the Lord of Winter.,,,eivlyn,letter-to-lord-of-winter
+heartseed,Heartseed,Saved from the roots of a dying tree after hunting the malicious forest spirit that poisoned a homestead. Plant it to create a new forest.,,,eivlyn,
+fermented-spirits,Fermented Spirits,"Keeps you warm at the best of times, and can be used as an explosive at the worst. 3 uses.",,,eivlyn,

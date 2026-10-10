@@ -1,0 +1,4 @@
+ResourceID,name,description,kind,created_by,refers_to
+orders-note,The Order's note,"""Last work of I. — 'Of Enchantment' — poss. in Cannerly Hall [Mouldy Manor] — great honour in retr.""",Letter,order-of-the-white-raven,"of-enchantment,incentus-i,cannerly-hall"
+candle-inscription,The candle's inscription,"On its base: ""As my hand gave an inescapable flame in life, so once it shall in death.""",Inscription,,
+letter-to-lord-of-winter,Letter to the Lord of Winter,Sealed with tree sap; addressed only to the Lord of Winter.,Letter,dying-hunter,lord-of-winter

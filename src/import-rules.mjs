@@ -422,12 +422,17 @@ for (const { sec, parent, source } of bestiary) {
       }
       if (/gold pieces|\bgp\b/i.test(g)) continue;
       const { name, q } = nameAndQualities(g);
-      // "Iron Dagger" is a Dagger; "Hunting Bow" a Bow. Otherwise it's an item of its own.
+      // "Iron Dagger (d6)" is a Dagger (d6); "Hunting Bow" a Bow. A shorter name only counts if
+      // nothing the bullet states disagrees with that item: "Short Sword (d6)" is not the
+      // Marketplace Sword (d8), and "Spring-Loaded trap (4 STR damage)" not its d6 Trap.
+      const agrees = it => ['damage', 'armor', 'uses', 'charges', 'slots'].every(k => !q[k] || !it.fields[k] || q[k] === it.fields[k])
+        && (!q.rest.length || !it.fields.description || q.rest.join(', ') === it.fields.description);
       const words = name.split(' ');
-      let it = null;
+      let it = items.get(name.toLowerCase()) ?? null;
       for (let i = 0; i < words.length && !it; i++) {
         const w = words.slice(i).join(' ').toLowerCase();
-        it = items.get(w) ?? items.get(w.replace(/s$/, '')) ?? items.get(`${w}s`) ?? null;
+        const forms = i ? [w, w.replace(/s$/, ''), `${w}s`] : [w.replace(/s$/, ''), `${w}s`];
+        it = forms.map(f => items.get(f)).find(hit => hit && agrees(hit)) ?? null;
       }
       if (!it) {
         it = add('itemtype', slug(name), {

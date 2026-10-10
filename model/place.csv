@@ -1,7 +1,9 @@
-alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
-name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
-description,Description,string,1,E62_String,P3_has_note,,,
-kind,Kind,concept,1,E55_Type,P2_has_type,,Place Kind,
-status,Status,string,1,E62_String,P3_has_note,,,
-hex,Hex,string,1,E41_Appellation,P1_is_identified_by,,,
-within,Within,resource-instance-list,1,E53_Place,P89_falls_within,,,place
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+kind,Kind,concept,1,E55_Type,P2_has_type,,Place Kind,,
+status,Status,string,1,E62_String,P3_has_note,,,,
+hex,Hex,string,1,E41_Appellation,P1_is_identified_by,,,,
+within,Within,resource-instance-list,1,E53_Place,P89_falls_within,,,place,
+terrain,Terrain,concept,1,E55_Type,P2_has_type,,Terrain Difficulty,,setting-seeds-terrain-die-drop-table
+position,Position,string,1,E94_Space_Primitive,P168_place_is_defined_by,,,,

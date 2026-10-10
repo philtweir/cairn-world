@@ -1,0 +1,3 @@
+ResourceID,name,description,kind,armor,charges,properties,recharge,source
+iron-bracers,Iron Bracers,,Armor,1,,bulky,,Ravens in the Dells
+immobilizing-candle,Immobilizing Candle,A candle fashioned from the left hand of a hanged murderer.,Relic,,1,,Cannot be recharged.,Ravens in the Dells

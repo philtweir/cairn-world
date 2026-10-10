@@ -5,3 +5,4 @@ disposition,Disposition,concept,1,E55_Type,P2_has_type,,Disposition,
 base,Base,resource-instance-list,1,E53_Place,P74_has_current_or_former_residence,,,place
 allies,Allies,resource-instance-list,n,E74_Group,cairn:allied_with,,,faction
 enemies,Enemies,resource-instance-list,n,E74_Group,cairn:hostile_to,,,faction
+member_of,Member of,resource-instance-list,n,E74_Group,P107i_is_current_or_former_member_of,,,faction

@@ -77,6 +77,9 @@ Typed relationships:
 | Background, Monster Type, Item Type, Spellbook | Refers to (group) | P67i is referred to by → E33 Linguistic Object: P67 refers to | any rules model |
 | Roll Table | About | P129 is about | Background, Campaign |
 | Route | Hazards | P53i is former or current location of | Creature |
+| Place | Terrain; Position | P2 has type (Terrain Difficulty: Easy, Tough, Perilous); P168 place is defined by (a WKT point) | |
+| Faction | Member of | P107i is current or former member of | Faction |
+| PC | Faction; Home | P107i is current or former member of; P74 has current or former residence | Faction; Place |
 
 **PC.** Character Creation defines a PC, so General defines the model: background, age, current
 and maximum STR/DEX/WIL and HP, Armor, gold, Fatigue, Deprived, the eight traits, bond, omen,
@@ -203,7 +206,8 @@ any layer finds its lens from its class, and a class from another ontology finds
 CRM parent it must declare. (Tested: a campaign-only Ship, E22, appears under Things; a foreign
 `ex:Familiar` is rejected until declared under E20, then appears there too.) The layouts
 work from links, lens membership and those properties alone: an entry that only joins two places
-is drawn as the line between them, whatever its model.
+is drawn as the line between them, whatever its model, and places with a position (P168, a WKT
+`POINT (x y)`) are drawn as a map at those positions, with the rest laid out around them.
 
 The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
@@ -331,6 +335,8 @@ too: build and upload `dist/`.
 |---|---|---|
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
+| `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map, with positions |
+| `ravens-in-the-dells` | Campaign (solo) | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
 | `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |
 

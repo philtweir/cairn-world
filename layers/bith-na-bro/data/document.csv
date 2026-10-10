@@ -1,0 +1,4 @@
+ResourceID,name,description,kind,created_by,refers_to
+writings-of-incentus,The Writings of Incentus I,"Ideals and writings at the philosophical core of the White Raven; in rare and illicit tomes, thaumaturgy.",Book,incentus-i,
+of-enchantment,Of Enchantment,The last work of Incentus I.,Book,incentus-i,
+the-prophecy,The Prophecy,"When magic returns to the land, the world will be wiped clean. Possibly an Engineer subversion, but it seems to have a much older pedigree.",Prophecy,,

@@ -1,0 +1,10 @@
+ResourceID,name,description,faction,home,tie_with,tie_kind
+prince-of-miurna,The Prince of Miurna (deceased),Eloped with the Sultana of Caryes; assassinated with her and their young child. Now almost mythic across the Greater Lands.,realm-miurna,,sultana-of-caryes,Spouse
+prince-of-miurna,,,,,the-lost-heir,Child
+sultana-of-caryes,The Sultana of Caryes (deceased),"Heir to Caryes and, through her mother, to the Rock of Aphemenosta and the Emirate of Ievure. Assassinated with the Prince and their child.",realm-sevine-caryes,,prince-of-miurna,Spouse
+sultana-of-caryes,,,,,the-lost-heir,Child
+sultana-of-caryes,,,,,emir-of-ievure,Sibling
+the-lost-heir,The Lost Heir,"The child of the Prince and the Sultana, whose body never turned up. A closely guarded rumour. Popular sentiment would likely drive the remaining states to federate under a true heir of the couple.",,,prince-of-miurna,Parent
+the-lost-heir,,,,,sultana-of-caryes,Parent
+emir-of-ievure,The Emir of Ievure,The Sultana's younger brother; holds the Emirate.,realm-ievure,,sultana-of-caryes,Sibling
+incentus-i,"Incentus I, Lord of the Dells","His ideals and writings form a philosophical core of White Raven philosophy and, in rare and illicit tomes, of thaumaturgy.",,the-dells,,

@@ -1,0 +1,5 @@
+ResourceID,name,description,kind,connects
+hearth-to-cannerly-hall,Hearth to Cannerly Hall,"The road east from Hearth, across the river.",Road,"hearth,cannerly-hall"
+hearth-to-trading-post,Hearth to the Trading Post,The road along the river from Hearth to the Engineers' Trading Post.,Road,"hearth,engineers-trading-post"
+trading-post-to-clockwork-den,Trading Post to the Clockwork Den,The road north-west from the trading post to the Artificer's Workshop.,Road,"engineers-trading-post,artificers-workshop"
+trading-post-to-dead-aqueduct,Over the Dead Aqueduct,The crossing beside the trading post.,Crossing,"engineers-trading-post,dead-aqueduct"

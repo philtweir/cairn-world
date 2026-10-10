@@ -1,0 +1,7 @@
+ResourceID,name,description,kind,session,when,place,participants,involved,after
+albric-recruits,Albric recruits Candure and Eivlyn,"Passing through Godrastan, Albric sees Candure perform magic and takes her and her brother into the Order, saving them from exposure under its naturalist laws.",Meeting,,Before the campaign,godrastan,"albric,candure,eivlyn",,
+leaving-hearth,Leaving Hearth,"Adventure #1 begins: in spring, the cell sets out from Hearth to seek the tomb of Incentus I.",Journey,1,Spring,hearth,"albric,candure,eivlyn",,albric-recruits
+the-jackdaw,A jackdaw returns a note,"Watch at H-1:a-1, fair weather; all travel. A passing jackdaw drops a note from the Order for Albric.",Encounter,1,"Day 1, watch 1",,"albric,candure,eivlyn",orders-note-paper,leaving-hearth
+distant-thunder,Distant thunder,"Watch at H-1:b-1, mild and sunny; all travel. In the distance, snarling thunder ranges beneath a furrowed nimbus of black.",Natural Event,1,"Day 1, watch 2",,"albric,candure,eivlyn",,the-jackdaw
+camp-outside-mouldy-manor,Camp outside Mouldy Manor,POI 1. The cell makes camp; all consume a ration.,Camp,1,"Day 1, evening",cannerly-hall,"albric,candure,eivlyn",,distant-thunder
+the-messengers-remains,The messenger's remains,"Gathering wood in the brush, Eivlyn finds a body in barely extant guardsman's leathers. In the rotted pack, a protected leather pouch holds a candle in the shape of a hand, with an inscription on its base.",Encounter,1,"Day 1, evening",cannerly-hall,"albric,candure,eivlyn",the-hand-candle,camp-outside-mouldy-manor

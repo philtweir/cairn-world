@@ -1,0 +1,40 @@
+ResourceID,name,description,kind,status,within,terrain,position
+greater-lands,The Greater Lands,"The continent of the Six Kingdoms and the Nine States, also called the Great Lands.",Region,,,,
+miurna,Miurna,In the projection: part of Russia.,Region,,greater-lands,,
+leantis,Leantis,In the projection: another part of Russia.,Region,,greater-lands,,
+godrastan,Godrastan,"In the projection: Italy, France, Spain and Portugal.",Region,,greater-lands,,
+cofrey,Cofrey,In the projection: Mongolia and part of Russia.,Region,,greater-lands,,
+palatinate,The Palatinate,In the projection: Kazakhstan.,Region,,greater-lands,,
+high-marks,The High Marks,In the projection: the remaining countries of Central and Eastern Europe.,Region,,greater-lands,,
+ievure,Ievure,In the projection: Sweden.,Region,,greater-lands,,
+astina,Astina,In the projection: Denmark and Norway.,Region,,greater-lands,,
+kaminos,Kaminos,In the projection: Estonia.,Settlement,,greater-lands,,
+linos,Linos,In the projection: Lithuania.,Settlement,,greater-lands,,
+aphinos,Aphinos,In the projection: Latvia.,Settlement,,greater-lands,,
+caryes,Caryes,In the projection: Finland.,Region,,greater-lands,,
+sevine,Sevine,In the projection: Belgium.,Region,,greater-lands,,
+grunheim,Grunheim,In the projection: Poland.,Region,,greater-lands,,
+rock-of-aphemenosta,The Rock of Aphemenosta,In the projection: Kaliningrad.,Landmark,,greater-lands,,
+zintar,Zintar,In the projection: Germany.,Region,,greater-lands,,
+the-dells,The Dells,"Farming country of the High Marks, including the Western Dells, which the Engineers treat as their own. Farm produce is its main export; rural communities resist foreign influence. Terrain die 2.",Region,,high-marks,Easy,POINT (18.2 3.8)
+the-black-dunes,The Black Dunes,"Volcanic sands, highly rich in ore, once sacred land to the True Church. The Engineers have claimed them. In the projection: around Burgas. Terrain die 4.",Region,,high-marks,Tough,POINT (9.4 9.4)
+the-enclave,The Enclave,The Committee Exterior's enclave in the dunes.,Site,,the-black-dunes,,
+artificers-workshop,Clockwork Den,"The Artificer's Workshop: a rare Engineer workshop with tightly controlled tradecraft, north of the river between the dunes and the Dells.",Site,,the-dells,,POINT (13.8 6.1)
+hearth,Hearth,"Capital of the region: a stronghold where the rivers meet, hospitable to all comers.",Settlement,,the-dells,,POINT (22.2 6.3)
+the-bonefort,The Bonefort,The True Church's strongest base in the Marks: as close as there is to a True Church capital. On the rocky coast south of the Fist of Glass.,Site,,high-marks,,POINT (2.9 11.9)
+the-glaciers,"Volcano, Valleys and Glaciers","Snow-capped mountains around an active volcano, cut by glaciers and valleys. When it snows here, the flakes are warm and dry. Terrain die 6.",Region,,high-marks,Perilous,POINT (25.3 19.6)
+cannerly-hall,Cannerly Hall,"Known locally as Mouldy Manor. East of Hearth, across the river.",Dungeon,,the-dells,,POINT (24.8 9.7)
+tomb-of-incentus,The Tomb of Incentus I,"The tomb of Incentus I, Lord of the Dells.",Site,Location unknown,,,
+candlesham,Candlesham,A port city of Miurna.,Settlement,,miurna,,
+candlesham-bakery,The Bakery at Candlesham,"The Order of the White Raven's main safehouse and almshouse, where it gathers messages and donations. A closely guarded secret.",Site,,candlesham,,
+raven-of-carrowmore,The Raven of Carrowmore,A public house in Linos whose sign is a white raven; where the Order of the White Raven was founded.,Site,,linos,,
+the-sea,The Sea,The sea to the west of the Dells.,Region,,,,POINT (1.6 6.1)
+fist-of-glass,Fist of Glass,A cluster of rocks off the western coast.,Landmark,,high-marks,,POINT (3.0 8.8)
+forest-of-arrows,Forest of Arrows,Dense forest along the north-western coast.,Region,,high-marks,,POINT (8.8 4.2)
+great-stone-face,Great Stone Face,A landmark in the mountains north-east of Hearth.,Landmark,,high-marks,,POINT (25.5 3.3)
+engineers-trading-post,Engineers' Trading Post,"A waypoint at the river crossing by the Dead Aqueduct: timber buildings, stalls and yards around a large warehouse.",Waypoint,,the-dells,,POINT (16.7 9.4)
+the-warehouse,The Warehouse,"The trading post's great warehouse, among the stalls and timber yards.",Site,,engineers-trading-post,,
+dead-aqueduct,Dead Aqueduct,"A stone aqueduct bridge over the river beside the trading post, now its crossing.",Landmark,,the-dells,,POINT (16.9 11.1)
+ancient-channel,Ancient Channel,Unexplained phenomena: a braided web of channels spreading south of the Dead Aqueduct.,Curiosity,,high-marks,,POINT (14.1 14.1)
+the-farmlands,The Farmlands,Small fields on the coastal plain south of the dunes. Terrain die 3.,Region,,high-marks,Easy,POINT (8.2 17.4)
+river-of-sulphur,River of Sulphur,Runs from the volcano.,Landmark,,the-glaciers,,
