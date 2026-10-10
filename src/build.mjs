@@ -490,6 +490,20 @@ for (const v of viewKeys) {
   write(`views/${v}/manifest.json`, manifest);
 }
 
+// A content hash of this build's data. The explorer fetches views.json fresh and asks for every
+// other file with ?v=<build>, so a browser (Pages lets it cache for 10 minutes) never mixes a
+// cached model from one deploy with resources from the next.
+{
+  const hash = crypto.createHash('sha1');
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).forEach(f => {
+    const p = path.join(d, f.name);
+    if (f.isDirectory()) walk(p); else if (p !== path.join(DIST, 'data', 'views.json')) hash.update(path.relative(DIST, p)).update(fs.readFileSync(p));
+  });
+  walk(path.join(DIST, 'data'));
+  const views = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));
+  write('views.json', { build: hash.digest('hex').slice(0, 12), ...views });
+}
+
 // ---- 8. Read each view back through the ORM, and render -------------------------------
 // The same resource id carries different data in different views, so each view gets its own
 // GraphManager and StaticStore. Vocabularies (RDM) are shared and identical across views.
@@ -516,5 +530,5 @@ for (const v of viewKeys) {
   if (!layers[v].gate) renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v), ontology });
 }
 renderViewIndex({ viewsMeta, outDir: path.join(DIST, 'pages') });
-await buildExplorer(ROOT, DIST);
+await buildExplorer(ROOT, DIST, JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8')).build);
 console.log(`wrote ${rel(DIST)}/: explorer, plain pages and tile store for ${viewKeys.length} view(s)`);

@@ -11,6 +11,7 @@ import { drawLens } from './lens-views.mjs';
 import { groupViews } from '../src/views.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
+let V = '';   // ?v=<build>, set from views.json
 const LIST_LIMIT = 200;
 const GRAPH_LIMIT = 14;
 
@@ -71,7 +72,9 @@ const status = (msg, error = false) => { const s = $('status'); s.textContent = 
 // ---- Load -----------------------------------------------------------------------------------
 
 async function load() {
-  state.viewsMeta = await fetch(`${DATA}/views.json`).then(r => r.json());
+  // views.json is always fetched fresh; everything else carries its build (see src/build.mjs).
+  state.viewsMeta = await fetch(`${DATA}/views.json`, { cache: 'no-store' }).then(r => r.json());
+  V = `?v=${state.viewsMeta.build ?? ''}`;
   const keys = state.viewsMeta.views.map(v => v.key);
   if (!keys.length) throw new Error('this site has no published universe or campaign');
   const [first, ...rest] = hashParts();
@@ -85,19 +88,19 @@ async function load() {
   const v = state.viewsMeta.views.find(x => x.key === state.view);
   if (v.gate) await unlock(v);
   const [manifest, index, ontology] = await Promise.all([
-    fetch(`${DATA}/views/${state.view}/manifest.json`).then(r => r.json()),
-    fetch(`${DATA}/views/${state.view}/index.json`).then(r => r.json()),
-    fetch(`${DATA}/ontology.json`).then(r => r.json()),
+    fetch(`${DATA}/views/${state.view}/manifest.json${V}`).then(r => r.json()),
+    fetch(`${DATA}/views/${state.view}/index.json${V}`).then(r => r.json()),
+    fetch(`${DATA}/ontology.json${V}`).then(r => r.json()),
   ]);
   state.ontology = ontology;
   await A.wasmReady;
   const archesClient = new A.client.ArchesClientRemoteStatic(DATA, {
-    allGraphFile: () => 'graphs.json',
-    graphToGraphFile: meta => `graphs/${meta.graphid}.json`,
-    graphIdToGraphFile: id => `graphs/${id}.json`,
-    graphIdToResourcesFiles: id => index[id] ?? [],
-    resourceIdToFile: id => `views/${state.view}/resources/${id}.json`,
-    collectionIdToFile: id => `collections/${id}.json`,
+    allGraphFile: () => `graphs.json${V}`,
+    graphToGraphFile: meta => `graphs/${meta.graphid}.json${V}`,
+    graphIdToGraphFile: id => `graphs/${id}.json${V}`,
+    graphIdToResourcesFiles: id => (index[id] ?? []).map(f => f + V),
+    resourceIdToFile: id => `views/${state.view}/resources/${id}.json${V}`,
+    collectionIdToFile: id => `collections/${id}.json${V}`,
   });
   A.graphManager.archesClient = archesClient;
   A.staticStore.archesClient = archesClient;

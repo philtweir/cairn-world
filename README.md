@@ -310,6 +310,12 @@ renders the plain pages from that; the explorer reads the same way, through `src
 | `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
 
+`views.json` carries `build`, a hash of the rest of `data/`. The explorer fetches `views.json`
+fresh and requests every other file, and the page its script and stylesheet, with `?v=<build>`,
+so a browser never combines a cached model from one deploy with data from the next (Pages lets
+browsers cache files for 10 minutes; without this, a model change showed as "Tile ... has
+nodegroup not on model" until the cache expired).
+
 A resource is `{ resourceinstance, tiles: [{ nodegroup_id, data: { <node id>: value } }] }`. Output is
 deterministic: the same CSVs give the same bytes. About 63 MB and 10,000 files with five views,
 mostly each view's copy of the rules, one file per resource.
