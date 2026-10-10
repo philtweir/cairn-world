@@ -10,5 +10,6 @@ attacks,Attacks,string,1,E62_String,P3_has_note,,,,creating-monsters-attacks
 group,Group,resource-instance-list,n,E55_Type,P127_has_broader_term,,,monstergroup,
 spells,Spells,resource-instance-list,n,E55_Type,cairn:wields,,,spellbook,
 listed_in,Listed in,resource-instance-list,1,E89_Propositional_Object,P67i_is_referred_to_by,,,rule|rolltable,
-refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling,
+text_refs,Refers to,semantic,n,E33_Linguistic_Object,P67i_is_referred_to_by,,,,
+refers_to,Refers to,resource-instance-list,1,E1_CRM_Entity,P67_refers_to,text_refs,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling,
 source,Source,string,1,E62_String,P3_has_note,,,,

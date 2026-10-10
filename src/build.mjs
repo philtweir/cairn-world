@@ -22,6 +22,7 @@ import { parseCsv, toCsv } from './csv.mjs';
 import { renderSite, renderViewIndex } from './render.mjs';
 import { buildExplorer } from './build-explorer.mjs';
 import { readEntities } from './world-read.mjs';
+import { loadOntology, checkField } from './ontology.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -32,12 +33,10 @@ const INCLUDE_UNPUBLISHED = process.argv.includes('--all');
 const RDM_NAMESPACE = 'http://cairn-world.example/rdm/';
 const CRM = 'http://www.cidoc-crm.org/cidoc-crm/';
 const CAIRN = 'http://cairn-world.example/ns/';
-// Ontologies interleaved with CIDOC-CRM. Unprefixed names are CRM; full URIs pass through.
-const PREFIXES = {
-  cairn: CAIRN,
-  rel: 'http://purl.org/vocab/relationship/',
-  skos: 'http://www.w3.org/2004/02/skos/core#',
-};
+// Ontologies interleaved with CIDOC-CRM, declared in ontology/prefixes.csv. Unprefixed names
+// are CRM; full URIs pass through.
+const PREFIXES = Object.fromEntries(parseCsv(fs.readFileSync(path.join(ROOT, 'ontology/prefixes.csv'), 'utf8')).slice(1));
+if (PREFIXES.cairn !== CAIRN) throw new Error('ontology/prefixes.csv must map cairn: to ' + CAIRN);
 const NODE_COLS = ['alias', 'name', 'datatype', 'cardinality', 'ontology_class',
   'parent_property', 'parent_alias', 'collection_name', 'graphs', 'description'];
 const LINK_TYPES = new Set(['resource-instance', 'resource-instance-list']);
@@ -136,11 +135,28 @@ for (const key of layerKeys) {
   }
 }
 const modelByAlias = Object.fromEntries(models.map(m => [m.alias, m]));
+const index_of = m => path.join(layerModelDir(m.definedIn), 'models.csv');
 for (const a of ROOT_MODELS) if (modelByAlias[a]?.definedIn !== GENERAL) problem(`model/models.csv must define "${a}"`);
+
+// Every model must be expressible in the ontology: known classes and properties, and each field's
+// property must accept the class it hangs from and the class (or linked models) it points to.
+const ontology = loadOntology(ROOT, expand);
+for (const msg of ontology.problems) problem(msg);
+for (const m of models) {
+  if (!ontology.classes[m.ontology]) problem(`${rel(index_of(m))} model "${m.alias}": class ${m.ontology} is not in CIDOC-CRM 7.1.3 or ontology/extensions.csv`);
+  for (const n of m.nodes) {
+    n.targets = (n.target_model || '').split('|').filter(Boolean);
+    const parent = n.parent_alias ? m.nodes.find(x => x.alias === n.parent_alias) : null;
+    for (const msg of checkField(ontology, {
+      parentClass: parent ? expand(parent.ontology_class) : m.ontology, cls: expand(n.ontology_class), property: expand(n.parent_property),
+      targetClasses: n.targets.map(t => modelByAlias[t]?.ontology).filter(Boolean),
+    })) problem(`${rel(m.file)}:${n.line} "${n.alias}": ${msg}`);
+  }
+}
+if (problems.length) bail();
 
 for (const m of models) {
   for (const n of m.nodes) {
-    n.targets = (n.target_model || '').split('|').filter(Boolean);
     if (LINK_TYPES.has(n.datatype) && !n.targets.length) problem(`${rel(m.file)}:${n.line} link node "${n.alias}" needs target_model`);
     for (const t of n.targets) if (!modelByAlias[t]) problem(`${rel(m.file)}:${n.line} unknown target_model "${t}"`);
   }
@@ -312,7 +328,8 @@ for (const key of layerKeys) {
       if (j === 0 || !isLinkCol(m, col)) return r.cells[j];
       const node = m.nodes.find(n => n.alias === col);
       const keys = splitKeys(r.cells[j]);
-      if (node.cardinality === '1' && keys.length > 1) problem(`${rel(r.file)}:${r.line} "${col}" takes one link, got ${keys.length}`);
+      // A `resource-instance` field holds one link; a `resource-instance-list` holds several per entry.
+      if (node.datatype === 'resource-instance' && keys.length > 1) problem(`${rel(r.file)}:${r.line} "${col}" takes one link, got ${keys.length}`);
       return keys.map(k => {
         const anywhere = node.targets.filter(tm => present[tm]?.has(k));
         const hits = anywhere.filter(tm => [...present[tm].get(k).layers].some(l => visible.has(l)));
@@ -419,6 +436,8 @@ for (const m of usedModels) {
   }
 }
 write('graphs.json', { models: graphMeta });
+// The ontology the interface reads: class hierarchy, labels, property domains, ranges, inverses.
+write('ontology.json', { classes: ontology.classes, properties: ontology.properties });
 
 // Raw, uncomposed layers: for hosts that want to compose themselves.
 for (const l of shippedLayers) for (const m of usedModels) {
@@ -436,7 +455,8 @@ write('views.json', {
 
 for (const v of viewKeys) {
   const index = {};
-  const manifest = { view: v, models: [] };
+  // `overrides` is the layer audit (what each upper layer changes), for the view's home page.
+  const manifest = { view: v, models: [], overrides: views[v].overrides };
   for (const m of usedModels) {
     const vm = views[v].models[m.alias];
     if (!vm) continue;
@@ -451,6 +471,7 @@ for (const v of viewKeys) {
       nodes: m.nodes.map(n => ({
         alias: n.alias, name: n.name, datatype: n.datatype, cardinality: n.cardinality, parent: n.parent_alias || null,
         targets: n.targets, collection: n.collection_name || null,
+        property: expand(n.parent_property), class: expand(n.ontology_class),
         rule: n.rule ? { key: n.rule, id: present.rule?.get(n.rule)?.id ?? null } : null,
       })),
       matches: Object.fromEntries(m.nodes.filter(n => vocabMatches[n.collection_name]).map(n => [n.collection_name, vocabMatches[n.collection_name]])),
@@ -484,7 +505,7 @@ for (const v of viewKeys) {
   await gm.initialize();
   const entities = await readEntities(gm, manifest);
   // A gated view gets no plain pages: they would sit, unasked-for, next to the open ones.
-  if (!layers[v].gate) renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v) });
+  if (!layers[v].gate) renderSite({ view: v, viewsMeta, models: manifest.models, entities, outDir: path.join(DIST, 'pages', v), ontology });
 }
 renderViewIndex({ viewsMeta, outDir: path.join(DIST, 'pages') });
 await buildExplorer(ROOT, DIST);

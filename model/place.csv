@@ -3,5 +3,5 @@ name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
 description,Description,string,1,E62_String,P3_has_note,,,
 kind,Kind,concept,1,E55_Type,P2_has_type,,Place Kind,
 status,Status,string,1,E62_String,P3_has_note,,,
-hex,Hex,string,1,E44_Place_Appellation,P87_is_identified_by,,,
+hex,Hex,string,1,E41_Appellation,P1_is_identified_by,,,
 within,Within,resource-instance-list,1,E53_Place,P89_falls_within,,,place

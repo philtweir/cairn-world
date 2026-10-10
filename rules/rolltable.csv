@@ -1,4 +1,4 @@
-ResourceID,name,description,die,columns,entries,section,part_of,refers_to,source
+ResourceID,name,description,die,columns,entries,section,part_of,about,refers_to,source
 character-creation-backgrounds-table,Backgrounds,,d20,Background,"1 | Aurifex
 2 | Barber-Surgeon
 3 | Beast Handler
@@ -18,7 +18,7 @@ character-creation-backgrounds-table,Backgrounds,,d20,Background,"1 | Aurifex
 17 | Outrider
 18 | Prowler
 19 | Rill Runner
-20 | Scrivener",1,character-creation-backgrounds,"aurifex,half-witch,barber-surgeon,hexenbane,beast-handler,jongleur,bonekeeper,kettlewright,cutpurse,marchguard,fieldwarden,mountebank,fletchwind,outrider,foundling,prowler,fungal-forager,rill-runner,greenwise,scrivener,npc-tables-background","Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+20 | Scrivener",1,character-creation-backgrounds,,"aurifex,half-witch,barber-surgeon,hexenbane,beast-handler,jongleur,bonekeeper,kettlewright,cutpurse,marchguard,fieldwarden,mountebank,fletchwind,outrider,foundling,prowler,fungal-forager,rill-runner,greenwise,scrivener,npc-tables-background","Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-physique-table,Physique,,d10,,"1 | Athletic
 2 | Brawny
 3 | Flabby
@@ -28,7 +28,7 @@ character-creation-physique-table,Physique,,d10,,"1 | Athletic
 7 | Short
 8 | Statuesque
 9 | Stout
-10 | Towering",1,character-creation-physique,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Towering",1,character-creation-physique,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-skin-table,Skin,,d10,,"1 | Birthmarked
 2 | Marked
 3 | Oily
@@ -38,7 +38,7 @@ character-creation-skin-table,Skin,,d10,,"1 | Birthmarked
 7 | Tanned
 8 | Tattooed
 9 | Weathered
-10 | Webbed",1,character-creation-skin,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Webbed",1,character-creation-skin,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-hair-table,Hair,,d10,,"1 | Bald
 2 | Braided
 3 | Curly
@@ -48,7 +48,7 @@ character-creation-hair-table,Hair,,d10,,"1 | Bald
 7 | Luxurious
 8 | Oily
 9 | Wavy
-10 | Wispy",1,character-creation-hair,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Wispy",1,character-creation-hair,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-face-table,Face,,d10,,"1 | Bony
 2 | Broken
 3 | Chiseled
@@ -58,7 +58,7 @@ character-creation-face-table,Face,,d10,,"1 | Bony
 7 | Rakish
 8 | Sharp
 9 | Square
-10 | Sunken",1,character-creation-face,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Sunken",1,character-creation-face,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-speech-table,Speech,,d10,,"1 | Blunt
 2 | Booming
 3 | Cryptic
@@ -68,7 +68,7 @@ character-creation-speech-table,Speech,,d10,,"1 | Blunt
 7 | Precise
 8 | Squeaky
 9 | Stuttering
-10 | Whispery",1,character-creation-speech,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Whispery",1,character-creation-speech,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-clothing-table,Clothing,,d10,,"1 | Antique
 2 | Bloody
 3 | Elegant
@@ -78,7 +78,7 @@ character-creation-clothing-table,Clothing,,d10,,"1 | Antique
 7 | Frumpy
 8 | Livery
 9 | Rancid
-10 | Soiled",1,character-creation-clothing,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Soiled",1,character-creation-clothing,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-virtue-table,Virtue,,d10,,"1 | Ambitious
 2 | Cautious
 3 | Courageous
@@ -88,7 +88,7 @@ character-creation-virtue-table,Virtue,,d10,,"1 | Ambitious
 7 | Humble
 8 | Merciful
 9 | Serene
-10 | Tolerant",1,character-creation-virtue,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Tolerant",1,character-creation-virtue,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-vice-table,Vice,,d10,,"1 | Aggressive
 2 | Bitter
 3 | Craven
@@ -98,7 +98,7 @@ character-creation-vice-table,Vice,,d10,,"1 | Aggressive
 7 | Nervous
 8 | Rude
 9 | Vain
-10 | Vengeful",1,character-creation-vice,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+10 | Vengeful",1,character-creation-vice,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-bonds-table,Bonds,,d20,Bond,"1 | You inherited a **Single Gem** (500gp, cold and brittle) from a long-dead relative. It arrived with a warning: squander your newfound riches, and a debt long thought forgotten would be called in.
 2 | A distant cousin left you a small inheritance. Take **20Gp** and a **Strange Compass** (_petty_) that always points towards something deep in the Wood.
 3 | You carry a **Portrait** in a locket (_petty_) of a past love who disappeared into the Wood long ago. Somehow you know that they are still alive.
@@ -118,7 +118,7 @@ character-creation-bonds-table,Bonds,,d20,Bond,"1 | You inherited a **Single Gem
 17 | The **Dawn Brigade** did your family a service, giving you a dried **Blood-Red Flower** (_petty_) as proof. When the flower turns white, it means the favor is owed.
 18 | An entertainer once visited your home, filling it with story and song. He left one day without a word, leaving behind only **A Miniature Lute**. Something rattles inside.
 19 | A white crow appeared to you in a dream, holding a twig in its mouth. You awoke the next morning with the **Twig** (_petty_) in your hand. You believe it brings you luck. It smells faintly of sulfur.
-20 | One of your ancestors wronged a **Moss Witch**, who cursed their bloodline. Your visage causes mirrors to shatter. You've noticed that the shards can sometimes reveal illusions.",1,character-creation-bonds,"character-creation-inventory-slots,gate,core-rules-deprivation-fatigue,procedures-panic,whistle","Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+20 | One of your ancestors wronged a **Moss Witch**, who cursed their bloodline. Your visage causes mirrors to shatter. You've noticed that the shards can sometimes reveal illusions.",1,character-creation-bonds,,"character-creation-inventory-slots,gate,core-rules-deprivation-fatigue,procedures-panic,whistle","Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-omens-table,Omens,,d20,Omen,"1 | The once rich waters of a life-giving river have turned black and putrid, tainting the land and sickening those who drink from it. A village elder points to some recent desecration as the cause, but most do not heed their words.
 2 | It feels like winter has arrived too quickly this year, frost and snows making their appearance much earlier than expected. There is talk of a pattern to the frost found in windows, ponds, and cracks in the ground. It almost looks like a map.
 3 | A thick, unnatural fog has begun encroaching upon an ancient and holy grove. It is said to be the work of a great forest spirit, angered by nearby deforestation.
@@ -138,12 +138,12 @@ character-creation-omens-table,Omens,,d20,Omen,"1 | The once rich waters of a li
 17 | An ancient tree at the heart of a sleepy village has suddenly withered and died, despite showing no signs of disease. After its trunk was cut, a bloody hand was found in its core.
 18 | Statues have been weeping blood for months on end, and the wombs of the village have lain barren since.  A single child has been the only exception, hidden away by elders overcome with fear and dread.
 19 | The local fauna is behaving oddly, displaying heightened aggression or fleeing the area entirely. Hunters talk of a shadowy figure that roams the Wood, calling to the animals.
-20 | Border towns have become riotous in recent weeks after multiple claims of a red-robed figure appearing in their children's dreams, uttering the same warning: A fire is coming, and it will consume everything.",1,character-creation-omens,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+20 | Border towns have become riotous in recent weeks after multiple claims of a red-robed figure appearing in their children's dreams, uttering the same warning: A fire is coming, and it will consume everything.",1,character-creation-omens,,,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 core-rules-reactions-table,Reactions,,2d6,,"2 | Hostile
 3-5 | Wary
 6-8 | Curious
 9-11 | Kind
-12 | Helpful",1,core-rules-reactions,,"Cairn 2e Player's Guide: Core Rules, CC-BY-SA 4.0"
+12 | Helpful",1,core-rules-reactions,,,"Cairn 2e Player's Guide: Core Rules, CC-BY-SA 4.0"
 core-rules-scars-table-table,Scars Table,,d12,Result,"1 | Lasting Scar: Roll 1d6. 1: Neck, 2: Hands, 3: Eye, 4: Chest, 5: Legs, 6: Ear. Roll 1d6. If the total is higher than your max HP, take the new result.
 2 | Rattling Blow: You’re disoriented and shaken. Describe how you refocus. Roll 1d6. If the total is higher than your max HP, take the new result.
 3 | Walloped: You’re sent flying and land flat on your face, winded. You are deprived until you rest for a few hours. Then, roll 1d6. Add that amount to your max HP.
@@ -155,40 +155,40 @@ core-rules-scars-table-table,Scars Table,,d12,Result,"1 | Lasting Scar: Roll 1d6
 9 | Re-brained: Some hidden part of your psyche is knocked loose. Roll 3d6. If the total is higher than your max WIL, take the new result.
 10 | Sundered: An appendage is torn off, crippled, or useless. (The Warden will tell you which.) Then make a WIL save. If you pass, increase your max WIL by 1d6.
 11 | Mortal Wound: You are deprived and out of action. You die in one hour unless healed. Upon recovery, roll 2d6. Take the new result as your max HP.
-12 | Doomed: Death seemed ever so close, but somehow you survived. If your next save against critical damage is a fail, you die horribly. If you pass, roll 3d6. If the total is higher than your max HP, take the new result.",1,core-rules-scars-table,,"Cairn 2e Player's Guide: Core Rules, CC-BY-SA 4.0"
+12 | Doomed: Death seemed ever so close, but somehow you survived. If your next save against critical damage is a fail, you die horribly. If you pass, roll 3d6. If the total is higher than your max HP, take the new result.",1,core-rules-scars-table,,,"Cairn 2e Player's Guide: Core Rules, CC-BY-SA 4.0"
 procedures-dungeon-events-table,Dungeon Events,,d6,,"1 | **Encounter** | Roll on an encounter table. Possibly **hostile**. (See Reactions.)
 2 | **Sign** | A clue, spoor, track, abandoned lair, scent, victim, etc is discovered.
 3 | **Environment** | Surroundings shift or escalate. Water rises, ceilings collapse, a ritual nears completion, etc.
 4 | **Loss** | Torches are blown out, an ongoing spell fizzles, etc. The party must resolve the effect before moving on.
 5 | **Exhaustion** | The party must rest (triggering another roll on this table), add a **Fatigue**, or consume a ration.
-6 | **Quiet** | The party is left alone (and safe) for the time being.",1,procedures-dungeon-events,"core-rules-reactions,core-rules-deprivation-fatigue","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+6 | **Quiet** | The party is left alone (and safe) for the time being.",1,procedures-dungeon-events,,"core-rules-reactions,core-rules-deprivation-fatigue","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-path-difficulty-table-1,Path Difficulty: Path / Penalty / Odds of Getting Lost,,,Path | Penalty | Odds of Getting Lost,"Roads | None | None
 Trails | +1 Watch | 2-in-6
-Wilderness | +2 Watches | 3-in-6",1,procedures-path-difficulty,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+Wilderness | +2 Watches | 3-in-6",1,procedures-path-difficulty,,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-path-difficulty-table-2,Path Difficulty: Path Distance / Penalty,,,Path Distance | Penalty,"Short | +1 Watch
 Medium | +2 Watches
-Long | +3 Watches",2,procedures-path-difficulty,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+Long | +3 Watches",2,procedures-path-difficulty,,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-terrain-difficulty-table,Terrain Difficulty,,,Difficulty | Terrain | Penalty | Factors,"Easy | **Plains, plateaus, valleys** | none | _Safe areas for rest, fellow travelers, good visibility_
 Tough | **Forests, deserts, hills** | +1 Watch | _Wild animals, flooding, broken equipment, falling rocks, unsafe shelters, hunter's traps_
-Perilous | **Mountains, jungles, swamp** | +2 Watches | _Quicksand, sucking mud, choking vines, unclean water, poisonous plants and animals, poor navigation_",1,procedures-terrain-difficulty,"overview-and-principles-difficulty,setting-seeds-easy,setting-seeds-tough,setting-seeds-perilous","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+Perilous | **Mountains, jungles, swamp** | +2 Watches | _Quicksand, sucking mud, choking vines, unclean water, poisonous plants and animals, poor navigation_",1,procedures-terrain-difficulty,,"overview-and-principles-difficulty,setting-seeds-easy,setting-seeds-tough,setting-seeds-perilous","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-weather-type-table,Weather Type,,d6,Spring | Summer | Fall | Winter,"1 | Nice | Nice | Fair | Fair
 2 | Fair | Nice | Fair | Unpleasant
 3 | Fair | Fair | Unpleasant | Inclement
 4 | Unpleasant | Unpleasant | Inclement | Inclement
 5 | Inclement | Inclement | Inclement | Extreme
-6 | Extreme | Extreme | Extreme | Extreme",1,procedures-weather-type,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+6 | Extreme | Extreme | Extreme | Extreme",1,procedures-weather-type,,,"Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-weather-difficulty-table,Weather Difficulty,,,Weather | Effect | Examples,"Nice | Favorable conditions for travel. | _Clear skies, sunny_
 Fair | Favorable conditions for travel. | _Overcast, breezy_
 Unpleasant | Add a **Fatigue** _or_ add one **watch** to the journey. | _Gusting winds, rain showers, sweltering heat, chill air_
 Inclement | Add a **Fatigue** _or_ add **+1 watch**. Increase terrain **Difficulty** by a step. | _Thunderstorms, lightning, rain, muddy ground_
 Extreme | Add a **Fatigue** _and_ add **+1 watch**. Increase terrain **Difficulty** by a step. | _Blizzards, freezing winds, flooding, mud slides_
-Catastrophic | Most parties cannot travel under these conditions. | _Tornados, tidal waves, hurricane, volcanic eruption_",1,procedures-weather-difficulty,"procedures-weather,core-rules-deprivation-fatigue,procedures-watches,overview-and-principles-difficulty","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+Catastrophic | Most parties cannot travel under these conditions. | _Tornados, tidal waves, hurricane, volcanic eruption_",1,procedures-weather-difficulty,,"procedures-weather,core-rules-deprivation-fatigue,procedures-watches,overview-and-principles-difficulty","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 procedures-wilderness-events-table,Wilderness Events,,d6,,"1 | **Encounter** | Roll on an encounter table for that terrain type or location. Don’t forget to roll for NPC reactions if applicable.
 2 | **Sign** | The party discovers a clue, spoor, or indication of a nearby encounter, locality, hidden feature, or information about a nearby area.
 3 | **Environment** | A shift in weather or terrain.
 4 | **Loss** | The party is faced with a choice that costs them a resource (rations, tools, etc), time, or effort.
 5 | **Exhaustion** | The party encounters a barrier, forcing effort, care or delays. This might mean spending extra time (and an additional **Wilderness Action**) or adding **Fatigue** to the PC's inventory to represent their difficulties.
-6 | **Discovery** | The party finds food, treasure, or other useful resources. The **Warden** can instead choose to reveal the primary feature of the area.",1,procedures-wilderness-events,"core-rules-reactions,core-rules-deprivation-fatigue","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
+6 | **Discovery** | The party finds food, treasure, or other useful resources. The **Warden** can instead choose to reveal the primary feature of the area.",1,procedures-wilderness-events,,"core-rules-reactions,core-rules-deprivation-fatigue","Cairn 2e Player's Guide: Procedures, CC-BY-SA 4.0"
 setting-seeds-culture-table,Culture,,d20,Character | Ambition,"1 | Altruistic | Bounty
 2 | Artistic | Conquest
 3 | Curious | Control
@@ -208,7 +208,7 @@ setting-seeds-culture-table,Culture,,d20,Character | Ambition,"1 | Altruistic | 
 17 | Traditional | Security
 18 | War-like | Stability
 19 | Wealthy | Unification
-20 | Xenophobic | Wealth",1,setting-seeds-culture,overview-and-principles-ambition,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Xenophobic | Wealth",1,setting-seeds-culture,,overview-and-principles-ambition,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-resources-table,Resources,,d20,Abundance | Scarcity,"1 | Food | Food
 2 | Fuel | Fuel
 3 | Gemstones | Gemstones
@@ -228,7 +228,7 @@ setting-seeds-resources-table,Resources,,d20,Abundance | Scarcity,"1 | Food | Fo
 17 | Vessels | Vessels
 18 | Water | Water
 19 | Weapons | Weapons
-20 | Wood | Wood",1,setting-seeds-resources,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Wood | Wood",1,setting-seeds-resources,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-faction-types-table,Faction Types,,d20,Type | Agent,"1 | Artisans | Academic
 2 | Commoners | Assassin
 3 | Criminals | Blacksmith
@@ -248,7 +248,7 @@ setting-seeds-faction-types-table,Faction Types,,d20,Type | Agent,"1 | Artisans 
 17 | Scholars | Politician
 18 | Settlers | Spy
 19 | Spies | Thief
-20 | Tribe | Thug",1,setting-seeds-faction-types,setting-seeds-type,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Tribe | Thug",1,setting-seeds-faction-types,,setting-seeds-type,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-faction-traits-table,Faction Traits,,d20,Trait 1 | Trait 2,"1 | Cautious | Adaptable
 2 | Connected | Bankrupt
 3 | Decadent | Brutal
@@ -268,7 +268,7 @@ setting-seeds-faction-traits-table,Faction Traits,,d20,Trait 1 | Trait 2,"1 | Ca
 17 | Resourceful | Selfish
 18 | Secretive | Stealthy
 19 | Shrewd | Threatened
-20 | Tenacious | Xenophobic",1,setting-seeds-faction-traits,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Tenacious | Xenophobic",1,setting-seeds-faction-traits,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-faction-advantages-table,Faction Advantages,,d20,# of Advantages | Advantage,"1 | 1 | Alliances
 2 | 1 | Anonymity
 3 | 1 | Apparatus
@@ -288,7 +288,7 @@ setting-seeds-faction-advantages-table,Faction Advantages,,d20,# of Advantages |
 17 | 3 | Ruthlessness
 18 | 4 | Specialization
 19 | 4 | Subterfuge
-20 | 4 | Wealth",1,setting-seeds-faction-advantages,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | 4 | Wealth",1,setting-seeds-faction-advantages,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-faction-agendas-table,Faction Agendas,,d20,Agenda | Obstacle,"1 | Ascend to a Higher Plane | A geographic barrier or impassable terrain.
 2 | Collect Artifacts | A key piece of information must first be discovered.
 3 | Cultivate a Rare Resource | A particular object or Relic is required.
@@ -308,16 +308,16 @@ setting-seeds-faction-agendas-table,Faction Agendas,,d20,Agenda | Obstacle,"1 | 
 17 | Revenge | Must be carried out at a rare or exact moment.
 18 | Revive a Former Power | Must be carried out in absolute secrecy.
 19 | Seek New Leadership | Requires a specialist of an uncommon sort.
-20 | Spread a Belief | The outcome would lead to unavoidable war.",1,setting-seeds-faction-agendas,"setting-seeds-agenda,setting-seeds-obstacle","Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Spread a Belief | The outcome would lead to unavoidable war.",1,setting-seeds-faction-agendas,,"setting-seeds-agenda,setting-seeds-obstacle","Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-faction-actions-table,Faction Actions,,d6,Consequence | Impact,"1 | **Failure** | A new **Obstacle** is introduced, and an **Advantage** is lost.
 2 | **Setback** | An **Advantage** is lost.
 3 | **Status Quo** | Nothing is gained, but nothing is lost.
 4 | **Mixed Success** | A **goal** is achieved,  but an **Advantage** is lost.
 5 | **Success** | A **goal** is achieved, and no **Advantages** are lost.
-6 | **Major Success** | A **goal** is achieved, and a new **Advantage** is found.",1,setting-seeds-faction-actions,"setting-seeds-obstacle,setting-seeds-advantages","Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+6 | **Major Success** | A **goal** is achieved, and a new **Advantage** is found.",1,setting-seeds-faction-actions,,"setting-seeds-obstacle,setting-seeds-advantages","Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-terrain-die-drop-table-table,Terrain Die Drop Table,,d6,Difficulty,"1-3 | Easy
 4-5 | Tough
-6 | Perilous",1,setting-seeds-terrain-die-drop-table,overview-and-principles-difficulty,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+6 | Perilous",1,setting-seeds-terrain-die-drop-table,,overview-and-principles-difficulty,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-easy-table,Easy,,d20,Terrain | Landmark,"1 | Bluffs | Broken Sundial
 2 | Dells | Circle of Menhirs
 3 | Farmlands | Circular Maze
@@ -337,7 +337,7 @@ setting-seeds-easy-table,Easy,,d20,Terrain | Landmark,"1 | Bluffs | Broken Sundi
 17 | Prairies | Pit of Cold Fire
 18 | Savannas | Silver Face
 19 | Steppes | Sinkhole
-20 | Valleys | Titanic Gate",1,setting-seeds-easy,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Valleys | Titanic Gate",1,setting-seeds-easy,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-tough-table,Tough,,d20,Terrain | Landmark,"1 | Barrens | Algae Falls
 2 | Canyons | Basalt Columns
 3 | Chaparral | Behemoth Graveyard
@@ -357,7 +357,7 @@ setting-seeds-tough-table,Tough,,d20,Terrain | Landmark,"1 | Barrens | Algae Fal
 17 | Taiga | Shrouded Ziggurat
 18 | Thickets | Stalagmite Forest
 19 | Tundra | Sunken Colossus
-20 | Woodlands | Titan's Table",1,setting-seeds-tough,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Woodlands | Titan's Table",1,setting-seeds-tough,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-perilous-table,Perilous,,d20,Terrain | Landmark,"1 | Alpine Meadows | Active Volcano
 2 | Bogs | Ammonia Caves
 3 | Boulders | Bone Mountain
@@ -377,13 +377,13 @@ setting-seeds-perilous-table,Perilous,,d20,Terrain | Landmark,"1 | Alpine Meadow
 17 | Quagmires | Siren Stones
 18 | Ravine | Sky-Root
 19 | Swamps | Titanic Ribcage
-20 | Wastelands | Weeping Bubble",1,setting-seeds-perilous,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Wastelands | Weeping Bubble",1,setting-seeds-perilous,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-seasonal-weather-table,Seasonal Weather,,d6,Spring | Summer | Fall | Winter,"1 | Mild and sunny | Hot and sunny | Nice and breezy | Mild and clear
 2 | Nice and drizzly | Nice and cloudy | Mild and windy | Cool and windy
 3 | Cool and breezy | Mild and rainy | Cool and foggy | Cold and raining
 4 | Mild and cloudy | Cool and stormy | Cold and cloudy | Frigid and stormy
 5 | Cold and windy | Hot and humid | Cool and rainy | Freezing and snowing
-6 | Cold and rainy | Sweltering and humid | Chilly and stormy | Freezing and hailing",1,setting-seeds-seasonal-weather,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+6 | Cold and rainy | Sweltering and humid | Chilly and stormy | Freezing and hailing",1,setting-seeds-seasonal-weather,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-unusual-weather-table,Unusual Weather,,d20,Weather,"1 | An annual fog appears randomly, turning metallic surfaces to gold on contact.
 2 | An aurora that is visible even during the day.
 3 | Birds fly backwards, yet somehow still move forward.
@@ -403,11 +403,11 @@ setting-seeds-unusual-weather-table,Unusual Weather,,d20,Weather,"1 | An annual 
 17 | The rain glows gently at night. It can be gathered, but the light eventually fades.
 18 | The stars rearrange themselves in intricate patterns, making navigation difficult.
 19 | The winds carry whispers. Some say they tell hints of the future.
-20 | When it snows, the flakes are warm and dry.",1,setting-seeds-unusual-weather,procedures-weather,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | When it snows, the flakes are warm and dry.",1,setting-seeds-unusual-weather,,procedures-weather,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-poi-die-drop-table-table,POI Die Drop Table,,d6,POI,"1 | Waypoint or Settlement
 2-3 | Curiosity
 4 | Lair
-5-6 | Dungeon",1,setting-seeds-poi-die-drop-table,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+5-6 | Dungeon",1,setting-seeds-poi-die-drop-table,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-settlements-table,Settlements,,d20,Settlements | Feature,"1 | Academy | Built Atop Ruins
 2 | Caravan | Built on Bones of Giants
 3 | Citadel | Center of Learning
@@ -427,7 +427,7 @@ setting-seeds-settlements-table,Settlements,,d20,Settlements | Feature,"1 | Acad
 17 | Stronghold | Protected by a Great Warrior
 18 | Town | Ruled by a Powerful Faction
 19 | Villa | Steeped in Tradition
-20 | Village | Trading Hub",1,setting-seeds-settlements,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Village | Trading Hub",1,setting-seeds-settlements,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-waypoints-table,Waypoints,,d20,Waypoints | Feature,"1 | Archive | A Haven for Outcasts
 2 | Asylum | Built on Sacred Grounds
 3 | Bazaar | Contains a Powerful Artifact
@@ -447,7 +447,7 @@ setting-seeds-waypoints-table,Waypoints,,d20,Waypoints | Feature,"1 | Archive | 
 17 | Temple | Protects a Powerful Object
 18 | Trading Post | Reclusive Occupants
 19 | Watchtower | Sits on Natural Deposits
-20 | Work Camp | Technologically Advanced",1,setting-seeds-waypoints,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Work Camp | Technologically Advanced",1,setting-seeds-waypoints,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-curiosities-table,Curiosities,,d20,Curiosities | Feature,"1 | Ancient Tree | Abandoned Vessel
 2 | Broken Tower | Ancient Trash Heap
 3 | Buried Megalith | Buried Ley Line
@@ -467,7 +467,7 @@ setting-seeds-curiosities-table,Curiosities,,d20,Curiosities | Feature,"1 | Anci
 17 | Petrified Trees | Perpetual Mist
 18 | Purple Geysers | Perpetual Shadows
 19 | Singing Stones | Site of Ancient Battle
-20 | Sunken City | Unstable Ground",1,setting-seeds-curiosities,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Sunken City | Unstable Ground",1,setting-seeds-curiosities,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-lairs-table,Lairs,,d20,Lair | Feature,"1 | Abandoned Tower | Abandoned
 2 | Ancient Prison | At Crossroads
 3 | Collapsed Mine | Baited Entrance
@@ -487,7 +487,7 @@ setting-seeds-lairs-table,Lairs,,d20,Lair | Feature,"1 | Abandoned Tower | Aband
 17 | Rusted Construct | Symbiotic Entity
 18 | Spiked Cave | Training Camp
 19 | Sunken Grotto | Underwater
-20 | Unruly Copse | Waste Pit",1,setting-seeds-lairs,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Unruly Copse | Waste Pit",1,setting-seeds-lairs,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-dungeons-table,Dungeons,,d20,Type | Feature,"1 | Burial Ground | Abandoned
 2 | Cave | Buried
 3 | Cellar | Burnt
@@ -507,7 +507,7 @@ setting-seeds-dungeons-table,Dungeons,,d20,Type | Feature,"1 | Burial Ground | A
 17 | Temple | Remote
 18 | Tomb | Sealed
 19 | Tower | Toxic
-20 | Workshop | Warped",1,setting-seeds-dungeons,setting-seeds-type,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Workshop | Warped",1,setting-seeds-dungeons,,setting-seeds-type,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 setting-seeds-path-features-table,Path Features,,d20,Feature | Condition,"1 | Abandoned Fields | Bandit Ambushes
 2 | Blood-Red | Blocked by Giant Boulder
 3 | Buried Charms | Collapsed Bridge
@@ -527,7 +527,7 @@ setting-seeds-path-features-table,Path Features,,d20,Feature | Condition,"1 | Ab
 17 | Shriveled Away | Smoke-filled
 18 | Shredded | Steep Climb
 19 | Twisted | Thick Evening Mist
-20 | Ubiquitous Footprints | Uneven, Soggy Ground",1,setting-seeds-path-features,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
+20 | Ubiquitous Footprints | Uneven, Soggy Ground",1,setting-seeds-path-features,,,"Cairn 2e Warden's Guide: Setting Seeds, CC-BY-SA 4.0"
 dungeon-seeds-purpose-table,Purpose,,d20,Original Use | Built By,"1 | Ancestral Rites | A Fallen Hero
 2 | Arcane Library | A Fanatical Cult
 3 | Astral Trading Hub | A Forgotten Empire
@@ -547,7 +547,7 @@ dungeon-seeds-purpose-table,Purpose,,d20,Original Use | Built By,"1 | Ancestral 
 17 | Pilgrimage Site | Mob Families
 18 | Protection of Rare Artifacts | Opulent Merchants
 19 | Secret Meeting Place | Pilgrims to a Dead God
-20 | Treasure Horde | Rogue Scholars",1,dungeon-seeds-purpose,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Treasure Horde | Rogue Scholars",1,dungeon-seeds-purpose,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-construction-table,Construction,,d20,Entrance | Composition,"1 | A Creature's Lair | Bone
 2 | A Dream | Coral
 3 | A Massive Tree | Crystal
@@ -567,7 +567,7 @@ dungeon-seeds-construction-table,Construction,,d20,Entrance | Composition,"1 | A
 17 | Through a Painting | Shadow Material
 18 | Under a Bridge | Stone
 19 | Underwater Tunnel | Webs
-20 | Veil of Mist | Wood",1,dungeon-seeds-construction,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Veil of Mist | Wood",1,dungeon-seeds-construction,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-ruination-table,Ruination,,d20,Condition | Cause,"1 | Corpse | Alchemical Accident
 2 | Crumbling | Ancient Curse
 3 | Cursed | Cataclysmic Flood
@@ -587,7 +587,7 @@ dungeon-seeds-ruination-table,Ruination,,d20,Condition | Cause,"1 | Corpse | Alc
 17 | Shrouded in Mist | Sudden Change in Climate
 18 | Submerged | Teleported to Another Realm
 19 | Unending | Turned to Stone
-20 | Warped | Unresolved Spirits",1,dungeon-seeds-ruination,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Warped | Unresolved Spirits",1,dungeon-seeds-ruination,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-traits-table,Traits,,d20,Virtues | Vices,"1 | Compassionate | Absent-Minded
 2 | Courageous | Aloof
 3 | Creative | Critical
@@ -607,7 +607,7 @@ dungeon-seeds-traits-table,Traits,,d20,Virtues | Vices,"1 | Compassionate | Abse
 17 | Studious | Superficial
 18 | Suave | Unfocused
 19 | Unwavering | Unimaginative
-20 | Witty | Vain",1,dungeon-seeds-traits,"character-creation-virtue,character-creation-vice","Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Witty | Vain",1,dungeon-seeds-traits,,"character-creation-virtue,character-creation-vice","Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-agendas-table,Agendas,,d20,Goal | Obstacle,"1 | Ascension | Conflict
 2 | Creation | Corruption
 3 | Destruction | Cost
@@ -627,11 +627,11 @@ dungeon-seeds-agendas-table,Agendas,,d20,Goal | Obstacle,"1 | Ascension | Confli
 17 | Revenge | Sacrifice
 18 | Survival | Stagnation
 19 | Transformation | Tradition
-20 | Wealth | Weakness",1,dungeon-seeds-agendas,setting-seeds-obstacle,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Wealth | Weakness",1,dungeon-seeds-agendas,,setting-seeds-obstacle,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-dungeon-die-drop-table-table,Dungeon Die Drop Table,,d6,Room,"1 | Monster
 2-3 | Lore
 4 | Special
-5-6 | Trap",1,dungeon-seeds-dungeon-die-drop-table,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+5-6 | Trap",1,dungeon-seeds-dungeon-die-drop-table,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-monster-table,Monster,,d20,Group | Activity,"1 | Avian | Building
 2 | Beast | Devouring
 3 | Behemoth | Dying
@@ -651,7 +651,7 @@ dungeon-seeds-monster-table,Monster,,d20,Group | Activity,"1 | Avian | Building
 17 | Plant | Stalking
 18 | Shape Shifter | Torturing
 19 | Undead | Training
-20 | Unusual | Trapped",1,dungeon-seeds-monster,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Unusual | Trapped",1,dungeon-seeds-monster,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-lore-table,Lore,,d20,Room Type | Clue,"1 | Armory | Decay
 2 | Barracks | Decor
 3 | Bath | Draft
@@ -671,7 +671,7 @@ dungeon-seeds-lore-table,Lore,,d20,Room Type | Clue,"1 | Armory | Decay
 17 | Storage | Tapping
 18 | Study | Temperature
 19 | Vault | Vibrations
-20 | Workshop | Writing",1,dungeon-seeds-lore,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Workshop | Writing",1,dungeon-seeds-lore,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-special-table,Special,,d20,Special | Feature,"1 | Books | Ages
 2 | Bridge | Alarms
 3 | Contraption | Animates
@@ -691,7 +691,7 @@ dungeon-seeds-special-table,Special,,d20,Special | Feature,"1 | Books | Ages
 17 | Treasure | Shifts
 18 | Voices | Silences
 19 | Wheel | Teleport
-20 | Writing | Transforms",1,dungeon-seeds-special,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Writing | Transforms",1,dungeon-seeds-special,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 dungeon-seeds-trap-table,Trap,,d20,Trap | Trigger,"1 | Ages | Activating
 2 | Burns | Breaking
 3 | Captures | Crossing
@@ -711,7 +711,7 @@ dungeon-seeds-trap-table,Trap,,d20,Trap | Trigger,"1 | Ages | Activating
 17 | Lifts | Taking
 18 | Poisons | Talking
 19 | Shocks | Touching
-20 | Shoots | Tripping",1,dungeon-seeds-trap,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
+20 | Shoots | Tripping",1,dungeon-seeds-trap,,,"Cairn 2e Warden's Guide: Dungeon Seeds, CC-BY-SA 4.0"
 forest-seeds-forest-description-table,Forest Description,,d20,Description | Description,"1 | Barren | Ancient
 2 | Crystalline | Awakening
 3 | Diseased | Buzzing
@@ -731,7 +731,7 @@ forest-seeds-forest-description-table,Forest Description,,d20,Description | Desc
 17 | Timeless | Silent
 18 | Uncharted | Smoldering
 19 | Unspoilt | Sunlit
-20 | Winding | Wild",1,forest-seeds-forest-description,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Winding | Wild",1,forest-seeds-forest-description,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-traits-table,Traits,,d20,Virtues | Vices,"1 | Adaptive | Aggressive
 2 | Balanced | Aloof
 3 | Brave | Covetous
@@ -751,7 +751,7 @@ forest-seeds-traits-table,Traits,,d20,Virtues | Vices,"1 | Adaptive | Aggressive
 17 | Sensible | Rigid
 18 | Sharp | Scatterbrained
 19 | Stable | Selfish
-20 | Trusting | Territorial",1,forest-seeds-traits,"character-creation-virtue,character-creation-vice","Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Trusting | Territorial",1,forest-seeds-traits,,"character-creation-virtue,character-creation-vice","Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-forest-agenda-table,Forest Agenda,,d20,Goal | Obstacle,"1 | Abundance | Agreements
 2 | Awakening | Belief
 3 | Balance | Contamination
@@ -771,11 +771,11 @@ forest-seeds-forest-agenda-table,Forest Agenda,,d20,Goal | Obstacle,"1 | Abundan
 17 | Purification | Stasis
 18 | Rebirth | Turmoil
 19 | Tranquility | Vulnerability
-20 | Unity | Vulnerability",1,forest-seeds-forest-agenda,setting-seeds-obstacle,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Unity | Vulnerability",1,forest-seeds-forest-agenda,,setting-seeds-obstacle,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-forest-die-drop-table-table,Forest Die Drop Table,,d6,POI,"1 | Monster
 2-3 | Ruins
 4 | Shelter
-5-6 | Hazard",1,forest-seeds-forest-die-drop-table,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+5-6 | Hazard",1,forest-seeds-forest-die-drop-table,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-trail-types-2-table,Trail Types,,d20,Type | Marker,"1 | Animal Path | Bear Rubbings
 2 | Bandit's Run | Bent Trees
 3 | Bouldered Way | Claw Marks
@@ -795,7 +795,7 @@ forest-seeds-trail-types-2-table,Trail Types,,d20,Type | Marker,"1 | Animal Path
 17 | Sticky Sap Path | Stillness
 18 | Trail Tree | Stone Piles
 19 | Treeline Heights | Swaying Plants
-20 | War Route | Tree Carvings",1,forest-seeds-trail-types-2,setting-seeds-type,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | War Route | Tree Carvings",1,forest-seeds-trail-types-2,,setting-seeds-type,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-monster-table,Monster,,d20,Monster | Activity,"1 | Bandit | Burrowing
 2 | Blink Dog | Burying
 3 | Blood Elk | Destroying
@@ -815,7 +815,7 @@ forest-seeds-monster-table,Monster,,d20,Monster | Activity,"1 | Bandit | Burrowi
 17 | Unicorn | Scouting
 18 | Will-o-Wisp | Stalking
 19 | Wolf | Torturing
-20 | Wood Troll | Trapped",1,forest-seeds-monster,dungeon-seeds-monster,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Wood Troll | Trapped",1,forest-seeds-monster,,dungeon-seeds-monster,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-ruins-table,Ruins,,d20,Ruin | Feature,"1 | Abandoned Manor | A Forest Spirit, Ready to Die
 2 | Broken Sundial | A Hag, Foraging for Ingredients
 3 | Chipped Bell Tower | A Mirror of Itself
@@ -835,7 +835,7 @@ forest-seeds-ruins-table,Ruins,,d20,Ruin | Feature,"1 | Abandoned Manor | A Fore
 17 | Shattered Bridge | Remnants of a Failed Ritual
 18 | Splintered Obelisk | The Veil Between Worlds Is Thin
 19 | Sunken Gazebo | Visions of the Past
-20 | Toppled Statue | Warded Grounds",1,forest-seeds-ruins,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Toppled Statue | Warded Grounds",1,forest-seeds-ruins,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-shelter-table,Shelter,,d20,Shelter | Feature,"1 | Bandit Hideout | Abandoned, for Now
 2 | Falconer's Tower | Attracts Wild Beasts
 3 | Fishing Hut | Built in Defiance of Customs
@@ -855,7 +855,7 @@ forest-seeds-shelter-table,Shelter,,d20,Shelter | Feature,"1 | Bandit Hideout | 
 17 | Pale Folk Stable | Presents a Ready Meal
 18 | Ranger's Outpost | Protected by a Playful Spirit
 19 | Smoky Cabin | Site of an Ancient Murder
-20 | Tattered Windmill | Thieves' Camp",1,forest-seeds-shelter,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Tattered Windmill | Thieves' Camp",1,forest-seeds-shelter,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-hazard-table,Hazard,,d20,Hazard | Feature,"1 | Animal Trap | A Pet Basilisk
 2 | Bog Shadows | A Spell Gone Wrong
 3 | Bone Orchard | Animated Armor
@@ -875,13 +875,13 @@ forest-seeds-hazard-table,Hazard,,d20,Hazard | Feature,"1 | Animal Trap | A Pet 
 17 | Thorny Thickets | Watchful Dead
 18 | Toxic Spores | Tracks Erased by Mist
 19 | Troll Den | Trees that Grow From Bones
-20 | Unstable Ground | Will-o-Wisps Congregate",1,forest-seeds-hazard,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+20 | Unstable Ground | Will-o-Wisps Congregate",1,forest-seeds-hazard,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 forest-seeds-encounters-table,Encounters,,d20,Encounter,"1 | A tiny bearded man argues with a squawking raven. It holds something shiny in its beak.
 2 | A dryad sits atop a stone, a purple fungus lining her arms. There is violence in her eyes.
 3 | A patch of quicksand is disguised as soft ground. A broken spool of rope lies nearby.
 4 | A snarling pack of wolves surround a fresh kill. They are not keen to share.
 5 | Wild berries grow here in abundance. None have been eaten, not even by birds.
-6 | A trap, hastily set and poorly concealed. It smells strongly of urine.",1,forest-seeds-encounters,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
+6 | A trap, hastily set and poorly concealed. It smells strongly of urine.",1,forest-seeds-encounters,,,"Cairn 2e Warden's Guide: Forest Seeds, CC-BY-SA 4.0"
 bestiary-monster-categories-table,Monster Categories,,d20,Group | Monsters,"1 | Avian | Phoenix, Roc, Wyvern
 2 | Beast | Blood Elk, Grizzly Bear, Killer Bees, Night Cat, Viper, Wolf
 3 | Behemoth | Green Dragon, Purple Worm
@@ -901,7 +901,7 @@ bestiary-monster-categories-table,Monster Categories,,d20,Group | Monsters,"1 | 
 17 | Plant | Creeping Vines, Root Witch, Shambling Mound, Treant
 18 | Shape Shifter | Swine Thing, Werewolf
 19 | Undead | Crypt Guardian, Ghost, Ghoul, Lich, Mummy, Skeleton, Vampire, Wight, Zombie
-20 | Unusual | Gelatinous Ooze, Mimic, Rust Monster, Warrior Snail",1,bestiary-monster-categories,dungeon-seeds-monster,"Cairn 2e Warden's Guide: Bestiary, CC-BY-SA 4.0"
+20 | Unusual | Gelatinous Ooze, Mimic, Rust Monster, Warrior Snail",1,bestiary-monster-categories,,dungeon-seeds-monster,"Cairn 2e Warden's Guide: Bestiary, CC-BY-SA 4.0"
 creating-monsters-monster-appearance-table,Monster Appearance,,d20,Physique | Feature,"1 | Albino | Antennae
 2 | Black | Beak
 3 | Crystalline | Carapace
@@ -921,7 +921,7 @@ creating-monsters-monster-appearance-table,Monster Appearance,,d20,Physique | Fe
 17 | Skeletal | Trunk
 18 | Slimy | Tusks
 19 | Translucent | Voice
-20 | Twisted | Wings",1,creating-monsters-monster-appearance,character-creation-physique,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+20 | Twisted | Wings",1,creating-monsters-monster-appearance,,character-creation-physique,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 creating-monsters-monster-traits-table,Monster Traits,,d20,Quirks | Weakness,"1 | Alters Its Size at Will | Alcohol
 2 | Changes Color at Will | Cold
 3 | Collects Rare Flowers | Conversation
@@ -941,7 +941,7 @@ creating-monsters-monster-traits-table,Monster Traits,,d20,Quirks | Weakness,"1 
 17 | Sleeps Upside Down | Silver
 18 | Speaks in Rhymes | Sunlight
 19 | Sweats Rare Minerals | True Name
-20 | Reproduces Asexually | Weak Spot",1,creating-monsters-monster-traits,npc-tables-quirks,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+20 | Reproduces Asexually | Weak Spot",1,creating-monsters-monster-traits,,npc-tables-quirks,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 creating-monsters-monster-attacks-table,Monster Attacks,,d20,Type | Critical Damage,"1 | Bites | Asphyxiates
 2 | Blunts | Bleeds
 3 | Burns | Blinds
@@ -961,7 +961,7 @@ creating-monsters-monster-attacks-table,Monster Attacks,,d20,Type | Critical Dam
 17 | Throws | Punctures
 18 | Touches | Severs
 19 | Whips | Tramples
-20 | Zaps | Weakens",1,creating-monsters-monster-attacks,"setting-seeds-type,core-rules-critical-damage","Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+20 | Zaps | Weakens",1,creating-monsters-monster-attacks,,"setting-seeds-type,core-rules-critical-damage","Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 creating-monsters-monster-abilities-table,Monster Abilities,,d20,Ability | Target,"1 | Absorbs | Body
 2 | Amplifies | Dreams
 3 | Attracts | Element
@@ -981,19 +981,19 @@ creating-monsters-monster-abilities-table,Monster Abilities,,d20,Ability | Targe
 17 | Shrinks | Vision
 18 | Transforms | Water
 19 | Traps | Weather
-20 | Zaps | Weakens",1,creating-monsters-monster-abilities,,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+20 | Zaps | Weakens",1,creating-monsters-monster-abilities,,,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 creating-monsters-converting-monsters-table,Converting Monsters,,,,"ML | 4 | 8 | 10 | 12
-WIL | 6 | 12 | 15 | 18",1,creating-monsters-converting-monsters,core-rules-attributes,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+WIL | 6 | 12 | 15 | 18",1,creating-monsters-converting-monsters,,core-rules-attributes,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 creating-monsters-saving-throws-table,Saving Throws,,,Death or Poison | STR,"Wands | **DEX**
 Paralysis or Petrification | **WIL** or **STR**
 Breath Attacks | **DEX** or **STR**
-Spells, Rods or Staves | **WIL**",1,creating-monsters-saving-throws,core-rules-attributes,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+Spells, Rods or Staves | **WIL**",1,creating-monsters-saving-throws,,core-rules-attributes,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 naming-procedures-names-formula-table,Names Formula,,d6,Formula,"1 | (The) **[Noun]** **[POI]**
 2 | (The) **[Adjective]** **[POI]**
 3 | **[POI]** of (the) **[Noun]**
 4 | **[Adjective]** **[POI]** of (the) **[Noun]**
 5 | (The) **[Noun]** **[Adjective]** **[POI]**
-6 | **[POI]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-names-formula,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+6 | **[POI]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-names-formula,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-adjectives-table,Adjectives,,d100,Adjective,"1 | Aging
 2 | Amber
 3 | Ancient
@@ -1093,7 +1093,7 @@ naming-procedures-adjectives-table,Adjectives,,d100,Adjective,"1 | Aging
 97 | Stuffed
 98 | Sunken
 99 | Thin
-100 | Withered",1,naming-procedures-adjectives,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+100 | Withered",1,naming-procedures-adjectives,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-nouns-table,Nouns,,d100,Noun,"1 | Abyss
 2 | Alliance
 3 | Amber
@@ -1193,7 +1193,7 @@ naming-procedures-nouns-table,Nouns,,d100,Noun,"1 | Abyss
 97 | Violet
 98 | War
 99 | Whisper
-100 | Zephyr",1,naming-procedures-nouns,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+100 | Zephyr",1,naming-procedures-nouns,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-terrain-synonyms-table,Terrain Synonyms,,,Terrain | Synonym,"Beaches | seaside, shore, coast, seaboard, foreshore, marina
 Bogs | marsh, morass, quad, slough, fens
 Canyons | ravine, chasm, abyss, gulf, gulch
@@ -1217,7 +1217,7 @@ Swamp | moors, wetlands
 Thickets | chaparral, boscage, covert, coppice, fells
 Tundra | expanse, boreal, ley
 Valley | dale, vale, basin, gorge, gap, glen
-Wasteland | _See desert_",1,naming-procedures-terrain-synonyms,thicket,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+Wasteland | _See desert_",1,naming-procedures-terrain-synonyms,,thicket,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-group-types-table,Group Types,,d20,Group,"1 | Assembly
 2 | Brotherhood
 3 | Circle
@@ -1237,20 +1237,20 @@ naming-procedures-group-types-table,Group Types,,d20,Group,"1 | Assembly
 17 | Network
 18 | Order
 19 | Pact
-20 | Syndicate",1,naming-procedures-group-types,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+20 | Syndicate",1,naming-procedures-group-types,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-faction-names-formula-table,Faction Names Formula,,d6,Formula,"1 | (The) **[Noun]** **[Group]**
 2 | (The) **[Adjective]** **[Group]**
 3 | **[Group]** of (the) **[Noun]**
 4 | **[Adjective]** **[Group]** of (the) **[Noun]**
 5 | (The) **[Noun]** **[Adjective]** **[Group]**
-6 | **[Group]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-faction-names-formula,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
-naming-procedures-realm-names-table,Realm Names,,,,"Optionally, replace any value with the dominant terrain synonym, e.g. ""The Misty Bluffs"".",1,naming-procedures-realm-names,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+6 | **[Group]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-faction-names-formula,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+naming-procedures-realm-names-table,Realm Names,,,,"Optionally, replace any value with the dominant terrain synonym, e.g. ""The Misty Bluffs"".",1,naming-procedures-realm-names,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-ruler-names-formula-table,Ruler Names Formula,,d6,Formula,"1 | (The) **[Noun]** **[Rulers]**
 2 | (The) **[Adjective]** **[Rulers]**
 3 | **[Rulers]** of (the) **[Noun]**
 4 | **[Adjective]** **[Rulers]** of (the) **[Noun]**
 5 | (The) **[Noun]** **[Adjective]** **[Rulers]**
-6 | **[Rulers]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-ruler-names-formula,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+6 | **[Rulers]** of (the) **[Adjective]** **[Noun]**",1,naming-procedures-ruler-names-formula,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-ruler-types-table,Ruler Types,,d20,Ruler,"1 | **Alliance**
 2 | **Barony**
 3 | **Commonwealth**
@@ -1270,7 +1270,7 @@ naming-procedures-ruler-types-table,Ruler Types,,d20,Ruler,"1 | **Alliance**
 17 | **Regency**
 18 | **Republic**
 19 | **State**
-20 | **Union**",1,naming-procedures-ruler-types,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+20 | **Union**",1,naming-procedures-ruler-types,,,"Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 naming-procedures-forest-names-table,Forest Names,,d100,Adjectives | Nouns,"1 | Abandoned | Arbors
 2 | Ancient | Arch
 3 | Beckoning | Blossoms
@@ -1370,7 +1370,7 @@ naming-procedures-forest-names-table,Forest Names,,d100,Adjectives | Nouns,"1 | 
 97 | Weeping | Woodlot
 98 | Whispering | Woods
 99 | Wild | Yonder
-100 | Winding | Zephyr",1,naming-procedures-forest-names,"naming-procedures-adjectives,naming-procedures-nouns","Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
+100 | Winding | Zephyr",1,naming-procedures-forest-names,,"naming-procedures-adjectives,naming-procedures-nouns","Cairn 2e Warden's Guide: Naming Procedures, CC-BY-SA 4.0"
 npc-tables-table-1,NPC Tables 1,,d20,Name,"1 | Alaric
 2 | Carver
 3 | Cleaver
@@ -1390,7 +1390,7 @@ npc-tables-table-1,NPC Tables 1,,d20,Name,"1 | Alaric
 17 | Neria
 18 | Pan
 19 | Quill
-20 | Seraphine",1,npc-tables,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Seraphine",1,npc-tables,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-table-2,NPC Tables 2,,d20,Name,"1 | Ainsley
 2 | Azura
 3 | Brave
@@ -1410,7 +1410,7 @@ npc-tables-table-2,NPC Tables 2,,d20,Name,"1 | Ainsley
 17 | Spade
 18 | Spike
 19 | Tanner
-20 | Thyme",2,npc-tables,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Thyme",2,npc-tables,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-table-3,NPC Tables 3,,d20,Name,"1 | Alder
 2 | Alistair
 3 | Caius
@@ -1430,7 +1430,7 @@ npc-tables-table-3,NPC Tables 3,,d20,Name,"1 | Alder
 17 | Sky
 18 | Storm
 19 | Taros
-20 | Thaddeus",3,npc-tables,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Thaddeus",3,npc-tables,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-quirks-table,Quirks,,d20,Quirk 1,"1 | Alert
 2 | Bald
 3 | Bright Eyes
@@ -1450,7 +1450,7 @@ npc-tables-quirks-table,Quirks,,d20,Quirk 1,"1 | Alert
 17 | Strong
 18 | Thick Eyebrows
 19 | Tired
-20 | Young",1,npc-tables-quirks,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Young",1,npc-tables-quirks,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-background-table,Background,,d20,Background,"1 | Academic
 2 | Assassin
 3 | Blacksmith
@@ -1470,7 +1470,7 @@ npc-tables-background-table,Background,,d20,Background,"1 | Academic
 17 | Politician
 18 | Spy
 19 | Thief
-20 | Thug",1,npc-tables-background,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Thug",1,npc-tables-background,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-goals-table,Goals,,d20,Goal,"1 | Ascension
 2 | Cleansing
 3 | Conservation
@@ -1490,7 +1490,7 @@ npc-tables-goals-table,Goals,,d20,Goal,"1 | Ascension
 17 | Revenge
 18 | Survival
 19 | Unity
-20 | Wealth",1,npc-tables-goals,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Wealth",1,npc-tables-goals,,,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-traits-table-1,Traits: Virtues,,d20,Virtues,"1 | Cautious
 2 | Compassionate
 3 | Connected
@@ -1510,7 +1510,7 @@ npc-tables-traits-table-1,Traits: Virtues,,d20,Virtues,"1 | Cautious
 17 | Suave
 18 | Shrewd
 19 | Tenacious
-20 | Witty",1,npc-tables-traits,character-creation-virtue,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Witty",1,npc-tables-traits,,character-creation-virtue,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 npc-tables-traits-table-2,Traits: Vices,,d20,Vices,"1 | Aloof
 2 | Corrupt
 3 | Craven
@@ -1530,244 +1530,244 @@ npc-tables-traits-table-2,Traits: Vices,,d20,Vices,"1 | Aloof
 17 | Selfish
 18 | Stubborn
 19 | Vain
-20 | Xenophobic",2,npc-tables-traits,character-creation-vice,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
+20 | Xenophobic",2,npc-tables-traits,,character-creation-vice,"Cairn 2e Warden's Guide: NPC Tables, CC-BY-SA 4.0"
 aurifex-table-1,What went horribly wrong?,,d6,,"1 | There was an explosion, and you lost your sense of smell. Well, almost: you can sniff out gold as a pig does truffles. Take a **Tin of Snuff** (6 uses) to dampen the impact. Use it every day or become _deprived_.
 2 | You dematerialized a beloved pet. Now it follows you around, invisible but always present. Although it cannot interact with the physical realm, you are able to share its senses. (Add a **Fatigue** each time.) It follows basic commands.
 3 | You were exposed to a long-acting truth serum whose effects have yet to wear off. The disorder has its advantages: you cannot repeat lies you've heard, either.
 4 | You were adept at creating _fake_ gold, which is almost as good. Eventually, your ruse was discovered, and you had to make a hasty retreat. Take a heavy **Metal Ingot** and **Gold Powder** (3 uses).
 5 | Your alchemical recipe worked, but a rival stole the blueprint before your claims could be proven. Take a prototype **Blunderbuss** (d12, _blast_, _bulky_) that takes one round to reload, and a taste for revenge.
-6 | Ridiculed for discovering how to turn gold into _lead_, you were a laughing stock. Take a bottle of **Universal Solvent** (2 uses) that dissolves anything it touches into its constituent parts.",1,aurifex,"core-rules-deprivation-fatigue,core-rules-attack-modifiers,character-creation-inventory-slots","Cairn 2e Backgrounds: Aurifex, CC-BY-SA 4.0"
+6 | Ridiculed for discovering how to turn gold into _lead_, you were a laughing stock. Take a bottle of **Universal Solvent** (2 uses) that dissolves anything it touches into its constituent parts.",1,,aurifex,"core-rules-deprivation-fatigue,core-rules-attack-modifiers,character-creation-inventory-slots","Cairn 2e Backgrounds: Aurifex, CC-BY-SA 4.0"
 aurifex-table-2,What alchemical marvel is the product of your latest ingenuity?,,d6,,"1 | **Pyrophoric Gel** | A sticky green fluid that catches fire when exposed to air, then burns for 8 hours. Cannot be extinguished (1 use).
 2 | **Blast Sphere** | A head-sized iron ball filled with explosive powder that detonates on impact (d12, _blast_, _bulky_, 1 use).
 3 | **Aqua Vita** | Purifies any liquid, converting it to pure water. Drinking it cures 1d6 STR (1 use).
 4 | **Mimic Stone** | Records a short phrase that can later be played back.
 5 | **Spark Dust** | Ignites easily and quickly. Useful for starting a fire or as an incendiary device (3 uses).
-6 | **Homunculus** | A miniature clay replica of yourself that follows your every command. It hates being enthralled to you and complains bitterly whenever possible. Any damage done to the homunculus is also done to you. 3 HP, 4 STR, 13 DEX, 5 WIL",2,aurifex,"core-rules-attack-modifiers,character-creation-inventory-slots","Cairn 2e Backgrounds: Aurifex, CC-BY-SA 4.0"
+6 | **Homunculus** | A miniature clay replica of yourself that follows your every command. It hates being enthralled to you and complains bitterly whenever possible. Any damage done to the homunculus is also done to you. 3 HP, 4 STR, 13 DEX, 5 WIL",2,,aurifex,"core-rules-attack-modifiers,character-creation-inventory-slots","Cairn 2e Backgrounds: Aurifex, CC-BY-SA 4.0"
 barber-surgeon-table-1,"How have you ""improved"" yourself?",,d6,,"1 | You have a replacement **eye** that can magnify objects, act as a telescope, and provide minimal night vision. You cannot wear anything metal on your head, and the presence of strong magnets make you _deprived_.
 2 | One **foot** is mostly metal (kick, d6), and you treat some Tough terrain as **Easy**. Carry a **Oil Can** (6 uses). Without a daily application, you are _deprived_ and noisy.
 3 | One of your fingers has been swapped, the bone replaced by gold and iron. Take a **Hook** and a **Screwdriver** that can attach to the fingertip.
 4 | Both **ears** have been surgically enhanced, tripling your hearing. You can focus on a specific sound, such as a conversation, at a great distance. You wear an ear flap to protect against sudden loud noises (WIL save to avoid temporary paralysis).
 5 | Your **chest** is lined with alchemical sigils, _toughening the skin_ (1 Armor). Wearing other metallic armor nullifies the effect.
-6 | One **arm** is fully metal and comes off at the shoulder. It can be used as a weapon (d8, _bulky_ when not attached) and can move independently if you are within sight of it.",1,barber-surgeon,"core-rules-deprivation-fatigue,setting-seeds-easy,oil-can,chest,character-creation-inventory-slots","Cairn 2e Backgrounds: Barber-Surgeon, CC-BY-SA 4.0"
+6 | One **arm** is fully metal and comes off at the shoulder. It can be used as a weapon (d8, _bulky_ when not attached) and can move independently if you are within sight of it.",1,,barber-surgeon,"core-rules-deprivation-fatigue,setting-seeds-easy,oil-can,chest,character-creation-inventory-slots","Cairn 2e Backgrounds: Barber-Surgeon, CC-BY-SA 4.0"
 barber-surgeon-table-2,What rare tool is essential to your work?,,d6,,"1 | **Regrowth Salve** | Regrows a body part over the course of a day. 1 use.
 2 | **Graftgrub** | A small worm that can fuse inanimate objects with parts of the body.  1 use.
 3 | **Woundwax** | Heals wounds from fire or chemicals (restoring full STR) but nothing else. 2 uses.
 4 | **Quicksilver** | A stimulant. Go first in combat, and automatically pass any WIL saves for one hour. _Addictive_: Save STR or become _deprived_ after 24 hours without it. 4 uses.
 5 | **Pneuma Pump** | Portable iron lungs (_bulky_). Enables life-saving surgery or underwater breathing.
-6 | **Lodestone** | Draws out dangerous elements from the body and acts as a powerful magnetic force.",2,barber-surgeon,"core-rules-deprivation-fatigue,character-creation-inventory-slots","Cairn 2e Backgrounds: Barber-Surgeon, CC-BY-SA 4.0"
+6 | **Lodestone** | Draws out dangerous elements from the body and acts as a powerful magnetic force.",2,,barber-surgeon,"core-rules-deprivation-fatigue,character-creation-inventory-slots","Cairn 2e Backgrounds: Barber-Surgeon, CC-BY-SA 4.0"
 beast-handler-table-1,What creature is your specialty?,,d6,,"1 | **Arachnids** | Take a **Quick-Flame Rod** and an **Oil Can** (6 uses). It can destroy a large spider nest in seconds.
 2 | **Felines** | Take a sack of **Whiskerwort**. Its odor can calm and control even the largest of cats.
 3 | **Canines** | Take a wreath of **Wolfsbane** and a **Large Net**. Effective against werewolves as well.
 4 | **Birds** | Take a **Warble-Whistle** (3 charges). It can imitate any bird call and can even be used to send simple messages. **Recharge**: Feed a baby bird as its mother would, then blow.
 5 | **Rodents** | Take a **Pan Flute** that emits a high-pitched sound that only rodents can hear. So long as you play, they will follow, even to their deaths.
-6 | **Serpents** | Take a **Warming Stone** that generates an irresistible heat and a vial of **Antitoxin** (2 uses).",1,beast-handler,"oil-can,core-rules-relics,antitoxin","Cairn 2e Backgrounds: Beast Handler, CC-BY-SA 4.0"
+6 | **Serpents** | Take a **Warming Stone** that generates an irresistible heat and a vial of **Antitoxin** (2 uses).",1,,beast-handler,"oil-can,core-rules-relics,antitoxin","Cairn 2e Backgrounds: Beast Handler, CC-BY-SA 4.0"
 beast-handler-table-2,What have you learned from the creatures of the wild?,,d6,,"1 | That there is far more to the world than meets the eye. With quiet concentration, you can borrow the senses of a nearby creature of your **specialty**.
 2 | That the behavior of beasts is a language in itself. When observing beasts of your **specialty** you gain insight into weather patterns and impending disasters.
 3 | That the pulse of the hunt is a powerful impulse. You have a sense for when predators, even those **not of your specialty** are near.
 4 | That the land is a language unto itself. Your chance of becoming lost in a terrain dominated by the beasts of your **specialty** is reduced by one step (e.g. 4-in-6 becomes 3-in-6).
 5 | That nature's symphony can be heard if you attune to its rhythm. When surrounded by creatures of your **specialty**, they can alert you to approaching danger before it arrives.
-6 | That survival is all about adaptability. Once per day, you may take on a simple feature from a creature of your **specialty** (webbed fingers, night vision, etc.). Add a **Fatigue** each time.",2,beast-handler,core-rules-deprivation-fatigue,"Cairn 2e Backgrounds: Beast Handler, CC-BY-SA 4.0"
+6 | That survival is all about adaptability. Once per day, you may take on a simple feature from a creature of your **specialty** (webbed fingers, night vision, etc.). Add a **Fatigue** each time.",2,,beast-handler,core-rules-deprivation-fatigue,"Cairn 2e Backgrounds: Beast Handler, CC-BY-SA 4.0"
 bonekeeper-table-1,What did you take from the dead?,,d6,,"1 | A **crow-shaped amulet**. You can ask a question of the dead but must add a **Fatigue** each time. They do not always speak truthfully.
 2 | A **mortal wound** from a freed _revenant_. You were healed, but the disfigurement has made you a pariah. You require neither air nor sustenance but are still subject to pain and death. Trapped between worlds, the dead see you as one of their own.
 3 | A **Blood Pail** (_bulky_) from a local death-cult. Empty it to raise a servant built from whatever is buried below, with 6 HP, 1 Armor, 13 STR, 11 DEX, 4 WIL, and shard fists (d8+d8). Only one servant can be raised at a time. If destroyed, you permanently lose 1d4 STR. **Recharge**: Fill with the blood of a dying warrior.
 4 | A **burial wagon** (+6 slots, _slow_) from your last job. It came with a stubborn old **donkey** (+4 slots, only +2 slots if pulling wagon).
 5 | The **Detect Magic** Spellbook, stolen from an ancient library. Your family worked in service to an obscure underworld deity, but you lost your faith. Though exiled, you continue to serve, even as an apostate. Detect Magic: You can see or hear nearby magical auras. _Becomes warm to the touch when magic is used nearby._
-6 | A **plague doctor's mask**, after its owner succumbed to the disease that wiped out everyone you once knew. They should have kept it on.",1,bonekeeper,"core-rules-deprivation-fatigue,character-creation-inventory-slots,core-rules-relics,detect-magic","Cairn 2e Backgrounds: Bonekeeper, CC-BY-SA 4.0"
+6 | A **plague doctor's mask**, after its owner succumbed to the disease that wiped out everyone you once knew. They should have kept it on.",1,,bonekeeper,"core-rules-deprivation-fatigue,character-creation-inventory-slots,core-rules-relics,detect-magic","Cairn 2e Backgrounds: Bonekeeper, CC-BY-SA 4.0"
 bonekeeper-table-2,What tool was invaluable in your work?,,d6,,"1 | **Manacles** | Though old, it's still effective even against the very strong. You don't have the key.
 2 | **Sponge** | Supposedly made from the remains of a rare sea creature. It never seems to dry out.
 3 | **Pulley** | Great for moving gravestones, rocks, or even bodies.
 4 | **Incense** | Perfect for rituals or to keep the flies at bay. Cools the blood.
 5 | **Crowbar** | d6 damage. Sometimes you just need to get the damn thing open!
-6 | **Repellent** | Powerful stuff. Its faded label makes it unclear what it is actually _meant_ to repel, though. Perhaps everything. 3 uses.",2,bonekeeper,repellent,"Cairn 2e Backgrounds: Bonekeeper, CC-BY-SA 4.0"
+6 | **Repellent** | Powerful stuff. Its faded label makes it unclear what it is actually _meant_ to repel, though. Perhaps everything. 3 uses.",2,,bonekeeper,repellent,"Cairn 2e Backgrounds: Bonekeeper, CC-BY-SA 4.0"
 cutpurse-table-1,What was your last big job?,,d6,,"1 | A noble's summer home. The place was full of fancy wine (+20gp) but not much else. Take **Fence Cutters**.
 2 | A bank. (You were caught.) You bear a brand only visible by firelight, and anyone who sees the mark can ask you for a beer. Take **Retractable Wires**.
 3 | A guild warehouse. Take a **Ladder** (_bulky_, 10ft) and **Blinding Powder** (1 use).
 4 | Moneylender. Someone beat you to the job but left behind a **Scroll** of _Arcane Eye_ (_petty_). _Arcane Eye_: You can see through a magical floating eyeball that flies around at your command.
 5 | Constable's quarters. You escaped but left some friends behind. Take **Strong Silk Rope** (30ft) and a queasy feeling.
-6 | A university. You were seen but not pursued. You still don't know why. Take **Smoke Pellets** (3 uses).",1,cutpurse,"character-creation-inventory-slots,core-rules-scrolls,arcane-eye","Cairn 2e Backgrounds: Cutpurse, CC-BY-SA 4.0"
+6 | A university. You were seen but not pursued. You still don't know why. Take **Smoke Pellets** (3 uses).",1,,cutpurse,"character-creation-inventory-slots,core-rules-scrolls,arcane-eye","Cairn 2e Backgrounds: Cutpurse, CC-BY-SA 4.0"
 cutpurse-table-2,What helps you steal?,,d6,,"1 | **Catring** | 2 charges. Climb up walls and fall safely. **Recharge**: Place the ring on a stray cat's tail.
 2 | **Gildfinger** | 1 charge. A finger glove that mimics any mundane key. **Recharge**: Bundle it with at least 100gp for a night.
 3 | **Glimpse Glass** | 3 uses. A monocle that lets you see through walls or other obstructions. It shatters after the last use.
 4 | **Sweetwhistle** | 1 charge. Listeners hear a soft, familiar voice in the distance that they cannot resist following. **Recharge**: Lose a dear memory. (Describe it.)
 5 | **Vagrant's Veil** | 1 charge. Wear it to blend seamlessly into crowds, appearing as a simple pauper. **Recharge**: Donate the day's winnings to the poor. _Petty_
-6 | **Reverse Teetotum** | 1 use. When spun, time skips backwards 30 seconds. Everyone remembers what happened.",2,cutpurse,"core-rules-relics,character-creation-inventory-slots","Cairn 2e Backgrounds: Cutpurse, CC-BY-SA 4.0"
+6 | **Reverse Teetotum** | 1 use. When spun, time skips backwards 30 seconds. Everyone remembers what happened.",2,,cutpurse,"core-rules-relics,character-creation-inventory-slots","Cairn 2e Backgrounds: Cutpurse, CC-BY-SA 4.0"
 fieldwarden-table-1,What got the better of you?,,d6,,"1 | A voracious swarm of pests that swallowed crops and animals alike. With nothing to defend, you left. Take **Gale Seed Extract** (3 uses).  Ingesting it lets you sprint with a speed four times your regular rate. Afterward you add two **Fatigue**.
 2 | A crop spirit, angered by a poor tithing. The fires consumed nearly everything, and afterward you were able to gather a pouch of **Fireseeds** (d8, _blast_, 4 uses).
 3 | An antlered, toothy demon that nearly ended you. Take a blood-stained **Bone Knife** (d6). On **Critical Damage**, its next attack becomes _enhanced_ from contact with blood.
 4 | _The Withering_, a type of stem rot from the **Roots**. Take a **Diseased Crop** (6 uses) that quickly decays any plant it touches.
 5 | Wolves, or so you thought. You are now a **Werewolf** [8 HP, 15 STR, 14 DEX, claws (d6+d6), bite (d8)]. Your WIL remains the same. You can _turn_ at will (once per day) but must make a WIL save to revert. Anyone left alive from your attacks must make a WIL save to avoid infection.
-6 | Crop thieves. Not all of them survived, but you were outnumbered. Start with +d4 HP and a **Cusped Falchion** (d8).",1,fieldwarden,"core-rules-deprivation-fatigue,core-rules-attack-modifiers,core-rules-critical-damage,werewolf","Cairn 2e Backgrounds: Fieldwarden, CC-BY-SA 4.0"
+6 | Crop thieves. Not all of them survived, but you were outnumbered. Start with +d4 HP and a **Cusped Falchion** (d8).",1,,fieldwarden,"core-rules-deprivation-fatigue,core-rules-attack-modifiers,core-rules-critical-damage,werewolf","Cairn 2e Backgrounds: Fieldwarden, CC-BY-SA 4.0"
 fieldwarden-table-2,What tool saved your life?,,d6,,"1 | **Bloodvine Whip** | d8 damage. On **Critical Damage**, it drains the target's blood, granting the weapon's next attack the _blast_ quality
 2 | **Clatter Keeper** | A hand-cranked device that emits a loud noise, frightening away most creatures.
 3 | **Sun Stick** | Provides ample warmth and light for up to one hour. **Recharge**: Leave in heavy sunlight for a full day. 1 use.
 4 | **Root Tether** | When thrown, binds a creature as large as a wolf to the soil for a short time.
 5 | **Greenwhistle** | A small flute that calms plants, making passage through areas heavy with plant life a bit easier.
-6 | **Everbloom Band** | A circlet adorned with flowers that never wilt. On **Critical Damage**, the flowers dissolve into dust, but you act as if your save succeeded (STR loss still occurs).",2,fieldwarden,"core-rules-critical-damage,core-rules-attack-modifiers,core-rules-relics","Cairn 2e Backgrounds: Fieldwarden, CC-BY-SA 4.0"
+6 | **Everbloom Band** | A circlet adorned with flowers that never wilt. On **Critical Damage**, the flowers dissolve into dust, but you act as if your save succeeded (STR loss still occurs).",2,,fieldwarden,"core-rules-critical-damage,core-rules-attack-modifiers,core-rules-relics","Cairn 2e Backgrounds: Fieldwarden, CC-BY-SA 4.0"
 fletchwind-table-1,How did you earn your bow?,,d6,,"1 | **War**. If you are first to attack, your bow gains the _blast_ property for the first round.
 2 | **Falconry**. You keep a falcon [3 hp, 5 STR, 16 DEX, 4 WIL, claws (d6+d6), bite (d8)]. It only eats live game.
 3 | **Hunting**. When taking the Supply action, your ability to secure **Rations** increases by **one step** (e.g. 1d4 becomes 1d6).
 4 | **Tournaments**. Attacks with your bow are _enhanced_ if the target is immobile.
 5 | **Training**. If you are the first to attack, melee attacks against you are _impaired_ until you take STR damage.
-6 | **Scouting**. When taking the Travel action, your presence decreases the chance of getting lost by one step (e.g. 4-in-6 becomes 3-in-6).",1,fletchwind,"core-rules-attack-modifiers,rations,procedures-training","Cairn 2e Backgrounds: Fletchwind, CC-BY-SA 4.0"
+6 | **Scouting**. When taking the Travel action, your presence decreases the chance of getting lost by one step (e.g. 4-in-6 becomes 3-in-6).",1,,fletchwind,"core-rules-attack-modifiers,rations,procedures-training","Cairn 2e Backgrounds: Fletchwind, CC-BY-SA 4.0"
 fletchwind-table-2,What kind of wood is your bow made from?,,d6,,"1 | **Western Yew** (d6, _bulky_). Can be wielded as a blunt weapon (d6). Noisy.
 2 | **Sessile Oak** (d8, _bulky_). Slams into targets. On **Critical Damage** something is torn off.
 3 | **Stone Pine** (d6, _bulky_). Produces one use of **Sticky Sap** per day. The sap is highly explosive.
 4 | **White Ash** (d6, _bulky_). Can be used in place of a shield in melee combat (+1 Armor).
 5 | **Striped Bamboo** (d6). Collapsible, it only requires one slot (but still requires both hands).
-6 | **Wych Elm** (d6, _bulky_). Protects the bearer from poisons and toxins, so long as they are holding it.",2,fletchwind,"character-creation-inventory-slots,core-rules-critical-damage","Cairn 2e Backgrounds: Fletchwind, CC-BY-SA 4.0"
+6 | **Wych Elm** (d6, _bulky_). Protects the bearer from poisons and toxins, so long as they are holding it.",2,,fletchwind,"character-creation-inventory-slots,core-rules-critical-damage","Cairn 2e Backgrounds: Fletchwind, CC-BY-SA 4.0"
 foundling-table-1,Who took you in?,,d6,,"1 | An old hunter. You were both quite happy, until it all ended. Take a **Weathered Longbow** (d8, _bulky_) and a **Leather Jerkin** (1 Armor).
 2 | A wizened apothecary, who taught you the healing arts but maintained a clinical detachment. Take a **Healing Unguent** (restores d4 STR, 1 use).
 3 | A druid, who taught you the language of trees. When it came time to , you took with you only a **Gnarled Staff** (d8) and left a promise that one day you would return.
 4 | A gruff blacksmith from a sleepy river town. You were always kept at arm's length. Now the forge is cold, and you've moved on. Take a **Smith's Apron** (_petty_) and a set of **Oft-mended Chain Mail** (2 Armor, _bulky_).
 5 | A troupe of traveling entertainers. For a time, they were like family to you. One day you woke up and they were gone with no explanation. Take a **Storybook**, a **Dagger** (d6), and some burning questions.
-6 | The monks of a secluded forest monastery. When their rules became too strict, and you snuck away. Take a **Monk's Habit** (warm, _petty_) and a **Spellbook** of _Control Plants_. Control Plants: Nearby plants and trees obey you and gain the ability to move at a slow pace. _Leaves grow along the spine, and it smells faintly of decay._",1,foundling,"character-creation-inventory-slots,leather-jerkin,dagger,core-rules-spellbooks,control-plants","Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
+6 | The monks of a secluded forest monastery. When their rules became too strict, and you snuck away. Take a **Monk's Habit** (warm, _petty_) and a **Spellbook** of _Control Plants_. Control Plants: Nearby plants and trees obey you and gain the ability to move at a slow pace. _Leaves grow along the spine, and it smells faintly of decay._",1,,foundling,"character-creation-inventory-slots,leather-jerkin,dagger,core-rules-spellbooks,control-plants","Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
 foundling-table-2,What keeps bad tidings at bay?,,d6,,"1 | **Pipeweed** | Your good luck charm. Conversations tend to flow more easily after a smoke. 6 uses.
 2 | **Stink Jar** | Shattering this jar releases an odor so foul all nearby must make a STR save or immediately vomit. 1 use.
 3 | **Ivy Worm** | A green worm often mistaken for a weed. Swallowed whole, it absorbs any toxins or rot in the body before exiting through the usual way.
 4 | **Dream Stone** | A smooth blue stone that helps recall dreams more clearly. Overuse can cause dream-addiction.
 5 | **Drowning Rod** | A finger-sized wooden stick that doubles in size each time it is fully submerged in water. It does not shrink down again.
-6 | **Rabbit's Foot** | You were wearing it when they found you. They say it is the foot of she who left you and that it protects you from witch magic. _Petty_.",2,foundling,character-creation-inventory-slots,"Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
+6 | **Rabbit's Foot** | You were wearing it when they found you. They say it is the foot of she who left you and that it protects you from witch magic. _Petty_.",2,,foundling,character-creation-inventory-slots,"Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
 fungal-forager-table-1,What strange fungus did you discover?,,d6,,"1 | **Shrieking Trumpet**. When exposed to light, it screams so loudly that all nearby attacks (including your own) are _impaired_. 2 uses.
 2 | **Torch Fungus**. When crushed, it creates a cold blue light for a short while. 2 uses.
 3 | **Murderous Truffle**. Pungent, highly toxic, and very rare (worth 50gp to assassins).  Illegal pretty much everywhere. 1 use.
 4 | **Hellcap**. Exposure to its aroma causes intense nausea and vomiting. Either way, it clears the room. Bottled (1 use).
 5 | **Sproutcup**. Ingest to shrink down to the size of a mouse. (Your belongings stay the same size.) You return to normal size within the hour, often in fits and starts. 1 use.
-6 | **Rootflower**. A white fungus found only on corpses deep underground. Ingest to restore d6 WIL. You will dream of the dead and their stories. 1 use.",1,fungal-forager,core-rules-attack-modifiers,"Cairn 2e Backgrounds: Fungal Forager, CC-BY-SA 4.0"
+6 | **Rootflower**. A white fungus found only on corpses deep underground. Ingest to restore d6 WIL. You will dream of the dead and their stories. 1 use.",1,,fungal-forager,core-rules-attack-modifiers,"Cairn 2e Backgrounds: Fungal Forager, CC-BY-SA 4.0"
 fungal-forager-table-2,"What keeps you sane, even in utter darkness?",,d6,,"1 | **Glowsnail** | Casts a soft, bioluminescent light. Feeds on one ration every two days.
 2 | **Silk Moth Shawl** | A weatherproof blanket, it can also douse a fire without being damaged.
 3 | **Milkflower** | A gentle stimulant. Chewing it makes you immune to _panic_ for the next hour. 3 uses.
 4 | **Luxcompass** | Hums softly as it moves closer to the Sun. Eventually the noise becomes unbearably loud.
 5 | **Sloth-Tarp** | A tough and weatherproof fabric, useful for hanging off trees. When inside, you have +1 Armor.
-6 | **Miner's Grease** | Great for dislodging a gem, tool, or limb from a tight crack. Highly explosive. 3 uses.",2,fungal-forager,procedures-panic,"Cairn 2e Backgrounds: Fungal Forager, CC-BY-SA 4.0"
+6 | **Miner's Grease** | Great for dislodging a gem, tool, or limb from a tight crack. Highly explosive. 3 uses.",2,,fungal-forager,procedures-panic,"Cairn 2e Backgrounds: Fungal Forager, CC-BY-SA 4.0"
 greenwise-table-1,How has the Wood failed you ?,,d6,,"1 | An ill-tempered forest spirit cursed you for stealing, marking you as an enemy of their kind. Take a **Bezoar Stone**. Ingesting it cures any poison (1 use, unless retrieved).
 2 | A close friend disappeared into the forest. Now you see their face in any tea you brew. Take a **Soporific Concoction** (3 uses).
 3 | You were poisoned, losing your sense of taste and smell. You can now withstand noxious fumes and always carry **Antitoxin** (2 uses).
 4 | Your radical experiments turned your skin green, and you now gain nourishment as a plant. You don't need **Rations**, but a day without sufficient sunlight and water leaves you _deprived_.
 5 | Your impressive corpseflower won a local contest then promptly killed a judge. You fled, but not without the **Prize Money (100gp)** and a warrant for your arrest.
-6 | You created a restorative tincture that also causes accidental infertility. Take a **Healing Potion** that completely restores STR. Only you know of its unintended side-effects.",1,greenwise,"antitoxin,rations,core-rules-deprivation-fatigue","Cairn 2e Backgrounds: Greenwise, CC-BY-SA 4.0"
+6 | You created a restorative tincture that also causes accidental infertility. Take a **Healing Potion** that completely restores STR. Only you know of its unintended side-effects.",1,,greenwise,"antitoxin,rations,core-rules-deprivation-fatigue","Cairn 2e Backgrounds: Greenwise, CC-BY-SA 4.0"
 greenwise-table-2,What keeps you safe while in the Wood?,,d6,,"1 | **Amadou** | A vermilion fungus that catches fire quite easily. 3 uses.
 2 | **Delphinium** | Breathe water for up to one hour. 1 use, but can be divided into fractional doses.
 3 | **Tacky Stalk** | A woody reed that hardens into a permanent adhesive when chewed. 2 uses.
 4 | **Wisp Lantern** | Caged in wrought iron, provides a dim light so long as the wisp is able to feed on nearby pain and fear.
 5 | **Seed Bomb** | A canvas sack filled with seeds that explode on impact. d6 damage (_blast_, 3 uses).
-6 | **Briarvine** | Entangles any creature up to horse size (STR to break free). Reusable.",2,greenwise,core-rules-attack-modifiers,"Cairn 2e Backgrounds: Greenwise, CC-BY-SA 4.0"
+6 | **Briarvine** | Entangles any creature up to horse size (STR to break free). Reusable.",2,,greenwise,core-rules-attack-modifiers,"Cairn 2e Backgrounds: Greenwise, CC-BY-SA 4.0"
 half-witch-table-1,What did you bring back from the Unseelie Court?,,d6,,"1 | A **Black Rose Fiddle** (_bulky_). Its music causes intense sadness and immobility in nearby mortals. (Others are merely fascinated.) You don't know how to play.
 2 | **Paper legs**. You are extremely light, and can fall a few stories without getting hurt. Try to avoid tearing them or getting them wet.
 3 | A **Living Nightmare** that dwells within you but manifests whenever you are in danger. It has your same **Attributes** and **HP** and attacks with claws (d8+d8). It disappears on **Critical Damage** (take 1d4 WIL damage), re-appearing again on the next full moon.
 4 | A **Raven Familiar** [8 HP, 3 STR, 11 DEX, 13 WIL, beak, (d6)]. It speaks as an intelligent being and is entirely devoted to you.
 5 | A **Briar Thorn**. It can pierce any organic material (quite painfully) but when removed leaves no trace of the intrusion.
-6 | A Fae creature's **True Name**. Use it to summon its owner for an act of great service, but only once. It could also fetch a hefty price, from the right buyer.",1,half-witch,"character-creation-inventory-slots,core-rules-attributes,character-creation-hit-protection,core-rules-critical-damage","Cairn 2e Backgrounds: Half Witch, CC-BY-SA 4.0"
+6 | A Fae creature's **True Name**. Use it to summon its owner for an act of great service, but only once. It could also fetch a hefty price, from the right buyer.",1,,half-witch,"character-creation-inventory-slots,core-rules-attributes,character-creation-hit-protection,core-rules-critical-damage","Cairn 2e Backgrounds: Half Witch, CC-BY-SA 4.0"
 half-witch-table-2,"What concoction do you carry, and what rare ingredients did you gather to make it?",,d6,,"1 | **Rebirth Ash** | Remnants of a bark spirit. Sprinkle to reignite a fire that has died or return to life a creature that has died only moments before. 3 uses.
 2 | **Glamour Feather** | Plume of a firebird. Can make any creature appear convincingly as someone (or something) else. 1 use.
 3 | **Hawthorn Seed** | An acorn from the other side, gathered on the spring equinox. When planted, it sprouts a luxurious shelter, collapsing at moonrise the next day. 1 use.
 4 | **Stonetree Sap** | Sap obtained in exchange for blood. Hardens when rubbed on any surface (+1 Armor). 3 uses.
 5 | **Nightdust Powder** | Made from the ritual burning of six owls. When tossed in the air, day turns to night for a short while. 2 uses.
-6 | **Hex Stone** | Gathered from a river that flows from the _other side_. Removed from its iron tin, it can absorb the effects of an active magical effect. If destroyed, the magic is released. 1 use.",2,half-witch,,"Cairn 2e Backgrounds: Half Witch, CC-BY-SA 4.0"
+6 | **Hex Stone** | Gathered from a river that flows from the _other side_. Removed from its iron tin, it can absorb the effects of an active magical effect. If destroyed, the magic is released. 1 use.",2,,half-witch,,"Cairn 2e Backgrounds: Half Witch, CC-BY-SA 4.0"
 hexenbane-table-1,To which order do you belong?,,d6,,"1 | **Order of the Crossroads**. Take a **Pocket Leyfinder**. It points to nearby ley lines and other sources of arcane power. If you lose it, the punishment is death.
 2 | **Order of the Bleeding Star**. Take a **Star-Iron Mace** (d8). It shines faintly in darkness and becomes very hot in the presence of witchcraft.
 3 | **Order of the Glass Sigil**. Take a short sword (d8) and chainmail (2 Armor, _bulky_). You have contacts in most towns (the more rural, the better) willing to provide aid, food, or even weapons.
 4 | **Order of the Blank Eye**. Take a **Voidglass Shard**. Peer through it to see invisible marks, creatures, and other magical effects. Lose the use of your eye for an hour afterwards (you are _deprived_).
 5 | **Order of Canaas**. Once per day, you can change into a wolf. Take a **Quicksilver Chain**. Without it, you are unable to shift back.
-6 | **Order of the Silent Veil**. Take a **Quell Stone** (2 uses) wrapped in burlap. Extinguishes any nearby flames once exposed to air.",1,hexenbane,"character-creation-inventory-slots,core-rules-deprivation-fatigue","Cairn 2e Backgrounds: Hexenbane, CC-BY-SA 4.0"
+6 | **Order of the Silent Veil**. Take a **Quell Stone** (2 uses) wrapped in burlap. Extinguishes any nearby flames once exposed to air.",1,,hexenbane,"character-creation-inventory-slots,core-rules-deprivation-fatigue","Cairn 2e Backgrounds: Hexenbane, CC-BY-SA 4.0"
 hexenbane-table-2,What was your vow?,,d6,,"1 | **Honesty**. Choose a **weapon type** (blunt, blade, etc). Attacks against you of this type are _impaired_. If your vow is broken, you lose d4 WIL.
 2 | **Poverty**. You carry the _Disassemble_ **Spellbook**. Only you can use it. If your vow is broken, it explodes (d12 STR damage). Disassemble: Any of your body parts may be detached and reattached at will, without causing pain or damage. You can still control them. _Regenerates any torn or defaced pages._
 3 | **Selflessness**. You are immune to **mind-altering magical effects**, such as _charm_, _hatred_, _frenzy_, and so on. If you break this vow, you lose d6 WIL.
 4 | **Mercy**. Choose a **weapon type** (blunt, blade, etc). Attacks with this weapon are _enhanced_. If your vow is broken, you can never use that weapon type again.
 5 | **Charity**. Once per day you can shrug off a **Fatigue**. If your vow is ever broken, you permanently lose one inventory slot.
-6 | **Valor**. The first time you inflict **Critical Damage**, you receive +d4 HP, returning to the previous limit at the end of combat. If your vow is broken, you die.",2,hexenbane,"core-rules-attack-modifiers,disassemble,core-rules-spellbooks,charm,hatred,frenzy,core-rules-deprivation-fatigue,core-rules-critical-damage","Cairn 2e Backgrounds: Hexenbane, CC-BY-SA 4.0"
+6 | **Valor**. The first time you inflict **Critical Damage**, you receive +d4 HP, returning to the previous limit at the end of combat. If your vow is broken, you die.",2,,hexenbane,"core-rules-attack-modifiers,disassemble,core-rules-spellbooks,charm,hatred,frenzy,core-rules-deprivation-fatigue,core-rules-critical-damage","Cairn 2e Backgrounds: Hexenbane, CC-BY-SA 4.0"
 jongleur-table-1,What happened at your final performance?,,d6,,"1 | Despite your training in the deadly arts, an actor died and you were blamed. Take a light-weight **Rapier** (d6) and a false identity.
 2 | The crowd loved your catchy tune about a noble and his romantic failings. The noble in question, not so much. Take the _Read Mind_ **Spellbook** and a warrant for your arrest. Read Mind: You can hear the surface thoughts of nearby creatures. _Long-term possession can cause the reader to mistake the thoughts of others as their own._
 3 | Your debut composition reduced the audience to a gibbering mess, murmuring of bright creatures descending from the night sky. Later you noticed that the notes resembled stellar constellations. Take a **Book On Astronomy**, and a lot of questions.
 4 | You mocked a forgotten trickster god and were cursed for it. You speak only in perfect rhyme. Ironically, this has only made you more popular among your peers. Take a **Thesaurus** (20gp). Without it, you are _deprived_.
 5 | You were scarred in an on-stage accident. The crowd cheered, thinking it was part of the act. Take well-worn **Stage Mail** (1 Armor), a memorable scar, and a fear of applause.
-6 | Your respectable puppeteering skills were matched only by your mimicry. You were so good you were branded a witch (literally) and banished. Take an **Uncanny Hand-Puppet** and a **Rabbit Skull** (_petty_) that protects against charms.",1,jongleur,"read-mind,core-rules-spellbooks,core-rules-deprivation-fatigue,character-creation-inventory-slots","Cairn 2e Backgrounds: Jongleur, CC-BY-SA 4.0"
+6 | Your respectable puppeteering skills were matched only by your mimicry. You were so good you were branded a witch (literally) and banished. Take an **Uncanny Hand-Puppet** and a **Rabbit Skull** (_petty_) that protects against charms.",1,,jongleur,"read-mind,core-rules-spellbooks,core-rules-deprivation-fatigue,character-creation-inventory-slots","Cairn 2e Backgrounds: Jongleur, CC-BY-SA 4.0"
 jongleur-table-2,What trinket were you unable to leave behind?,,d6,,"1 | **False Cuffs** | Comfortable, realistic-looking cuffs. Only you know the trick to get out of them.
 2 | **Pocket Theatre** | A set of small puppets and a folding stage. Good for quick distractions.
 3 | **Ghost Violin** | A dark-gray violin that plays a haunting tune, mirrored by an invisible, distant twin.
 4 | **Tragic Tales** | Banned in proper company, this book becomes less bawdy and more harrowing towards the end. Worth **100gp**.
 5 | **Mythos Mask** | A plaster mask that allows one to take on a monster's countenance. Once it comes off, add a **Fatigue**.
-6 | **Rebreak Glass** | A wine flute that can be broken multiple times, reforming after 24 hours. Makes a really loud noise.",2,jongleur,core-rules-deprivation-fatigue,"Cairn 2e Backgrounds: Jongleur, CC-BY-SA 4.0"
+6 | **Rebreak Glass** | A wine flute that can be broken multiple times, reforming after 24 hours. Makes a really loud noise.",2,,jongleur,core-rules-deprivation-fatigue,"Cairn 2e Backgrounds: Jongleur, CC-BY-SA 4.0"
 kettlewright-table-1,What is your trade?,,d6,,"1 | You build small contraptions for local guilds (and don't ask too many questions). Take an extra 40gp and a wanted poster with your face on it. Given time and materials, you can open almost any door or vault.
 2 | You deal in home goods and tools, hawking your wares to townspeople across the lands. Take 20gp worth of items from the gear table. You are fluent in the _Traveler's Cant_.
 3 | You were a military smelter, before peace destroyed your livelihood. Take a **smelting hammer** (d10, _bulky_) and a **tin helm** (+1 Armor). Given time and adequate materials, you can repair armor.
 4 | You sell rare and quality items to monasteries and nobles alike. Take a **Spyglass**, a **Necklace** (_petty_) worth 20gp, and a **Scroll** of Mirrorwalk (_petty_).
 5 | You offer protection as a service, quietly watching for threats as money exchanges hands. You start with **+d4 HP**, and carry a **Long Sword** (d10, _bulky_) and a **Gambeson** (+1 Armor).
-6 | You scavenge raw tin and iron from battlefields, pulling teeth from still-twitching corpses. Start with a young **Donkey** (+4 slots, slow), a **Crossbow** (d8 damage, _bulky_), and a **Saw** (d6).",1,kettlewright,"marketplace-gear,character-creation-inventory-slots,spyglass,core-rules-scrolls,long-sword,gambeson,crossbow","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
+6 | You scavenge raw tin and iron from battlefields, pulling teeth from still-twitching corpses. Start with a young **Donkey** (+4 slots, slow), a **Crossbow** (d8 damage, _bulky_), and a **Saw** (d6).",1,,kettlewright,"marketplace-gear,character-creation-inventory-slots,spyglass,core-rules-scrolls,long-sword,gambeson,crossbow","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
 kettlewright-table-2,What never fails to get you out of trouble?,,d6,,"1 | **Fire Eggs** | Six small pellets made of sea salt, wood, and crockery-dust. They explode at low heat (d8, _blast_) but the flames dissipate quickly.
 2 | **Black Tar** | Versatile: both sticky and highly flammable. 3 uses.
 3 | **Spiked Boots** | Cracks heads (d8) as easily as it does ice and muck. Travel is also a bit slower, but easier.
 4 | **Tinker's Paste** | Seals shut any fist-sized opening. 3 uses.
 5 | **Fireworks** | A dazzling albeit dangerous display. Enough explosive material to blow off a finger or three. 2 uses remain.
-6 | **Carrion Cat** | A clever pet, small enough to hide in your pack (_bulky_), but strong enough to scare off smaller predators. Requires one **Ration** a day, and it must be meat.",2,kettlewright,"core-rules-attack-modifiers,spiked-boots,character-creation-inventory-slots","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
+6 | **Carrion Cat** | A clever pet, small enough to hide in your pack (_bulky_), but strong enough to scare off smaller predators. Requires one **Ration** a day, and it must be meat.",2,,kettlewright,"core-rules-attack-modifiers,spiked-boots,character-creation-inventory-slots","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
 marchguard-table-1,Why did you take the Oath?,,d6,,"1 | Your family has a long tradition of serving, and you were trained from an early age on how to survive in the wild. When taking the Supply action, your yield increases by one step (e.g. 1d4 > 1d6).
 2 | As a convict, the Oath was simply a means of avoiding punishment. Take a set of **Lockpicks** and the **Key** (_petty_) to a safehouse.
 3 | Noble-born, you joined to escape family trouble. Take a **Goosefelt Tarp** (fits two) that you stole before leaving home.
 4 | When your family lost everything, you took the Oath to avoid becoming a burden. Take extra **Rations** (3 uses) and a brace of **Throwing Knives** (d6).
 5 | Your life was saved by a member of the **Marchguard**, and you were inspired to join their ranks. Take a **Snare Trap** and a **Sketchbook** filled with detailed drawings.
-6 | You were in a dark place and decided that your life needed a little direction. You're still not so sure it was the right choice. Take an **Oilskin Coat** and **Mapping Paper**.",1,marchguard,"lockpicks,character-creation-inventory-slots,rations","Cairn 2e Backgrounds: Marchguard, CC-BY-SA 4.0"
+6 | You were in a dark place and decided that your life needed a little direction. You're still not so sure it was the right choice. Take an **Oilskin Coat** and **Mapping Paper**.",1,,marchguard,"lockpicks,character-creation-inventory-slots,rations","Cairn 2e Backgrounds: Marchguard, CC-BY-SA 4.0"
 marchguard-table-2,What do you carry as proof of your Oath?,,d6,,"1 | **Impressive Pin** | A metal badge of honor from the Guard. It can open doors but leaves a trail. _Petty_.
 2 | **Oath Compass** | Points not towards North, but instead to the nearest member of the Guard. It also lets you know when they're getting close.
 3 | **Pullstones** | Two jet-black stones. When separated, the stones will always roll toward one another.
 4 | **Fireflask** | Highly alcoholic, yet strangely delicious. When thrown, it creates a wall of flames 10ft high that burns out after a few minutes. 1 use.
 5 | **Pain Band** | Touch an injured creature to transfer their wounds to you. (Exchange their lost STR with your own.) **Recharge**: Wear the ring while in perfect health. You will lose 1 STR, permanently. _Petty_.
-6 | **Poacher's Woe** | Strongly-scented arrows (3 uses). The scent is powerful enough to track with ease.",2,marchguard,"character-creation-inventory-slots,core-rules-relics","Cairn 2e Backgrounds: Marchguard, CC-BY-SA 4.0"
+6 | **Poacher's Woe** | Strongly-scented arrows (3 uses). The scent is powerful enough to track with ease.",2,,marchguard,"character-creation-inventory-slots,core-rules-relics","Cairn 2e Backgrounds: Marchguard, CC-BY-SA 4.0"
 mountebank-table-1,How was your fraud exposed?,,d6,,"1 | Your ""patients"" kept reporting miraculous recoveries, despite your lack of training. Start with **Bandages** (3 uses) and a knack for healing.
 2 | After seducing a wealthy patron, their family hired a criminal gang to retrieve you. You got away and need to lay low. Start with **Beauty Cream**, 2 uses. Apply to appear irresistibly beautiful for the next 12 hours.
 3 | You were a peddler of fake prophesies, but when one turned out to be true, it drew unwanted attention. Roll on the **Omens** table, but keep the result to yourself. Start with a concealable **Knife** (d6, _petty_).
 4 | Your latest stunt destroyed a priceless artifact and injured a dozen bystanders. Start with a **Captain's Uniform** (_petty_), a **Ceremonial Sword** (harmless, 60gp), and a **Bouquet of Flowers**.
 5 | You were cursed by a hedgewitch for fooling some innocent village folk. Magic acts unpredictably in your hands (_WIL save to avoid disaster_). If you are the target of magic, the same applies to its wielder.
-6 | Your ""seances"" with the dead were in actuality a ruse involving a cleverly hidden spellbook of Auditory Illusion. Inevitably, a patron discovered your secret. Start with the **Spellbook** and a bundle of scarves. Auditory Illusion: You create illusory sounds that seem to come from a direction of your choice. _Produces random and occasionally inopportune sounds throughout the day_.",1,mountebank,"bandages,character-creation-omens,character-creation-inventory-slots,core-rules-spellbooks","Cairn 2e Backgrounds: Mountebank, CC-BY-SA 4.0"
+6 | Your ""seances"" with the dead were in actuality a ruse involving a cleverly hidden spellbook of Auditory Illusion. Inevitably, a patron discovered your secret. Start with the **Spellbook** and a bundle of scarves. Auditory Illusion: You create illusory sounds that seem to come from a direction of your choice. _Produces random and occasionally inopportune sounds throughout the day_.",1,,mountebank,"bandages,character-creation-omens,character-creation-inventory-slots,core-rules-spellbooks","Cairn 2e Backgrounds: Mountebank, CC-BY-SA 4.0"
 mountebank-table-2,What keepsake could always identify you?,,d6,,"1 | **Royal Crest** | Born into royalty, you chose a different life. The crest grants you access but also alerts your family of your whereabouts. _Petty_.
 2 | **Miracle Oil** | A smelly, slippery concoction. 2 uses.
 3 | **Surgeon's Soap** | A lye and ash block that makes skin temporarily transparent, revealing the anatomy within. 4 uses.
 4 | **Goat Powder** | Derived from the placenta of a baby goat.  Temporarily cures any affliction, but symptoms return within hours.
 5 | **Cursed Sapphire** | Worth **200gp**, it noticeably returns to your pocket shortly after you spend it. You can't seem to get rid of it.
-6 | **Alchemical Tattoo** | A dog, cat, or bird that can leave your body on demand. It follows your commands to the best of its abilities and can pass its injuries (_as STR loss_) back onto you. _Petty_.",2,mountebank,character-creation-inventory-slots,"Cairn 2e Backgrounds: Mountebank, CC-BY-SA 4.0"
+6 | **Alchemical Tattoo** | A dog, cat, or bird that can leave your body on demand. It follows your commands to the best of its abilities and can pass its injuries (_as STR loss_) back onto you. _Petty_.",2,,mountebank,character-creation-inventory-slots,"Cairn 2e Backgrounds: Mountebank, CC-BY-SA 4.0"
 outrider-table-1,What personal code or principle do you uphold?,,d6,,"1 | **No innocent blood**: No bystander will come to harm on your watch. Take a **Steadymade Buckler** (+1 Armor). While holding this shield, you cannot be moved so long as both feet are planted on firm ground.
 2 | **Revere the tools of death**: Weapons are to be respected and maintained. Take a **Wyrmbone Whetstone**. Following a half-hour ritual sharpening, attacks with the weapon are _enhanced_ until STR damage is dealt.
 3 | **To the death, always**: You never back down from a fight, no matter the odds. Take a **Death-Whistle**, 1 charge. Its scream frightens away all who hear it (save WIL or flee). **Recharge**: Capture the final breath of a dying warrior.
 4 | **Revere the dead**: Death is a journey we all take, and it deserves respect. Take an extra **30gp**. You always place two gold pieces on the eyelids of a slain foe. Somehow, you always find the coin.
 5 | **Loyalty to the work**: Your word is your bond. Once you've accepted a job, you see it through to the end. Take a weathered **Tally Stick**. Once a vow is marked onto its face, the stick hardens (d8) until it is complete. The stick will snap in half if the vow is ever broken.
-6 | **Always pay your debts**: You always repay what you owe, whether in coin or in kind. You expect nothing less from all others. Take a **Blacked-Out Ledger**, then roll a second time on the **Bonds** table.",1,outrider,"core-rules-attack-modifiers,core-rules-relics,character-creation-bonds","Cairn 2e Backgrounds: Outrider, CC-BY-SA 4.0"
+6 | **Always pay your debts**: You always repay what you owe, whether in coin or in kind. You expect nothing less from all others. Take a **Blacked-Out Ledger**, then roll a second time on the **Bonds** table.",1,,outrider,"core-rules-attack-modifiers,core-rules-relics,character-creation-bonds","Cairn 2e Backgrounds: Outrider, CC-BY-SA 4.0"
 outrider-table-2,What breed is your horse?,,d6,,"1 | **Heavy Destrier** | A beast built for war, an imposing creature. 8 HP, 1 Armor, hooves (d10+d10), +2 slots.
 2 | **Blacklegged Dandy** | Hardy and adaptable. **Tough** or **Perilous** terrain are one step easier. 6 HP. +4 slots.
 3 | **Rivertooth** | Impressively strong, capable of carrying heavy loads. 4 HP. +6 slots (only +2 slots if carrying two people).
 4 | **Piebald Cob** | Intelligent, it can understand simple commands and even has an instinct for danger. 6 HP. +4 slots.
 5 | **Linden White** | Highly trained and agile, it can perform intricate maneuvers in a time of need (no DEX save to flee). 4 HP. +3 slots.
-6 | **Stray Fogger** | Wild but very fast (even in **Tough** terrain). Rides light. 4 HP. +2 slots.",2,outrider,"setting-seeds-tough,setting-seeds-perilous","Cairn 2e Backgrounds: Outrider, CC-BY-SA 4.0"
+6 | **Stray Fogger** | Wild but very fast (even in **Tough** terrain). Rides light. 4 HP. +2 slots.",2,,outrider,"setting-seeds-tough,setting-seeds-perilous","Cairn 2e Backgrounds: Outrider, CC-BY-SA 4.0"
 prowler-table-1,What did you last hunt?,,d6,,"1 | A _mock firefly_, baiting water carriers with its glowing lure. Take an **Alchemical Limb** (d8, _petty_ when worn) to replace the one it tore off and an **Oil Can** (6 uses). The limb is immune to heat and poison. Needs to be oiled daily.
 2 | An _ice nettle_, trapping and draining sheep. You lost your commission when the fungus you introduced killed half the flock. Take a **Rime Seed** (1 use). It freezes any body of water, no matter the size. Don't eat it.
 3 | A _silver marsh crawler_ that killed someone close to you. You now carry its **Tooth** (_petty_) on a chain around your neck as a warning to others of its kind. _The tooth hums softly when something is stalking you_.
 4 | A malicious _forest spirit_ that poisoned a homestead. You saved a **Heartseed** from the roots of a dying tree. (Plant it to create a new forest.) Also, take **Iron Bracers** (+1 Armor, _bulky_).
 5 | A _hollow wolf_ that had been frightening travelers. You took pity on the half-starved creature and nursed it back to health. Now it is loyal to you unto death. It is also a great tunneler. 5 HP, 11 STR, 13 DEX, 8 WIL, teeth (d6).
-6 | An _azure warbler_. The gametes attract a sizeable profit, if properly extracted. You succeeded but left its nest to the wolves. Take a **Paring Knife** (d6), **an extra 20gp**, and a pang of regret. | ",1,prowler,"character-creation-inventory-slots,oil-can","Cairn 2e Backgrounds: Prowler, CC-BY-SA 4.0"
+6 | An _azure warbler_. The gametes attract a sizeable profit, if properly extracted. You succeeded but left its nest to the wolves. Take a **Paring Knife** (d6), **an extra 20gp**, and a pang of regret. | ",1,,prowler,"character-creation-inventory-slots,oil-can","Cairn 2e Backgrounds: Prowler, CC-BY-SA 4.0"
 prowler-table-2,What tool is always in your pack?,,d6,,"1 | **Fermented Spirits** | Keeps you warm at the best of times and as an explosive at the worst. 3 Uses.
 2 | **Trail Shaker** | A noisy instrument that reveals nearby trails, even when deeply hidden.
 3 | **Drowse Balm** | A wax bar. If boiled in water, the steam acts as a soporific agent.
 4 | **Spike and Cord** | For traversing difficult terrain or for creating makeshift traps and structures.
 5 | **Iron Rattle** | A noisemaker for distracting or scaring your quarry. Sounds convincingly like a snake.
-6 | **Hardening Glue** | Makes any flat material (cloth, leather, sand) as hard as stone. Expensive (20gp a bottle, 3 uses).",2,prowler,,"Cairn 2e Backgrounds: Prowler, CC-BY-SA 4.0"
+6 | **Hardening Glue** | Makes any flat material (cloth, leather, sand) as hard as stone. Expensive (20gp a bottle, 3 uses).",2,,prowler,,"Cairn 2e Backgrounds: Prowler, CC-BY-SA 4.0"
 rill-runner-table-1,What songs are you best known for?,,d6,,"1 | _The Tinker's Two-Step_. A humorous fairy tale about a gift-giving traveler. Start with a **Reed Whistle**. Anyone in earshot must pass a WIL save to perform an act of violence.
 2 | _The Sylph and Her Lover_. A bawdy tale of lost love. Start with a **Breeze Knot** (3 charges). Creates a strong breeze. **Recharge**: Tie it to a mast during a storm.
 3 | _Harper's Devotion_. A sad, short tale about a musician that falls in love with a star. Start with a **Celestial Lute**. Reveals the constellations above, no matter the weather.
 4 | _The Reed Fisher_. A celebrated song about a massive carp that always seems to get away. Begin with a spool of **River Twine** (5 uses). Each dip into the river guarantees a catch, though it might not be pleasant.
 5 | _Song of the Silver Stream_. A wordless lullaby that mimics flowing water. Take a **Stone Flute** that can calm almost any river.
-6 | _The Thrush and the Meadow_. A moody tale told in alternating chorus. Start with a **Feather Quill** (1 use, _petty_). A map drawn with this quill reveals the most expedient course between any two points.",1,rill-runner,"core-rules-relics,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
+6 | _The Thrush and the Meadow_. A moody tale told in alternating chorus. Start with a **Feather Quill** (1 use, _petty_). A map drawn with this quill reveals the most expedient course between any two points.",1,,rill-runner,"core-rules-relics,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
 rill-runner-table-2,What pays your way across the land?,,d6,,"1 | **Performance** | Performing at taverns always yields both room and board. Sometimes you even get tips! Start with an extra **10gp**.
 2 | **Bodyguard** | You are a protector for those afraid to travel alone. Start with a **Rapier** (d8).
 3 | **Wares** | You buy low and sell high, always making just enough to get by. Take a **single item** worth **20gp** (or less) from the gear table.
 4 | **Transport** | You deliver ""delicate"" packages throughout the lands. You have at least one contact in any major town.
 5 | **Sailor's Friend** | Over troubled waters and dangerous winds, you always make sure a ship reaches its destination. For you, passage is always free.
-6 | **Guide** | You shepherd caravans and travelers across water-soaked lands. Start a **map** (_petty_) relevant to your next journey.",2,rill-runner,"marketplace-gear,bodyguard,marketplace-transport,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
+6 | **Guide** | You shepherd caravans and travelers across water-soaked lands. Start a **map** (_petty_) relevant to your next journey.",2,,rill-runner,"marketplace-gear,bodyguard,marketplace-transport,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
 scrivener-table-1,What work did you keep for yourself?,,d6,,"1 | **The Wild Tongue**. A bundle of leather-bound scrolls. A seminal work, cataloging the hidden languages of beasts and how to understand them.
 2 | **The Silent Symphony**. Bound in fluorescent wrap. Very rare, it chronicles the subtle signs used by those employing invisibility magic.
 3 | **A Treatise on the Abyss**. A nondescript black book. An in-depth, largely theoretical text describing the **Roots**, as well as information about the location of a nearby **Gate**.
 4 | **The Star Waltz**. A comet-shaped clasp bound in a fine leather cover. Detailed astronomical charts, celestial movements, and stellar festivals. Highly valued (100gp) for its usefulness to travelers.
 5 | **The Cathedral and the Canopy**. Large-leaf binding over vellum. Nominally a children's storybook, the margins detail information about traveling, eating, and sleeping in the cloud forests.
-6 | **Garden of Glass**. Bound in the cover of another book. A heretical work, it describes the materials, procedures, and optimal locations required to open a **Gate**.",1,scrivener,gate,"Cairn 2e Backgrounds: Scrivener, CC-BY-SA 4.0"
+6 | **Garden of Glass**. Bound in the cover of another book. A heretical work, it describes the materials, procedures, and optimal locations required to open a **Gate**.",1,,scrivener,gate,"Cairn 2e Backgrounds: Scrivener, CC-BY-SA 4.0"
 scrivener-table-2,How do you transcribe sensitive information?,,d6,,"1 | **Fib Ink** | Glows when used to write true statements but fades if used to write false ones.
 2 | **Cipher Stone** | A pair of sharp black stones. Each one decrypts any message written by the other.
 3 | **Everquill** | A quill that writes on any surface. You still need ink. _Petty_.
 4 | **Whisper Vial** | Whisper a message into the vial, and it will play it back to whoever opens it next.
 5 | **Sanguine Lens** | Extracts blood from a target without their knowledge. A stolen drop placed on the eye reveals memories from the past day.
-6 | **Echo Leaf** | A blank parchment. Whomever unfurls it sees their actions of the day slowly revealed in a tight scrawl. _Petty_.",2,scrivener,character-creation-inventory-slots,"Cairn 2e Backgrounds: Scrivener, CC-BY-SA 4.0"
+6 | **Echo Leaf** | A blank parchment. Whomever unfurls it sees their actions of the day slowly revealed in a tight scrawl. _Petty_.",2,,scrivener,character-creation-inventory-slots,"Cairn 2e Backgrounds: Scrivener, CC-BY-SA 4.0"

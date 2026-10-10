@@ -136,7 +136,7 @@ function nameAndQualities(label) {
 
 const MODELS = {
   rule: ['name', 'description', 'category', 'section', 'part_of', 'refers_to', 'source'],
-  rolltable: ['name', 'description', 'die', 'columns', 'entries', 'section', 'part_of', 'refers_to', 'source'],
+  rolltable: ['name', 'description', 'die', 'columns', 'entries', 'section', 'part_of', 'about', 'refers_to', 'source'],
   itemtype: ['name', 'description', 'kind', 'damage', 'armor', 'slots', 'uses', 'charges', 'properties', 'recharge', 'price', 'spell', 'listed_in', 'refers_to', 'source'],
   spellbook: ['name', 'description', 'quirk', 'roll', 'listed_in', 'refers_to', 'source'],
   hireling: ['name', 'description', 'wage', 'listed_in', 'source'],
@@ -172,11 +172,12 @@ function addRule(page, key, fields, parent, mentions = fields.description) {
   return e;
 }
 
+// A table is a component of a rule (P148), or is about a background (P129).
 function addRollTable(key, name, parsed, parent, section, source, mentions) {
   const entries = parsed.rows.map(r => r.join(' | ')).join('\n');
   const e = add('rolltable', key, { name, die: parsed.die, columns: parsed.columns.join(' | '), entries, section, source }, mentions);
   e.page = parent.page;
-  link(e, 'part_of', parent);
+  link(e, parent.model === 'rule' ? 'part_of' : 'about', parent);
   return e;
 }
 
@@ -526,7 +527,7 @@ for (const model of Object.keys(all)) {
       if (target) hits.push(target);
     }
     for (const t of hits) {
-      if (t === e || e.links.part_of?.has(t) || e.links.listed_in?.has(t)) continue;
+      if (t === e || e.links.part_of?.has(t) || e.links.about?.has(t) || e.links.listed_in?.has(t)) continue;
       link(e, FIELD_FOR[model]?.[t.model] ?? 'refers_to', t);
     }
   }

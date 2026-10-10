@@ -30,7 +30,8 @@ anything that ships it, including this site.
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
 | `layers/<key>/layer.json` | Optional: layer settings; today only a password `gate` |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
-| `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin into the site root |
+| `ontology/` | CIDOC-CRM 7.1.3 RDFS (FORTH-ICS, CC BY 4.0), `extensions.csv` (terms from outside CRM, each tied to CRM), `prefixes.csv` |
+| `explorer/` | Browser explorer source (HTML, CSS, JS); bundled with Alizarin and d3-force into the site root |
 | `src/` | Build script, rules importer, CSV helpers, HTML and markdown renderers, shared ORM reader |
 
 ## Ontology
@@ -72,6 +73,10 @@ Typed relationships:
 | Document | Refers to | P67 refers to | most instance and type models |
 | Relic | Carries | P128 carries | Document (a physical copy of it) |
 | Event | Kind; Involved | P2 has type (Event Kind); P12 occurred in the presence of | Relic, Document, Creature |
+| Event | Session, When; After | P4 has time-span; P183i starts after the end of | (E52 Time-Span); Event |
+| Background, Monster Type, Item Type, Spellbook | Refers to (group) | P67i is referred to by → E33 Linguistic Object: P67 refers to | any rules model |
+| Roll Table | About | P129 is about | Background, Campaign |
+| Route | Hazards | P53i is former or current location of | Creature |
 
 **PC.** Character Creation defines a PC, so General defines the model: background, age, current
 and maximum STR/DEX/WIL and HP, Armor, gold, Fatigue, Deprived, the eight traits, bond, omen,
@@ -91,7 +96,17 @@ Tie Kinds match terms in the [RELATIONSHIP vocabulary](http://purl.org/vocab/rel
 (`rel:mentorOf` is the property from the other person to this one). Kinds without a term
 (Relative) are left unmatched.
 
-**Other ontologies.** Prefixes in model CSVs expand through `PREFIXES` in `src/build.mjs`
+**Checked against CRM.** The build loads the CIDOC-CRM 7.1.3 RDFS and checks every model: its
+class exists, each field's class and property exist, the property's domain admits the class the
+field hangs from, and its range admits the field's class and every model it links to. Anything
+outside CRM must be declared in `ontology/extensions.csv`: a property with its domain and range,
+a class with its CRM parent. Without a parent the build stops, because nothing could place it.
+The check caught real mistakes, now fixed: types "referring to" rules (P67 is only for
+propositions; a type's text, an E33 Linguistic Object, now does the referring), tables as
+components of backgrounds (now P129 is about), route hazards as references (now P53i is
+location of), and the hex field's P87/E44, which CRM 7 removed.
+
+**Other ontologies.** Prefixes in model CSVs expand through `ontology/prefixes.csv`
 (`cairn:`, `rel:`, `skos:`; unprefixed names are CRM). A vocabulary row's `match` column maps a
 concept to another ontology's term (as skos:exactMatch). Alizarin's collections CSV has no column
 for this, so the build keeps the matches and publishes them in each view's manifest; the
@@ -149,6 +164,35 @@ files are on the site like any other view's. `--remove` takes the gate off.
 Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
 models in `layers/<key>/model/`, and Alizarin's `LayeredGraph` supports overlays, but the build does
 not create overlay graphs yet.
+
+## The interface: lenses from the ontology
+
+The explorer divides each view into **lenses**, and takes them from CIDOC-CRM rather than from a
+list of models. Each layout it can draw is pinned to the CRM property it is built on
+(`src/lenses.mjs`); the lens's class is that property's domain or range in the RDFS, and its name
+is that class's CRM label:
+
+| Lens | Layout | Built on | Class (from the RDFS) |
+|---|---|---|---|
+| Actor | network of links between actors | P107 has current or former member | range: E39 Actor |
+| Place | "within" tree, plus a graph of connections | P89 falls within | domain: E53 Place |
+| Temporal Entity | timeline: by session, then by CRM "before" relations (P176, P182, P183) | P4 has time-span | domain: E2 Temporal Entity |
+| Physical Thing | cards grouped by the place or actor each links to | P52 has current owner | domain: E18 Physical Thing |
+| Propositional Object | whole/part tree | P148 has component | domain: E89 Propositional Object |
+| Type | broader/narrower tree, with how much of the view uses each type | P127 has broader term | domain: E55 Type |
+
+A model joins the lens whose class is its nearest ancestor in the CRM class hierarchy, so a
+Person is an Actor before a Physical Thing. Nothing maps a model to a lens by hand: a new model in
+any layer finds its lens from its class, and a class from another ontology finds it through the
+CRM parent it must declare. (Tested: a campaign-only Ship, E22, appears under Physical Thing; a
+foreign `ex:Familiar` is rejected until declared under E20, then appears there too.) The layouts
+work from links, lens membership and those properties alone: an entry that only joins two places
+is drawn as the line between them, whatever its model.
+
+The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
+entries are this layer's own, inherited, or General, and the layer audit of what this layer
+changes. Detail pages are as before, with the lens as a breadcrumb. The plain pages group each
+view's index by the same lenses.
 
 ## Rules data (`rules/`)
 
@@ -261,7 +305,8 @@ too: build and upload `dist/`.
   views too. Do not put GM-only secrets in a world you publish.
 - **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
 - **Licences.** Rules text in `rules/` is adapted from Cairn (CC BY-SA 4.0), so the site credits it
-  and the adapted data is share-alike. Alizarin is AGPL-3.0. Add your own licence for `layers/`.
+  and the adapted data is share-alike. Alizarin is AGPL-3.0. The CIDOC-CRM RDFS (published as
+  `data/ontology.json`) is CC BY 4.0 and credited in the footer. d3-force is ISC. Add your own licence for `layers/`.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
 ## Campaigns in this repository

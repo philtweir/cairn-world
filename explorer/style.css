@@ -1,6 +1,6 @@
-:root{--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
+:root{--c0:#8a3b12;--c1:#3d5a80;--c2:#2f7d4f;--c3:#8e5aa3;--c4:#a8780f;--c5:#257f7f;--c6:#a33d5c;--c7:#5f6b3a;--bg:#fbfaf7;--panel:#f3f0e8;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12;--accent-bg:#f1e1d6;--node:#8a3b12;--node-type:#3d5a80}
 [hidden]{display:none !important}
-@media (prefers-color-scheme:dark){:root{--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
+@media (prefers-color-scheme:dark){:root{--c0:#e0925a;--c1:#8fb3dd;--c2:#7cc79a;--c3:#c39bd6;--c4:#e2bd5a;--c5:#6fcfcf;--c6:#e08aa3;--c7:#b5c27a;--bg:#171512;--panel:#1f1c18;--fg:#e8e3d6;--muted:#9a9384;--line:#38342c;--accent:#e0925a;--accent-bg:#3a2a1f;--node:#e0925a;--node-type:#8fb3dd}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,serif}
 header{display:flex;align-items:center;gap:1rem;padding:.6rem 1rem;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;position:sticky;top:0;background:var(--bg);z-index:2}
@@ -10,7 +10,7 @@ header{display:flex;align-items:center;gap:1rem;padding:.6rem 1rem;border-bottom
 #q{flex:1;min-width:0;padding:.45rem .7rem;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg);font:inherit;font-size:15px}
 #status{padding:2rem 1rem;color:var(--muted);font-family:system-ui,sans-serif}
 #status.error{color:#b3261e}
-#app{display:grid;grid-template-columns:20rem 1fr;min-height:calc(100vh - 3.4rem)}
+#app{display:grid;grid-template-columns:20rem 1fr;grid-template-rows:auto 1fr;min-height:calc(100vh - 3.4rem)}
 #side{border-right:1px solid var(--line);padding:.8rem;overflow:auto;max-height:calc(100vh - 3.4rem);position:sticky;top:3.4rem;font-family:system-ui,sans-serif}
 #chips{display:flex;flex-wrap:wrap;gap:.35rem}
 .chip{font:13px system-ui,sans-serif;padding:.2rem .6rem;border:1px solid var(--line);border-radius:999px;background:none;color:var(--fg);cursor:pointer}
@@ -67,6 +67,57 @@ th,td{text-align:left;vertical-align:top;padding:.3rem .6rem;border-bottom:1px s
 th,caption{font:600 13px system-ui,sans-serif;color:var(--muted)}
 caption{text-align:left;padding:.3rem .6rem}
 td:first-child{white-space:nowrap;font:600 14px system-ui,sans-serif}
+#lenses{grid-column:1/-1;display:flex;gap:.25rem;overflow-x:auto;padding:.4rem 1rem;border-bottom:1px solid var(--line);font:14px system-ui,sans-serif;scrollbar-width:thin}
+#lenses a{white-space:nowrap;padding:.3rem .7rem;border-radius:6px;text-decoration:none;color:var(--fg)}
+#lenses a small{color:var(--muted);margin-left:.35rem}
+#lenses a:hover{background:var(--panel)}
+#lenses a[aria-current=page]{background:var(--accent-bg);color:var(--accent)}
+.scope-label{font:600 12px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem}
+.kind a{color:inherit}
+.scope{color:var(--muted);font-style:italic}
+.note{font:13px system-ui,sans-serif;color:var(--muted)}
+.lenscards{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:.8rem;margin:1.2rem 0}
+.lenscard{display:block;padding:.8rem 1rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-decoration:none;color:var(--fg)}
+.lenscard:hover{border-color:var(--accent)}
+.lenscard h3{margin:.1rem 0 .3rem;color:var(--accent)}
+.lenscard p{margin:.2rem 0;font:14px system-ui,sans-serif}
+.lenscard .counts{color:var(--muted);font-size:13px}
+svg.lensgraph{max-width:none;width:100%;max-height:78vh}
+.lensgraph .edge{stroke:var(--muted);stroke-width:1.3;opacity:.7}
+.lensgraph .edge.part{stroke-dasharray:4 3}
+.lensgraph .connector .edge{stroke:var(--accent);stroke-width:2.2;opacity:.85}
+.lensgraph .connector .hit{stroke:transparent;stroke-width:12;cursor:pointer}
+.lensgraph .connector:hover .edge,.lensgraph .connector:focus-visible .edge{stroke-width:3.5}
+.lensgraph .node{cursor:pointer}
+.lensgraph .node circle{stroke:var(--bg);stroke-width:2}
+.lensgraph .node.general circle{fill:var(--bg)!important;stroke-width:2.5}
+.lensgraph .node:hover circle,.lensgraph .node:focus-visible circle{stroke:var(--fg)}
+.lensgraph text{font:11px system-ui,sans-serif;fill:var(--fg);paint-order:stroke;stroke:var(--panel);stroke-width:3px}
+.lensgraph .c0 circle{fill:var(--c0)}.lensgraph .node.general.c0 circle{stroke:var(--c0)}li.c0::marker{color:var(--c0)}.key .c0{background:var(--c0)}
+.lensgraph .c1 circle{fill:var(--c1)}.lensgraph .node.general.c1 circle{stroke:var(--c1)}li.c1::marker{color:var(--c1)}.key .c1{background:var(--c1)}
+.lensgraph .c2 circle{fill:var(--c2)}.lensgraph .node.general.c2 circle{stroke:var(--c2)}li.c2::marker{color:var(--c2)}.key .c2{background:var(--c2)}
+.lensgraph .c3 circle{fill:var(--c3)}.lensgraph .node.general.c3 circle{stroke:var(--c3)}li.c3::marker{color:var(--c3)}.key .c3{background:var(--c3)}
+.lensgraph .c4 circle{fill:var(--c4)}.lensgraph .node.general.c4 circle{stroke:var(--c4)}li.c4::marker{color:var(--c4)}.key .c4{background:var(--c4)}
+.lensgraph .c5 circle{fill:var(--c5)}.lensgraph .node.general.c5 circle{stroke:var(--c5)}li.c5::marker{color:var(--c5)}.key .c5{background:var(--c5)}
+.lensgraph .c6 circle{fill:var(--c6)}.lensgraph .node.general.c6 circle{stroke:var(--c6)}li.c6::marker{color:var(--c6)}.key .c6{background:var(--c6)}
+.lensgraph .c7 circle{fill:var(--c7)}.lensgraph .node.general.c7 circle{stroke:var(--c7)}li.c7::marker{color:var(--c7)}.key .c7{background:var(--c7)}
+.legend .key{display:inline-flex;align-items:center;gap:.3rem;margin-right:.9rem}
+.legend .key i{display:inline-block;width:.7rem;height:.7rem;border-radius:50%}
+.timeline{list-style:none;padding:0;margin:1rem 0;border-left:2px solid var(--line)}
+.timeline>li{padding:0 0 1rem 1rem;position:relative}
+.timeline>li::before{content:"";position:absolute;left:-.4rem;top:.35rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--accent)}
+.timeline .when{font:600 13px system-ui,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.timeline ul{padding-left:1.1rem;margin:.3rem 0}
+.timeline .gist{font-size:15px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.8rem;margin:1rem 0}
+.card{border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;background:var(--panel)}
+.card h3{font:600 14px system-ui,sans-serif;margin:.2rem 0 .4rem}
+.card ul{padding-left:1.1rem;margin:0}
+.tree ul{padding-left:1.1rem;margin:.2rem 0}
+.tree li{margin:.15rem 0}
+.tree summary{cursor:pointer}
+.tree h3{font:600 14px system-ui,sans-serif;color:var(--muted);margin:1rem 0 .3rem}
+.uses{font:12px system-ui,sans-serif;color:var(--accent);margin-left:.5rem}
 body>footer{padding:1rem;border-top:1px solid var(--line);font:13px system-ui,sans-serif;color:var(--muted)}
 @media (max-width:760px){
   #app{grid-template-columns:1fr}
@@ -74,6 +125,7 @@ body>footer{padding:1rem;border-top:1px solid var(--line);font:13px system-ui,sa
   body[data-view=detail] #side{display:none}
   body[data-view=list] #detail{display:none}
   .back{display:inline-block}
+  #lenses{padding:.4rem .5rem}
   dl{grid-template-columns:1fr}dd{margin-bottom:.4rem}
   #detail{padding:1rem}
   .plain{display:none}

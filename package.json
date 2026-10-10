@@ -15,7 +15,8 @@
     "set-password": "node src/set-password.mjs"
   },
   "dependencies": {
-    "alizarin": "2.0.0-alpha.139"
+    "alizarin": "2.0.0-alpha.139",
+    "d3-force": "3.0.0"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

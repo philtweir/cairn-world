@@ -5,11 +5,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { blocks, inline, tableRows, toHtml } from './md.mjs';
 import { backlinks as reverseLinks } from './world-read.mjs';
+import { assignLenses } from './lenses.mjs';
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const ATTRIBUTION = 'Rules text adapted from <a href="https://cairnrpg.com">Cairn</a> by Yochai Gal, ' +
-  '<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Unofficial fan project.';
+  '<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Unofficial fan project. ' +
+  'Ontology: <a href="https://cidoc-crm.org/">CIDOC CRM</a> 7.1.3 (RDFS by FORTH-ICS, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>).';
 
 const CSS = `
 :root{--bg:#fbfaf7;--fg:#1d1b17;--muted:#6b665c;--line:#d9d4c7;--accent:#8a3b12}
@@ -26,7 +28,8 @@ dt{font:14px system-ui,sans-serif;color:var(--muted)}
 dt a{color:inherit;text-decoration-style:dotted}
 ul.group{margin:0;padding-left:1.1rem}
 dd{margin:0}
-h2{font:600 15px system-ui,sans-serif;color:var(--muted);margin-top:2rem}
+h2{font:600 17px system-ui,sans-serif;margin-top:2.2rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+h3{font:600 15px system-ui,sans-serif;color:var(--muted);margin:1.2rem 0 .3rem}
 ul,ol{padding-left:1.2rem}
 blockquote{margin:1rem 0;padding-left:1rem;border-left:3px solid var(--line);color:var(--muted);font-style:italic}
 .wrap{overflow-x:auto;margin:1.2rem 0}
@@ -69,7 +72,7 @@ export function renderViewIndex({ viewsMeta, outDir }) {
     `<h1>Cairn World</h1><p>Pick a universe or campaign. Each shows its own entries on top of the ones it builds on.</p><ul>${items}</ul>`, 0));
 }
 
-export function renderSite({ view, viewsMeta, models, entities, outDir }) {
+export function renderSite({ view, viewsMeta, models, entities, outDir, ontology }) {
   const viewName = viewsMeta.views.find(v => v.key === view)?.name ?? view;
   const byId = new Map(entities.map(e => [e.id, e]));
   const titleOf = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
@@ -102,10 +105,15 @@ export function renderSite({ view, viewsMeta, models, entities, outDir }) {
   };
   const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die']);
 
-  // Index
-  const sections = models.map(m => {
-    const items = sorted(entities.filter(e => e.model === m.alias));
-    return `<h2 id="${m.alias}">${esc(m.name)} (${items.length})</h2><ul>${items.map(e => `<li>${link(e, 0)}</li>`).join('')}</ul>`;
+  // Index: grouped by lens (src/lenses.mjs), the same CIDOC-CRM classes the explorer uses.
+  const { lenses } = assignLenses(ontology, models.map(m => ({ alias: m.alias, ontology: m.ontology })));
+  const sections = lenses.map(l => {
+    const parts = l.models.map(alias => models.find(m => m.alias === alias)).map(m => {
+      const items = sorted(entities.filter(e => e.model === m.alias));
+      return items.length ? `<h3 id="${m.alias}">${esc(m.name)} (${items.length})</h3><ul>${items.map(e => `<li>${link(e, 0)}</li>`).join('')}</ul>` : '';
+    }).join('');
+    const code = l.class.replace(/^.*\//, '').replace(/_/g, ' ');
+    return parts ? `<h2>${esc(l.label)} <span class="kind">${esc(code)}</span></h2>${parts}` : '';
   }).join('');
   fs.writeFileSync(path.join(outDir, 'index.html'),
     page(`${viewName} · Cairn World`, nav(0), `<h1>${esc(viewName)}</h1><p class="kind">${entities.length} entries</p><p><a href="../../index.html#/${esc(view)}/">Open the interactive explorer →</a></p>${sections}`, 0));

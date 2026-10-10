@@ -1,7 +1,7 @@
-ResourceID,name,description,kind,session,place,participants,involved
-temple-built,The Temple of St. Rylan is built,"About 400 years ago, in the style of the IIIrd Emperor.",Construction,,temple-of-st-rylan,priests-of-st-rylan,
-hann-takes-two-spheres,Archmage Hann takes two spheres,33 years ago. He leaves a note promising their return and seals the Thing in the tavern cellar. The Empire's decline starts about now.,Transfer of Custody,,temple-of-st-rylan,archmage-hann,"the-missing-spheres,hann-note-paper,the-thing"
-marcos-research,Marcos researches the spheres,"Over years, Marcos finds the clues proving the spheres exist, and works out the paths to the temple. He writes the letter and annotates the map.",Research,,,marcos,"marcos-letter,marcos-map"
-marcos-dies,The death of Marcos,"Too old, as he says himself, to walk the paths he found.",Death,,,marcos,
-reading-of-the-will,The reading of Marcos's will,Each PC receives the same letter and annotated map.,Transfer of Custody,,,"bryn,gann,akshara","marcos-will,bryn-letter-and-map,gann-letter-and-map,akshara-letter-and-map"
-autumn-equinox,The Autumn Equinox,The temple doors open at dawn (6am) and close 24 hours later. Two days after the party sets out from the fork.,Ritual,,temple-of-st-rylan,
+ResourceID,name,description,kind,session,when,place,participants,involved,after
+temple-built,The Temple of St. Rylan is built,"About 400 years ago, in the style of the IIIrd Emperor.",Construction,,About 400 years ago,temple-of-st-rylan,priests-of-st-rylan,,
+hann-takes-two-spheres,Archmage Hann takes two spheres,33 years ago. He leaves a note promising their return and seals the Thing in the tavern cellar. The Empire's decline starts about now.,Transfer of Custody,,33 years ago,temple-of-st-rylan,archmage-hann,"the-missing-spheres,hann-note-paper,the-thing",temple-built
+marcos-research,Marcos researches the spheres,"Over years, Marcos finds the clues proving the spheres exist, and works out the paths to the temple. He writes the letter and annotates the map.",Research,,Before his death,,marcos,"marcos-letter,marcos-map",temple-built
+marcos-dies,The death of Marcos,"Too old, as he says himself, to walk the paths he found.",Death,,Shortly before play,,marcos,,marcos-research
+reading-of-the-will,The reading of Marcos's will,Each PC receives the same letter and annotated map.,Transfer of Custody,,The start of play,,"bryn,gann,akshara","marcos-will,bryn-letter-and-map,gann-letter-and-map,akshara-letter-and-map",marcos-dies
+autumn-equinox,The Autumn Equinox,The temple doors open at dawn (6am) and close 24 hours later. Two days after the party sets out from the fork.,Ritual,,Two days after setting out,temple-of-st-rylan,,,reading-of-the-will

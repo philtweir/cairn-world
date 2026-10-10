@@ -5,6 +5,7 @@ die,Die,string,1,E62_String,P3_has_note,,,
 columns,Columns,string,1,E62_String,P3_has_note,,,
 entries,Entries,string,1,E62_String,P3_has_note,,,
 section,Section,number,1,E60_Number,P3_has_note,,,
-part_of,Part of,resource-instance-list,1,E89_Propositional_Object,P148i_is_component_of,,,rule|background|campaign
+part_of,Part of,resource-instance-list,1,E89_Propositional_Object,P148i_is_component_of,,,rule
+about,About,resource-instance-list,1,E1_CRM_Entity,P129_is_about,,,background|campaign
 refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,rule|rolltable|itemtype|spellbook|monstertype|monstergroup|background|hireling
 source,Source,string,1,E62_String,P3_has_note,,,

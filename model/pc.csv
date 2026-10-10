@@ -1,6 +1,6 @@
 alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
 name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
-player,Player,string,1,E41_Appellation,cairn:played_by,,,,
+player,Player,string,1,E62_String,cairn:played_by,,,,
 description,Description,string,1,E62_String,P3_has_note,,,,
 background,Background,resource-instance-list,1,E55_Type,P2_has_type,,,background,character-creation-backgrounds
 age,Age,number,1,E54_Dimension,P43_has_dimension,,,,character-creation-attributes-hit-protection-and-traits

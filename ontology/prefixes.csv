@@ -1,0 +1,4 @@
+prefix,namespace
+cairn,http://cairn-world.example/ns/
+rel,http://purl.org/vocab/relationship/
+skos,http://www.w3.org/2004/02/skos/core#

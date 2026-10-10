@@ -30,7 +30,7 @@ async function readField(entity, node) {
 }
 
 const empty = v => v === null || (Array.isArray(v) && !v.length);
-const fieldOf = (node, value) => ({ alias: node.alias, label: node.name, datatype: node.datatype, targets: node.targets, collection: node.collection ?? null, rule: node.rule ?? null, value });
+const fieldOf = (node, value) => ({ alias: node.alias, label: node.name, datatype: node.datatype, targets: node.targets, collection: node.collection ?? null, rule: node.rule ?? null, property: node.property ?? null, value });
 
 async function readGroup(entity, node, children) {
   const v = await entity[node.alias];
@@ -78,9 +78,11 @@ export function links(e) {
       for (const item of f.value ?? []) {
         const words = item.fields.filter(c => !c.targets.length && !empty(c.value) && c.datatype !== 'string').map(c => [].concat(c.value).join(', '));
         const label = words.length ? `${f.label}: ${words.join(', ')}` : f.label;
-        for (const c of item.fields) if (c.targets.length && c.value) for (const id of c.value) out.push({ id, label: words.length ? label : `${f.label}: ${c.label}` });
+        // A group with a single field (a text that refers to things) is labelled by the group.
+        const plain = c => (item.fields.length === 1 ? f.label : `${f.label}: ${c.label}`);
+        for (const c of item.fields) if (c.targets.length && c.value) for (const id of c.value) out.push({ id, label: words.length ? label : plain(c), property: c.property });
       }
-    } else if (f.targets.length && f.value) for (const id of f.value) out.push({ id, label: f.label });
+    } else if (f.targets.length && f.value) for (const id of f.value) out.push({ id, label: f.label, property: f.property });
   }
   return out;
 }
