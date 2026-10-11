@@ -11,20 +11,20 @@
 import * as duckdb from '@duckdb/duckdb-wasm';
 import initCompiler, { Compiler } from 'ros-madair';
 
-// assets: where the site keeps duckdb/ and the compiler's wasm; substrate: the view's substrate
-// directory (with its manifest.json); graphs: the view's Arches model documents (JSON text);
-// suffix: the build's ?v= cache key.
-export async function openEngine({ assets, substrate, graphs, suffix = '' }) {
+// duckdb: the directory of duckdb-wasm's files; compiler: the compiler's WASM; substrate: the view's
+// substrate directory (with its manifest.json); graphs: the view's Arches model documents (JSON
+// text); suffix: the build's ?v= cache key, for the data only.
+export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, substrate, graphs, suffix = '' }) {
   const [manifest] = await Promise.all([
     fetch(`${substrate}manifest.json${suffix}`).then(r => { if (!r.ok) throw new Error(`substrate manifest: HTTP ${r.status}`); return r.json(); }),
-    initCompiler({ module_or_path: `${assets}ros_madair_wasm_bg.wasm${suffix}` }),
+    initCompiler({ module_or_path: compilerWasm }),
   ]);
   const compiler = new Compiler(`[${graphs.join(',')}]`);
 
   // The exception-handling build only: every current browser has it.
-  const worker = new Worker(`${assets}duckdb/duckdb-browser-eh.worker.js${suffix}`);
+  const worker = new Worker(`${duckdbDir}duckdb-browser-eh.worker.js`);
   const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
-  await db.instantiate(`${assets}duckdb/duckdb-eh.wasm${suffix}`);
+  await db.instantiate(`${duckdbDir}duckdb-eh.wasm`);
   const conn = await db.connect();
   const files = manifest.artifacts.map(a => a.path).filter(p => p.endsWith('.parquet'));
   for (const f of files) await db.registerFileURL(f, new URL(`${f}${suffix}`, new URL(substrate, location.href)).href, duckdb.DuckDBDataProtocol.HTTP, false);

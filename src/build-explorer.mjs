@@ -2,6 +2,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { build } from 'esbuild';
 
 // Icons: Lucide (lucide-static, ISC), monochrome line icons that take the text colour. Lens icons
@@ -25,6 +26,27 @@ function buildIconSprite(root, dist) {
 export async function buildExplorer(root, dist, version) {
   const out = dist;
   fs.mkdirSync(out, { recursive: true });
+  // The query engine for filters (explorer/query-engine.mjs), a bundle of its own that the
+  // explorer imports only when a filter is first used, with the Rós Madair compiler's WASM and
+  // duckdb-wasm's (the exception-handling build, and its worker). Unlike the data, these are named
+  // by their own versions (the bundle by a hash of itself), so a browser keeps them from one deploy
+  // to the next until they change: a new world does not mean fetching 34 MB of DuckDB again.
+  const pkg = name => JSON.parse(fs.readFileSync(path.join(root, 'node_modules', name, 'package.json'), 'utf8')).version;
+  const engineCode = (await build({
+    entryPoints: [path.join(root, 'explorer/query-engine.mjs')],
+    write: false, bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true, logLevel: 'warning',
+  })).outputFiles[0].contents;
+  const engine = {
+    js: `query-engine.${crypto.createHash('sha1').update(engineCode).digest('hex').slice(0, 10)}.js`,
+    duckdb: `duckdb/${pkg('@duckdb/duckdb-wasm')}/`,
+    compiler: `ros-madair/${pkg('ros-madair')}/ros_madair_wasm_bg.wasm`,
+  };
+  fs.writeFileSync(path.join(out, engine.js), engineCode);
+  fs.mkdirSync(path.join(out, engine.duckdb), { recursive: true });
+  for (const f of ['duckdb-eh.wasm', 'duckdb-browser-eh.worker.js']) fs.copyFileSync(path.join(root, 'node_modules/@duckdb/duckdb-wasm/dist', f), path.join(out, engine.duckdb, f));
+  fs.mkdirSync(path.dirname(path.join(out, engine.compiler)), { recursive: true });
+  fs.copyFileSync(path.join(root, 'node_modules/ros-madair/ros_madair_wasm_bg.wasm'), path.join(out, engine.compiler));
+
   await build({
     entryPoints: [path.join(root, 'explorer/app.js')],
     outfile: path.join(out, 'app.js'),
@@ -35,19 +57,9 @@ export async function buildExplorer(root, dist, version) {
     minify: true,
     // Alizarin's Node-only paths are dynamic and never taken in a browser.
     external: ['fs', 'path', 'url', 'node:*'],
+    define: { __ENGINE__: JSON.stringify(engine) },
     logLevel: 'warning',
   });
-  // The query engine for filters (explorer/query-engine.mjs), a bundle of its own that the
-  // explorer imports only when a filter is first used, with the Rós Madair compiler's WASM and
-  // duckdb-wasm's (the exception-handling build, and its worker).
-  await build({
-    entryPoints: [path.join(root, 'explorer/query-engine.mjs')],
-    outfile: path.join(out, 'query-engine.js'),
-    bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true, logLevel: 'warning',
-  });
-  fs.copyFileSync(path.join(root, 'node_modules/ros-madair/ros_madair_wasm_bg.wasm'), path.join(out, 'ros_madair_wasm_bg.wasm'));
-  fs.mkdirSync(path.join(out, 'duckdb'), { recursive: true });
-  for (const f of ['duckdb-eh.wasm', 'duckdb-browser-eh.worker.js']) fs.copyFileSync(path.join(root, 'node_modules/@duckdb/duckdb-wasm/dist', f), path.join(out, 'duckdb', f));
   // Alizarin resolves its WASM relative to the bundle (new URL('alizarin_bg.wasm', import.meta.url)).
   fs.copyFileSync(path.join(root, 'node_modules/alizarin/dist/alizarin_bg.wasm'), path.join(out, 'alizarin_bg.wasm'));
   fs.writeFileSync(path.join(out, '.nojekyll'), '');

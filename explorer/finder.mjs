@@ -32,10 +32,13 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
   let engine = null;
   const getEngine = () => (engine ??= (async () => {
     const graphs = await Promise.all(models.map(m => graph(m.graphid)));
-    // The engine bundle, beside app.js; a URL in a variable, so the bundler leaves it to load later.
-    const url = new URL(`./query-engine.js${suffix}`, import.meta.url).href;
+    // The engine bundle, beside app.js, and its WASM: paths by their own versions (set by
+    // src/build-explorer.mjs), not the data's, so they stay cached across deploys. A URL in a
+    // variable, so the bundler leaves it to load later.
+    const at = p => new URL(p, import.meta.url).href;
+    const url = at(__ENGINE__.js);
     const { openEngine } = await import(url);
-    return openEngine({ assets: new URL('./', import.meta.url).href, substrate: `${data}/${search.substrate}`, graphs, suffix });
+    return openEngine({ duckdb: at(__ENGINE__.duckdb), compiler: at(__ENGINE__.compiler), substrate: `${data}/${search.substrate}`, graphs, suffix });
   })().catch(err => { engine = null; throw err; }));   // a failed load is tried again next time
 
   let pagefind = null;

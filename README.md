@@ -253,9 +253,11 @@ offers, for each model in the current lens:
 
 The panel's choices become Rós Madair's query IR, which its compiler (the `ros-madair` npm package,
 the same lowering its native reader runs) turns into DuckDB SQL; duckdb-wasm runs it over the
-Parquet by HTTP range requests. The compiler and DuckDB are a bundle of their own
-(`query-engine.js`, with `duckdb/` and the compiler's WASM) loaded on the first filter, so a visitor
-who never filters never fetches them. Filtering and search combine: a search lists only matches
+Parquet by HTTP range requests. The compiler and DuckDB are a bundle of their own, loaded on the
+first filter, so a visitor who never filters never fetches them. Unlike the data (which carries the
+build's `?v=`), they are named by their own versions (`duckdb/<version>/`, `ros-madair/<version>/`,
+and `query-engine.<hash>.js`), so a browser keeps them from one deploy to the next and fetches them
+again only when they change, not whenever the world does. Filtering and search combine: a search lists only matches
 that pass the filters, and while any filter is set only the filtered models are listed.
 
 Three things this release of Rós Madair (0.1.0-alpha.21) shapes:
@@ -514,7 +516,7 @@ label exactly.
 | Path | What |
 |---|---|
 | `index.html`, `app.js`, `style.css`, `icons.svg`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
-| `query-engine.js`, `ros_madair_wasm_bg.wasm`, `duckdb/` | The filters' query engine, loaded on first use (see Search and filters) |
+| `query-engine.<hash>.js`, `ros-madair/<version>/`, `duckdb/<version>/` | The filters' query engine, loaded on first use (see Search and filters) |
 | `data/` | The tile store |
 
 The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
