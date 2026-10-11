@@ -1,8 +1,5 @@
 ResourceID,name,description,itemtype,location,holder,carries
 statue-staff,The Statue's Staff,Still shining in the hand of the defaced statue; break it off for a Stone Torch.,stone-torch-of-st-rylan,bridge-of-saints,,
-bryn-letter-and-map,Bryn's Letter and Map,One of the identical copies handed out at the reading of the will.,,,bryn,"marcos-letter,marcos-map"
-gann-letter-and-map,Gann's Letter and Map,One of the identical copies handed out at the reading of the will.,,,gann,"marcos-letter,marcos-map"
-akshara-letter-and-map,Akshara's Letter and Map,One of the identical copies handed out at the reading of the will.,,,akshara,"marcos-letter,marcos-map"
 hann-note-paper,Hann's Note (on the pedestals),"The note itself, lying on the empty pedestals.",,temple-of-st-rylan,,hann-note
 red-sphere,,,silver-sphere,,archmage-hann,
 yellow-sphere,,,silver-sphere,,archmage-hann,
@@ -11,3 +8,7 @@ blue-sphere,,,silver-sphere,temple-of-st-rylan,,
 black-sphere,,,silver-sphere,temple-of-st-rylan,,
 purple-sphere,,,silver-sphere,temple-of-st-rylan,,
 pink-sphere,,,silver-sphere,temple-of-st-rylan,,
+oswald-letter-and-map,Oswald's Letter and Map,One of the identical copies handed out at the reading of the will.,,,oswald,"marcos-letter,marcos-map"
+siofra-letter-and-map,Siofra's Letter and Map,One of the identical copies handed out at the reading of the will.,,,siofra,"marcos-letter,marcos-map"
+blindy-letter-and-map,Blindy's Letter and Map,One of the identical copies handed out at the reading of the will.,,,blindy,"marcos-letter,marcos-map"
+greg-seegers-letter-and-map,Greg Seegers's Letter and Map,One of the identical copies handed out at the reading of the will.,,,greg-seegers,"marcos-letter,marcos-map"
