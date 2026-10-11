@@ -11,14 +11,17 @@ uniform vec2 uSize;        // canvas, device pixels
 uniform vec2 uCentre;      // projection.translate(), device pixels
 uniform float uScale;      // projection.scale(), device pixels
 uniform vec3 uRot;         // projection.rotate(), radians
-uniform sampler2D uWorld, uDetail;
-uniform vec4 uWorldBox, uDetailBox;   // lon0, lat0, lon1, lat1 of each image's pixel centres
-uniform vec2 uWorldPx, uDetailPx;     // image sizes
-uniform float uHasDetail;
+uniform sampler2D uWorld, uDetail, uFine;
+uniform vec4 uWorldBox, uDetailBox, uFineBox;   // lon0, lat0, lon1, lat1 of each image's pixel centres
+uniform vec2 uWorldPx, uDetailPx, uFinePx;      // image sizes
+uniform float uHasDetail, uHasFine;
 uniform vec3 uTint, uShadow, uLight;
 vec4 sampleAt(sampler2D t, vec4 box, vec2 px, float lon, float lat) {
   vec2 uv = vec2((lon - box.x) / (box.z - box.x) * (px.x - 1.0) + 0.5, (box.w - lat) / (box.w - box.y) * (px.y - 1.0) + 0.5) / px;
   return texture2D(t, uv);
+}
+float inner(vec4 box, float lon, float lat) {
+  return smoothstep(0.0, 0.05, min(min(lon - box.x, box.z - lon) / (box.z - box.x), min(lat - box.y, box.w - lat) / (box.w - box.y)));
 }
 void main() {
   vec2 s = vec2(gl_FragCoord.x, uSize.y - gl_FragCoord.y);
@@ -33,12 +36,15 @@ void main() {
   float lon = degrees(atan(y * cdg + z * sdg, x * cdp + k * sdp) - uRot.x);
   float lat = degrees(asin(clamp(k * cdp - x * sdp, -1.0, 1.0)));
   lon = mod(lon + 540.0, 360.0) - 180.0;
-  vec4 t;
-  if (uHasDetail > 0.5 && lon > uDetailBox.x && lon < uDetailBox.z && lat > uDetailBox.y && lat < uDetailBox.w) t = sampleAt(uDetail, uDetailBox, uDetailPx, lon, lat);
-  else if (lon > uWorldBox.x && lon < uWorldBox.z && lat > uWorldBox.y && lat < uWorldBox.w) t = sampleAt(uWorld, uWorldBox, uWorldPx, lon, lat);
-  else discard;
+  // Each finer image over the coarser, faded in over the outer 5% of its area so no seam shows.
+  vec4 t = vec4(0.0);
+  bool any = false;
+  if (lon > uWorldBox.x && lon < uWorldBox.z && lat > uWorldBox.y && lat < uWorldBox.w) { t = sampleAt(uWorld, uWorldBox, uWorldPx, lon, lat); any = true; }
+  if (uHasDetail > 0.5 && lon > uDetailBox.x && lon < uDetailBox.z && lat > uDetailBox.y && lat < uDetailBox.w) { t = mix(t, sampleAt(uDetail, uDetailBox, uDetailPx, lon, lat), any ? inner(uDetailBox, lon, lat) : 1.0); any = true; }
+  if (uHasFine > 0.5 && lon > uFineBox.x && lon < uFineBox.z && lat > uFineBox.y && lat < uFineBox.w) { t = mix(t, sampleAt(uFine, uFineBox, uFinePx, lon, lat), any ? inner(uFineBox, lon, lat) : 1.0); any = true; }
+  if (!any) discard;
   if (t.a < 0.5 / 255.0) discard;
-  float e = (t.a * 255.0 - 1.0) / 254.0;           // 0..1, the square root of height / top
+  float e = max(0.0, (t.a * 255.0 - 1.0) / 254.0);  // 0..1, the square root of height / top
   float d = t.r - 0.7071;                           // hillshade against flat ground
   float tintA = 0.30 * e, shadowA = clamp(-d * 1.4, 0.0, 0.55), lightA = clamp(d * 1.1, 0.0, 0.3);
   vec4 c = vec4(uTint * tintA, tintA);              // premultiplied
@@ -54,7 +60,8 @@ const rgb = css => {
   return n ? n.slice(0, 3).map(v => v / 255) : [0.5, 0.5, 0.5];
 };
 
-// relief: relief.json with each image's `url`. Returns null where WebGL is not available.
+// relief: relief.json with each image's `url`. Up to two finer images are drawn over the world's:
+// those whose area holds the view's centre and is about as wide as the view, finest on top. Returns null where WebGL is not available.
 export function reliefLayer(canvas, relief) {
   const gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
   if (!gl) return null;
@@ -103,9 +110,12 @@ export function reliefLayer(canvas, relief) {
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       if (!world?.tex) return;
-      // The finer image of the area in view, once the view is about as small as it.
-      const detail = details.find(d => view.span < (d.bbox[2] - d.bbox[0]) && view.centre[0] > d.bbox[0] && view.centre[0] < d.bbox[2] && view.centre[1] > d.bbox[1] && view.centre[1] < d.bbox[3]);
+      // The finer images of the area in view, once the view is about as small as them.
+      const near = details.filter(d => view.span < (d.bbox[2] - d.bbox[0]) && view.centre[0] > d.bbox[0] && view.centre[0] < d.bbox[2] && view.centre[1] > d.bbox[1] && view.centre[1] < d.bbox[3])
+        .sort((a, b) => (b.bbox[2] - b.bbox[0]) - (a.bbox[2] - a.bbox[0]));
+      const [detail, fine] = near;
       if (detail) load(detail, 1);
+      if (fine) load(fine, 2);
       gl.uniform2f(u.uSize, canvas.width, canvas.height);
       const [tx, ty] = projection.translate();
       gl.uniform2f(u.uCentre, tx * dpr, ty * dpr);
@@ -123,6 +133,10 @@ export function reliefLayer(canvas, relief) {
         gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, detail.tex); gl.uniform1i(u.uDetail, 1);
         gl.uniform4f(u.uDetailBox, ...boxOf(detail)); gl.uniform2f(u.uDetailPx, detail.width, detail.height);
       } else { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, world.tex); gl.uniform1i(u.uDetail, 1); }
+      const useFine = fine?.tex;
+      gl.uniform1f(u.uHasFine, useFine ? 1 : 0);
+      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, useFine ? fine.tex : world.tex); gl.uniform1i(u.uFine, 2);
+      if (useFine) { gl.uniform4f(u.uFineBox, ...boxOf(fine)); gl.uniform2f(u.uFinePx, fine.width, fine.height); }
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
   };

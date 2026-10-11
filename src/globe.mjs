@@ -142,7 +142,7 @@ const wkt = g => {
 
 // A point on a regional map -> the globe: the map is drawn north-up, `kmPerUnit` to a unit, with
 // `anchor.at` (map units) at `anchor.earth` (Earth's coordinates, remapped like everything else).
-function mapToGlobe(map, remap, [x, y]) {
+export function mapToGlobe(map, remap, [x, y]) {
   const [lon0, lat0] = remap.toGlobe(map.anchor.earth);
   const km = 6371 * deg;   // per degree of latitude
   const east = (x - map.anchor.at[0]) * map.kmPerUnit, north = -(y - map.anchor.at[1]) * map.kmPerUnit;

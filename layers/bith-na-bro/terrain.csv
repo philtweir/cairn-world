@@ -1,2 +1,18 @@
 kind,at,radius,value,note
-scale,EARTH POINT (23.8 42.3),300,1.4,"The Balkan interior is more mountainous than Earth's: its relief raised by up to 40%, fading out towards the coasts. (Its volcanoes are Earth's own massifs, Rila, Pirin and the Balkan range, unchanged in shape: cones drawn as edits looked artificial.)"
+scale,EARTH POINT (23.8 42.3),300,1.4,"The Balkan interior is more mountainous than Earth's: its relief raised by up to 40%, fading out towards the coasts. (Rila, Pirin and the Balkan range are left in Earth's own shapes; the Dells' volcano is drawn below.)"
+plain,"dells POLYGON ((0 12.4, 4 12.4, 8 13.4, 12 14.4, 14.5 16.3, 13.5 19, 11 22.5, 6 24, -2 24, -2 12.4, 0 12.4))",8,70,"The coastal plain and the Farmlands, south of the dunes."
+dunes,"dells POLYGON ((5.6 6, 8.5 5.4, 11.5 7.4, 13.6 9.2, 13.2 11.2, 11 12.6, 9 13.3, 6.2 13, 4.9 10, 5.6 6))",6,90,"The Black Volcanic Dunes: low, hummocky, between the forest and the channel."
+plain,"dells POLYGON ((11.8 11.8, 15.8 10.8, 17.6 12.4, 17.2 15.4, 14.6 16.2, 12 15.6, 11.4 13.2, 11.8 11.8))",6,55,"The Ancient Channel's floor: flat, where the waters braid."
+plain,"dells POLYGON ((15.5 5.5, 19 5, 22.5 5.5, 23 8.5, 21 10, 18 10.5, 15.5 9, 15.5 5.5))",8,90,"The meeting of the waters between Hearth and the Trading Post: open, low ground."
+mountains,"dells POLYGON ((6 -2, 3 -7, 6 -13, 12 -16, 19 -15, 23 -10, 23 -1, 19.5 2, 15 2.5, 10.5 0.5, 6 -2))",15,800,"Uplands north of the map, where the rivers to Hearth and the Trading Post rise; the Dells are their southern foot."
+mountains,"dells POLYGON ((21.5 -3, 19.5 -6, 20.5 -10, 23.5 -12, 25 -15, 30 -16, 34 -12, 36 -4, 38 3, 36 8, 31 8.4, 27.5 8, 25 6.6, 23.2 4.6, 22 1.5, 21.5 -3))",18,2300,"The bare crags of the north-east, about the Great Stone Face."
+mountains,"dells POLYGON ((19.5 9, 24 8.6, 30 9.2, 35 10, 37 11.5, 34 13, 30 13.2, 26 14.5, 21.5 13.5, 19.5 11.5, 19.5 9))",15,1000,"Wooded hills east of the river, Mouldy Manor's country."
+mountains,"dells POLYGON ((12 18.5, 15.5 17.8, 19 18.3, 22.5 15.6, 26 12.5, 31 11.6, 36 12.5, 40 16, 41 22, 38 28, 33 31, 27 33, 20 32, 14 29, 10 25, 10.5 22, 12 18.5))",18,2700,"The volcano's massif: rock and snow to the south-east, its glaciers' valleys."
+volcano,dells POINT (25.5 19),38,4400,"The volcano of the Valleys and Glaciers, smoking."
+river,"dells LINESTRING (13.5 14.6, 11.5 14.2, 9 13.9, 7 13.4, 5.5 12.6, 4.2 12, 2.6 11, 1.2 10.5, -1 10.5)",1,40,"The Ancient Channel's water, along the dunes' southern edge to the sea by the Bonefort."
+river,"dells LINESTRING (16.8 9.3, 16.9 11.1, 16.2 12.5, 15 13.8, 13.5 14.6)",1.5,40,Past the Engineers' Trading Post and the Dead Aqueduct into the Ancient Channel.
+river,"dells LINESTRING (21.4 6.8, 20.2 6.9, 18.8 7.4, 17.6 8.2, 16.8 9.3)",0.5,60,From Hearth west to the Trading Post.
+river,"dells LINESTRING (10.4 -3, 10.5 0, 11.3 1.6, 12.3 3.2, 12.5 4.6, 12.9 6.3, 14.1 7.5, 15.7 8.5, 16.8 9.3)",0.5,60,Down from the north past the Clockwork Den to the Trading Post.
+river,"dells LINESTRING (20.6 -3, 20.8 0, 21.2 2, 21.4 4, 21.2 6, 21.4 6.8)",0.5,80,"Down from the north to Hearth, under the crags."
+river,"dells LINESTRING (25.1 17.4, 25.6 16.4, 25.6 15.5, 26.2 14.6, 26.1 13.6, 25.5 12.6, 24.6 11.9, 24.1 11, 23.4 10.3, 23.3 9.4, 22.8 8.4, 22.2 7.4, 21.4 6.8)",0.5,120,"The River of Sulphur, off the volcano, through the hills to Hearth."
+river,"dells LINESTRING (19.6 22.8, 19.1 21.9, 19.2 21, 18.6 20.3, 18.2 19.6, 17.4 18.9, 17 18, 16.2 17.4, 15.6 16.5, 14.8 15.6, 13.5 14.6)",0.5,100,Off the massif's western glaciers into the Ancient Channel.

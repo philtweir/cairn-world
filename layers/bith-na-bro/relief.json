@@ -2,7 +2,7 @@
  "kind": "relief",
  "source": "Terrain Tiles (Mapzen/Tilezen, AWS Open Data: SRTM, GMTED2010, ETOPO1, EU-DEM and others), remapped",
  "top": 4500,
- "edits": 1,
+ "edits": 17,
  "images": [
   {
    "file": "relief-world.webp",
@@ -29,6 +29,19 @@
    "height": 674,
    "step": 0.01,
    "name": "dells"
+  },
+  {
+   "file": "relief-dells-fine.webp",
+   "bbox": [
+    -11.2975,
+    26.4425,
+    -9.195,
+    28.0025
+   ],
+   "width": 842,
+   "height": 625,
+   "step": 0.0025,
+   "name": "dells-fine"
   }
  ]
 }

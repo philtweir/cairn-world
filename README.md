@@ -309,32 +309,59 @@ Hearth to the Trading Post about one 30 km watch.
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
 edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
-globe (0.15°, about 15 km a pixel) and one of each regional map's detailed area (0.01°, about 1 km).
+globe (0.15°, about 15 km a pixel), one of each regional map's detailed area (0.01°, about 1 km),
+and one of each regional map with an `extent` (its drawn area, in map units, in `layer.json`) and a
+quarter of its size around it (0.0025°, about 280 m).
 Each is a WebP (with `sharp`): grey is hillshade, alpha is height (0 at sea). `relief.json` says
 where they lie. The explorer draws them with a small WebGL shader that, for each pixel, undoes
 d3's orthographic projection and rotation and reads the image there, tinting by height and shading
-by the hillshade in the theme's colours; the detailed image is fetched only when a map is zoomed in
-to its area. Elevation is from the Terrain Tiles open dataset (Mapzen/Tilezen on AWS: SRTM,
+by the hillshade in the theme's colours; the finer images are fetched only when a map is zoomed in
+to their area, and each fades in over the outer edge of its area so no seam shows. Elevation is from the Terrain Tiles open dataset (Mapzen/Tilezen on AWS: SRTM,
 GMTED2010, ETOPO1, EU-DEM and others), fetched once into `.cache/terrain/`; the site's footer
-carries its attribution. `terrain.csv` holds the edits, in order: `volcano` (a cone rising to a
-height), `raise` (add metres, fading out), `scale` (multiply heights, fading out), each at a place,
-a globe `POINT`, or an `EARTH POINT`, with a radius in km.
+carries its attribution. `terrain.csv` holds the edits, in order (`src/terrain.mjs` says exactly what
+each does), each at a place, a globe `POINT`, an `EARTH POINT`, or a shape drawn on a regional map
+in its own units (`dells POLYGON ((x y, ...))`), with a radius in km:
+
+- `scale` and `raise`: multiply heights, or add metres, fading out.
+- `mountains`: ridged fractal ranges over what is there, with a ragged edge, their grain running as
+  the Balkan ranges around them do.
+- `volcano`: a stratovolcano, a broad base and steep summit cone with a crater, its flanks scored
+  by wandering gullies.
+- `plain` and `dunes`: lowland levelled towards a height (Earth's relief kept at a sixth), rolling
+  or hummocky.
+- `river`: a valley carved along a line drawn downstream. Its bed falls all the way, under the
+  lowest ground near it, to the river it joins or the sea, and its walls widen where it cuts deep.
+  So the rivers found from the heights run where the story puts them.
+
+The shapes are seeded noise, so a bake is repeatable, at scales down to twice the image's cell.
 
 **Rivers and lakes.** Real ones, so they run down the same valleys as the relief: Natural Earth
 1:50m rivers (in three widths by its rank; the stretches through lakes left out) and lakes,
 remapped by `npm run globe` into `basemap.json`. In each regional map's detailed area, where Natural
 Earth has only the greatest rivers, `npm run terrain` finds them from the 1 km heights instead
 (after the story edits): pits are filled so every cell drains to the sea or the edge, each cell
-drains to its steepest lower neighbour, and a river is drawn wherever more than 400 km² drains
+drains to its steepest lower neighbour, and a river is drawn wherever more than 150 km² drains
 through (wider past 2,000 and 15,000 km²), smoothed, into `rivers.json`. The explorer draws water
 over the relief, Natural Earth's rivers masked out of a detailed area where the found ones are
-drawn; the smaller rivers and lakes appear as a map zooms in. Rivers found this way follow the real
-terrain, not the hand-drawn regional map, so a story river that must run somewhere else needs an
-edit (or a `raise` to steer it).
+drawn; the smaller rivers and lakes appear as a map zooms in. Rivers found this way follow the
+terrain, so a story river is drawn as a `river` edit and the finding follows it.
 
-Bith na Bró's Balkan interior is more mountainous than Earth's, by one edit: its relief raised by
-up to 40%, fading out towards the coasts. Its volcanoes are Earth's own massifs (Rila, Pirin, the
-Balkan range) in the story, unchanged in shape: cones drawn as edits read as artificial.
+Bith na Bró's Balkan interior is more mountainous than Earth's: its relief raised by up to 40%,
+fading out towards the coasts. The Dells are drawn to match their regional map:
+
+- the volcano of the Valleys and Glaciers, about 3,600 m, rising from a snowy massif to the
+  south-east, with the bare crags of the Great Stone Face to the north-east and wooded hills between;
+- uplands to the north;
+- the Black Volcanic Dunes, the Ancient Channel's flat floor and the coastal Farmlands as lowland.
+
+Its rivers are drawn in as well:
+
+- down from the north to Hearth and past the Clockwork Den to the Trading Post;
+- the River of Sulphur off the volcano to Hearth;
+- from Hearth past the Trading Post and the Dead Aqueduct into the Ancient Channel, which a stream
+  off the massif joins, and along the dunes' southern edge to the sea by the Bonefort.
+
+Elsewhere the land is Earth's.
 
 **Speed.** Turning a map redraws only what is in view, at most once a frame: relief costs the same
 however detailed (it is per pixel, in the shader); land, rivers and lakes outside the view are
