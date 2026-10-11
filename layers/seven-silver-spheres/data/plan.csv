@@ -3,9 +3,9 @@ taster,Seven Silver Spheres in 90 minutes,"A Warden's run plan for [[campaign/se
 
 The notes in this view are condensed, not the adventure: you still need the booklet for the Warden's map, the player handout (Marcos's map) and the full text.
 
-Two things follow from where the adventure sits, on [[universe/bith-na-bro|Bith na Bró]] and [[era/the-empire|the Empire]], its past:
+Two things follow from where the adventure sits: in [[era/the-empire|the First Empire]], the earlier of [[universe/bith-na-bro|Bith na Bró]]'s two eras.
 
-- **The PCs will not carry over.** The one-shot is a millennium or more before any Bith na Bró campaign. Use pregens and treat them as disposable; what carries over is where the spheres end up.
+- **The PCs will not carry over.** The one-shot is 1,000–2,000 years before the Antenexus, the present era where Bith na Bró's other campaigns are set. Use pregens and treat them as disposable; what carries over is where the spheres end up.
 - **The forest is on the campaign's map.** [[place/forest-of-dawn|The Forest of Dawn]] is the valley just north of [[place/the-dells|the Dells]], about 60 km from the coast hills to the ridge at its head (the Places lens draws it on the globe). Players who later travel the Dells can walk past where this happened.
 
 Like the rest of this view, the plan is behind its password, and only the Warden should open it. The rules it links to are in every view, so players can read them in the Bith na Bró view, which has no password.",,,,,,
@@ -121,7 +121,7 @@ taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]].
 If they take spheres, the way out is the scene: a [[monstertype/shadow-dryad|shadow-possessed dryad]], the goblins, the Thing if they freed it. Run one obstacle and end on whether they get clear.
 
 **Rolls here** ([[plan/crib-saves-here|all of them]]): Side chambers: a d6 on Dungeon Events if they linger or make noise. Carrying spheres: each is _bulky_ (two slots).",7,taster-session,1:10–1:25 (1:20–1:35 with characters),"Day 8, the equinox",,
-taster-7-epilogue,7. Epilogue: where the spheres went,"Ask each player, in a sentence, what their PC did with what they took, and where they ended up. Then tell them what this was: Bith na Bró, the date you picked, and [[event/spheres-scattered|the Seven Spheres]] that the present remembers only as lore. Each holds a strand of magic in check (the table).
+taster-7-epilogue,7. Epilogue: where the spheres went,"Ask each player, in a sentence, what their PC did with what they took, and where they ended up. Then tell them what this was: Bith na Bró in the First Empire, the date you picked, and [[event/spheres-scattered|the Seven Spheres]] that the present remembers only as lore. Each holds a strand of magic in check (the table).
 
 End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land, the world will be wiped clean."" Their characters just decided how much of it came back.",8,taster-session,1:25–1:30 (1:35–1:40 with characters),Bith na Bró,Sphere | Strand | At the start of play,"[[relic/red-sphere|Red]] | [[strand/wrath|Wrath]] (anger) | With Hann
 [[relic/yellow-sphere|Yellow]] | [[strand/dread|Dread]] (fear) | With Hann
@@ -130,15 +130,16 @@ End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land,
 [[relic/black-sphere|Black]] | [[strand/despair|Despair]] | In the temple
 [[relic/purple-sphere|Purple]] | [[strand/pride|Pride]] | In the temple
 [[relic/pink-sphere|Pink]] | [[strand/delight|Delight]] | In the temple"
-taster-after,After the session: making it canon,"Write the outcome down the same day, in two layers, because different views see them (the table). Links point down the stack and campaigns cannot see each other, so nothing written in this layer reaches the coming campaign. Anything it must know goes into Bith na Bró: an Event after [[event/spheres-scattered|The Seven Spheres are scattered]], say, or a sphere's description. Keep the Bith na Bró version as the present remembers it, rumour and gaps included; the table's detail stays here.
+taster-after,After the session: making it canon,"Write the outcome down the same day, in up to three layers, because different views see them (the table). Links point down the stack, and neither campaigns nor eras can see each other, so nothing written in this layer or the First Empire's reaches the coming campaign. What is true in every age goes into Bith na Bró itself: an Event after [[event/spheres-scattered|The Seven Spheres are scattered]], say, or where a sphere now lies. How the present remembers it, rumour and gaps included, goes into the Antenexus. The table's detail stays here.
 
-To write it, append rows to the layer's CSVs, or turn on **Author** in the right view (this one for what happened at the table, Bith na Bró's for canon), use **Edit** or **New**, then **Export**, and in the repository run `npm run merge-edits -- cairn-edits-<view>.json` and `npm run check`.
+To write it, append rows to the layer's CSVs, or turn on **Author** in the right view (this one for what happened at the table, Bith na Bró's for what holds in every age, the Antenexus's for the present's version), use **Edit** or **New**, then **Export**, and in the repository run `npm run merge-edits -- cairn-edits-<view>.json` and `npm run check`.
 
 Two things to know before relying on this plan:
 
-- This layer and the Empire's are still flagged as test layers (""remove when done""), though Bith na Bró now stands on them for its past. Keep them as the prologue and the flag should go; remove them and this plan goes with them.
+- This layer and the First Empire's are still flagged as test layers (""remove when done""), though the First Empire is now Bith na Bró's earlier era, not a stand-in for it. Keep them and the flag should go; remove them and this plan goes with them, and Bith na Bró loses its past.
 - The password keeps players from wandering in. It is not security: this layer's CSVs, the plan included, are in a public repository, and its data files are on the published site.",6,taster,,,What | Layer | Seen by,"What happened at the table: the PCs' fates, who freed the Thing, which spheres left with whom | Seven Silver Spheres | This one-shot only
-What the coming campaign should know: where each sphere went, how the scattering began | Bith na Bró | Every Bith na Bró campaign, Ravens in the Dells included"
+What holds in every age: where each sphere went, how the scattering began | Bith na Bró | Every era and campaign of Bith na Bró
+What the present makes of it: rumour, lore, what is lost | The Antenexus | Its campaigns, Ravens in the Dells included"
 taster-crib,The Warden's crib sheet,"For a first-time Warden, and one who knows Pathfinder: keep this open all session. Its parts are the loop you run all evening, when to roll and what, a fight from start to finish, harm outside a fight, every save this adventure asks for and where, and some lines to have ready.
 
 The one idea under all of it: **the players say what their characters do; you say what happens.** Most of the time nobody rolls. A roll is for a risk the players have chosen to take, and they should know what it is before the dice land ([[rule/overview-and-principles-fiction-first|Fiction First]], [[rule/saves-save-principles|Save Principles]]).",3,taster,,,,
