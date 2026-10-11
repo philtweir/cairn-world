@@ -12,6 +12,8 @@ import { drawLens } from './lens-views.mjs';
 import { geoMap, locate } from './geo-map.mjs';
 import { groupViews } from '../src/views.mjs';
 import { makeFinder, excerptNodes } from './finder.mjs';
+import { openDrafts } from './drafts.mjs';
+import { editForm } from './editor.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
 let V = '';   // ?v=<build>, set from views.json
@@ -124,6 +126,8 @@ async function load() {
   // named by its version, so it stays cached across deploys) and Alizarin, side by side.
   status('Opening the world…');
   const graphs = await Promise.all(manifest.models.map(m => fetch(`${DATA}/graphs/${m.graphid}.json${V}`).then(r => r.text())));
+  const vocabularies = new Map();
+  const collection = id => vocabularies.get(id) ?? vocabularies.set(id, fetch(`${DATA}/collections/${id}.json${V}`).then(r => r.json())).get(id);
   const at = p => new URL(p, import.meta.url).href;
   const engine = import(at(__ENGINE__.js)).then(({ openEngine }) => openEngine({
     duckdb: at(__ENGINE__.duckdb), compiler: at(__ENGINE__.compiler),
@@ -143,8 +147,12 @@ async function load() {
   A.staticStore.archesClient = archesClient;
   A.RDM.archesClient = archesClient;
   state.engine = await engine;
-  state.store = makeStore({ engine: state.engine, A, client: archesClient, manifest, state });
+  state.store = makeStore({ engine: state.engine, A, client: archesClient, manifest, state, collection,
+    graphs: Object.fromEntries(graphs.map(g => JSON.parse(g).graph[0]).map(g => [g.graphid, g])) });
   await A.graphManager.initialize();
+  // Edits made in this browser: a layer over the view, in place before anything is read.
+  state.drafts = await openDrafts(state.view, state.viewsMeta.build);
+  if (state.drafts.list().length) state.editProblems = await state.store.applyEdits(state.drafts);
   state.counts = await state.store.counts(state.view);
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
   [state.root = null] = await state.store.full([state.store.idOf(v.kind, state.view)]);
@@ -287,7 +295,7 @@ async function renderSide(currentId) {
   rows.forEach((e, i) => {
     if (!i || rows[i - 1].model !== e.model) items.push(h('li', { class: 'grp' }, state.modelOf[e.model].name, h('small', {}, perModel(e.model))));
     const ex = rank && state.hits.excerpt.get(e.id);
-    items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: colourOf(e.model) }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)),
+    items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: `${colourOf(e.model)}${state.store.edited(e.id) ? ' edited' : ''}`, title: state.store.edited(e.id) ? 'Edited in this browser' : false }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)),
       ex && h('span', { class: 'ex' }, excerptNodes(h, ex)))));
   });
   put($('list'), [
@@ -392,7 +400,8 @@ function renderDetail(e) {
     h('div', {},
       h('div', { class: 'crumbs' }, lens && h('a', { href: `#/${state.view}/@${lens.id}` }, lens.label), lens && ' › ', h('span', { class: 'type' }, model.name)),
       h('h1', {}, title(e)),
-      state.author && h('div', { class: 'kind' }, `${provenance(e)} · ${model.ontology.replace(/^.*\//, '').replace(/_/g, ' ')}`)));
+      state.author && h('div', { class: 'kind' }, `${provenance(e)} · ${model.ontology.replace(/^.*\//, '').replace(/_/g, ' ')}`)),
+    state.author && !isRoot(e) && h('a', { class: 'edit-btn', href: `${route(e)}/edit` }, icon('pencil'), 'Edit'));
 
   // Where it is, across the top: its own place on the map, or the places it links to.
   const where = locate(ctx(), e);
@@ -413,6 +422,7 @@ function renderDetail(e) {
     h('a', { class: 'back', href: lens ? `#/${state.view}/@${lens.id}` : `#/${state.view}/` }, `← ${lens?.label ?? 'All entries'}`),
     map,
     head,
+    editedBanner(e),
     description && h('div', { class: 'text lead' }, md(blocks(description))),
     state.author && description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'References: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
       h('a', { class: 'ref rel-in' }, 'related the other way'), ' · ', h('a', { class: 'ref mention' }, 'mention only')),
@@ -474,6 +484,161 @@ function node(e, x, y, r, tip, short, center = false) {
     g.addEventListener('keydown', ev => { if (ev.key === 'Enter') go(); });
   }
   return g;
+}
+
+// ---- Editing --------------------------------------------------------------------------------
+// Edits are a layer over the view, kept in this browser (explorer/drafts.mjs) and composed over
+// the published entries by Alizarin (explorer/store.mjs): an edited entry reads everywhere as it
+// will once the edits are exported and merged into layers/<view>/data/ (src/merge-edits.mjs).
+
+const isRoot = e => e.id === state.root?.id;
+const layerFile = () => `layers/${state.view}/data/`;
+const editsTitle = () => `${state.drafts.list().length} edit${state.drafts.list().length === 1 ? '' : 's'} in this browser`;
+
+// After any change to the edits: compose them again, recount, redraw.
+async function editsChanged() {
+  state.editProblems = await state.store.applyEdits(state.drafts);
+  state.counts = await state.store.counts(state.view);
+  renderEditsBar();
+}
+
+function editedBanner(e) {
+  const d = state.store.edited(e.id);
+  if (!d) return null;
+  return h('div', { class: 'edited-banner' }, icon('pencil'),
+    h('span', {}, d.created ? 'Made in this browser' : 'Edited in this browser', `: not yet in ${layerFile()}.`),
+    h('a', { href: `${route(e)}/edit` }, 'Edit'),
+    h('button', { type: 'button', onclick: () => revert(d) }, d.created ? 'Discard' : 'Revert'));
+}
+
+async function revert(d) {
+  await state.drafts.remove(d.model, d.key);
+  await editsChanged();
+  if (d.created) location.hash = `#/${state.view}/`; else show();
+}
+
+function renderEditor(e) {
+  textOf = e;
+  const model = state.modelOf[e.model];
+  const before = state.store.edited(e.id);
+  const form = editForm({ h, state, store: state.store, title, terms: state.finder.terms ?? (async () => []) }, e, before);
+  const problems = h('ul', { class: 'eproblems', role: 'alert' });
+  const save = async ev => {
+    ev.preventDefault();
+    const entry = form.read();
+    const errs = [];
+    // References are written exact, as the build writes them.
+    for (const row of [entry.cells, ...entry.rows]) for (const [f, v] of Object.entries(row)) {
+      if (!v.includes('[[')) continue;
+      const got = await state.store.exactRefs(v);
+      row[f] = got.text;
+      errs.push(...got.problems.map(p => `${state.modelOf[e.model].nodes.find(n => n.alias === f)?.name ?? f}: ${p}`));
+    }
+    if (!entry.created && !Object.keys(entry.cells).length && !entry.rows.length) {
+      if (before) await revert(before); else location.hash = route(e);
+      return;
+    }
+    if (!errs.length) {
+      try { await state.store.compose(entry, state.drafts.list().filter(d => d.created)); } catch (err) { errs.push(err?.message ?? String(err)); }
+    }
+    if (errs.length) { put(problems, errs.map(x => h('li', {}, x))); return; }
+    await state.drafts.put(entry);
+    await editsChanged();
+    location.hash = route(e);
+  };
+  put($('detail'),
+    h('a', { class: 'back', href: route(e) }, `← ${title(e)}`),
+    h('div', { class: 'kind' }, `Editing · ${model.name}`),
+    h('h1', {}, title(e)),
+    h('p', { class: 'note' }, `An edit is a layer over ${layerName(state.view)}, kept in this browser until you export it. `,
+      'A field you change replaces what the layers below give it; to a repeatable field you can only add (as a layer can). ',
+      'Links name entries by slug; [[Name]] in text links to an entry by its name.'),
+    h('form', { onsubmit: save }, form.el, problems,
+      h('div', { class: 'eactions' }, h('button', { type: 'submit' }, 'Save edit'), h('a', { href: route(e) }, 'Cancel'),
+        before && h('button', { type: 'button', onclick: () => revert(before) }, before.created ? 'Discard this entry' : 'Revert to published'))));
+  document.title = `Editing ${title(e)} · Cairn World`;
+}
+
+// The edits, for review: what each one changes, and any that no longer fit the published world.
+function renderEdits() {
+  const list = state.drafts.list();
+  put($('detail'),
+    h('div', { class: 'kind' }, `Edits · layer ${state.view}`),
+    h('h1', {}, editsTitle()),
+    h('p', { class: 'note' }, `Export them, then run "npm run merge-edits -- <file>" in the repository: it writes them into ${layerFile()}, and the next build has them.`),
+    list.length ? h('ul', { class: 'rel' }, list.map(d => {
+      const e = state.byId.get(state.store.idOf(d.model, d.key));
+      const why = state.editProblems?.get(`${d.model}/${d.key}`);
+      const what = [Object.keys(d.cells).length && `sets ${Object.keys(d.cells).join(', ')}`, d.rows.length && `adds ${d.rows.length} group entr${d.rows.length === 1 ? 'y' : 'ies'}`].filter(Boolean).join('; ');
+      return h('li', {}, e ? h('a', { href: route(e) }, title(e)) : `${d.model}/${d.key}`,
+        h('span', { class: 'm' }, `${state.modelOf[d.model]?.name ?? d.model}${d.created ? ' · new' : ''} · ${what || 'no changes'}`),
+        why && h('p', { class: 'eproblems' }, `Not applied: ${why}`));
+    })) : h('p', { class: 'empty' }, 'No edits yet. Turn on Author and use Edit on an entry, or add a new one above.'));
+  document.title = 'Edits · Cairn World';
+}
+
+// The bar of edit actions: shown to the author, and to anyone with edits.
+function renderEditsBar() {
+  const bar = $('edits');
+  const n = state.drafts?.list().length ?? 0;
+  bar.hidden = !state.drafts || (!state.author && !n);
+  if (bar.hidden) return;
+  const creatable = state.models.filter(m => !['universe', 'campaign'].includes(m.alias));
+  const pick = h('select', { 'aria-label': 'Model of the new entry' }, creatable.map(m => h('option', { value: m.alias }, m.name)));
+  const name = h('input', { type: 'text', placeholder: 'Name', 'aria-label': 'Name of the new entry' });
+  const file = h('input', { type: 'file', accept: '.json,application/json', hidden: true, onchange: () => importEdits(file.files[0]) });
+  const bad = state.editProblems?.size ?? 0;
+  put(bar,
+    h('span', {}, icon('pencil'), ' ', n ? h('a', { href: `#/${state.view}/@edits` }, h('b', {}, editsTitle())) : 'No edits yet', bad ? h('span', { class: 'eproblems' }, ` (${bad} not applied)`) : null),
+    n > 0 && h('button', { type: 'button', onclick: exportEdits }, icon('download'), ' Export'),
+    h('button', { type: 'button', onclick: () => file.click() }, icon('upload'), ' Import'), file,
+    n > 0 && h('button', { type: 'button', onclick: async () => { if (!confirm(`Discard ${editsTitle()}?`)) return; await state.drafts.clear(); await editsChanged(); show(); } }, icon('undo-2'), ' Discard all'),
+    state.author && h('form', { class: 'new', onsubmit: ev => { ev.preventDefault(); newEntry(pick.value, name.value); } }, 'New:', pick, name, h('button', { type: 'submit' }, 'Add')));
+}
+
+function exportEdits() {
+  const blob = new Blob([JSON.stringify(state.drafts.exported(state.store.renamed()), null, 2) + '\n'], { type: 'application/json' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: `cairn-edits-${state.view}.json` });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function importEdits(f) {
+  if (!f) return;
+  try {
+    const groupFields = alias => {
+      const m = state.modelOf[alias];
+      if (!m) return null;
+      const repeatable = new Set(m.nodes.filter(n => n.datatype === 'semantic' && n.cardinality === 'n').map(n => n.alias));
+      return new Set(m.nodes.filter(n => repeatable.has(n.parent)).map(n => n.alias));
+    };
+    await state.drafts.imported(JSON.parse(await f.text()), groupFields);
+    await editsChanged();
+    location.hash = `#/${state.view}/@edits`;
+  } catch (err) { alert(`Could not import: ${err?.message ?? err}`); }
+}
+
+// A new entry: its slug from its name, unique in its model; then its form.
+async function newEntry(model, name) {
+  name = name.trim();
+  if (!name) return;
+  const base = name.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'entry';
+  let key = base;
+  for (let i = 2; (await state.store.know([state.store.idOf(model, key)])).length || state.drafts.get(model, key); i++) key = `${base}-${i}`;
+  await state.drafts.put({ model, key, created: true, cells: { name }, rows: [] });
+  await editsChanged();
+  location.hash = `#/${state.view}/${model}/${key}/edit`;
+}
+
+// Edited entries whose name has the text (the search index has only the published text).
+async function editedMatching(q) {
+  const es = await state.store.know(state.drafts.list().map(d => state.store.idOf(d.model, d.key)));
+  return es.filter(e => title(e).toLowerCase().includes(q));
+}
+
+function backButton() {
+  const [, a] = hashParts();
+  $('back').disabled = (history.state?.depth ?? 0) === 0 && !a;
 }
 
 // ---- Routing --------------------------------------------------------------------------------
@@ -552,10 +717,11 @@ function renderLens(lens, entries) {
 let shows = 0;
 async function show() {
   const mine = ++shows;
-  const [view, a, b] = hashParts();
+  const [view, a, b, c] = hashParts();
   // The ORM's caches belong to one view, so moving to another view reloads the page.
   if (view && view !== state.view) { location.reload(); return; }
   const lens = a?.startsWith('@') ? lensById(a.slice(1)) : null;
+  backButton();
   const id = !lens && a && b ? state.store.idOf(a, b) : null;
   const [known] = id ? await state.store.know([id]) : [];
   // A link to a General entry must open even while General is hidden in the list.
@@ -565,7 +731,9 @@ async function show() {
   renderSide(known?.id);
   const reading = setTimeout(() => { if (mine === shows) put($('detail'), h('p', { class: 'empty' }, 'Reading…')); }, 150);
   try {
-    if (known) { const e = await neighbourhood(known.id); if (mine === shows) renderDetail(e); }
+    if (known && c === 'edit') { const e = await neighbourhood(known.id); if (mine === shows) renderEditor(e); }
+    else if (known) { const e = await neighbourhood(known.id); if (mine === shows) renderDetail(e); }
+    else if (a === '@edits') { await state.store.know(state.drafts.list().map(d => state.store.idOf(d.model, d.key))); if (mine === shows) renderEdits(); }
     else if (lens) { const entries = await lensEntries(lens); if (mine === shows) renderLens(lens, entries); }
     else if (a) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: `#/${state.view}/` }, 'Back home'));
     else {
@@ -602,9 +770,15 @@ try {
       const ok = m => (state.rules || !m.general) && m.id !== state.root?.id && (!state.filter.size || state.filter.has(m.model)) && state.finder.passes(m);
       const { hits, complete } = await state.finder.search(q, ok, LIST_LIMIT);
       if (mine !== asked) return;
-      const list = hits.map(x => state.byId.get(x.id) ?? state.byId.set(x.id, { model: x.meta.model, id: x.id, key: x.meta.key, layers: x.meta.general ? ['general'] : [], light: true,
-        fields: [{ alias: 'name', label: 'Name', datatype: 'string', targets: [], collection: null, rule: null, property: null, value: x.meta.title }] }).get(x.id));
-      state.hits = { list, rank: new Map(hits.map((x, i) => [x.id, i])), excerpt: new Map(hits.map(x => [x.id, x.excerpt])), complete };
+      // The index is the published text: an edited entry is listed under its name now, and the
+      // edits are searched by name besides.
+      const seen = new Set(hits.map(x => x.id));
+      const all = [...(await editedMatching(q)).filter(e => !seen.has(e.id) && ok({ ...e, general: isGeneral(e) })).map(e => ({ id: e.id })), ...hits];
+      await state.store.know(all.filter(x => state.store.edited(x.id)).map(x => x.id));
+      if (mine !== asked) return;
+      for (const x of all) if (!state.byId.has(x.id)) state.byId.set(x.id, { model: x.meta.model, id: x.id, key: x.meta.key, layers: x.meta.general ? ['general'] : [], light: true,
+        fields: [{ alias: 'name', label: 'Name', datatype: 'string', targets: [], collection: null, rule: null, property: null, value: x.meta.title }] });
+      state.hits = { list: all.map(x => state.byId.get(x.id)), rank: new Map(all.map((x, i) => [x.id, i])), excerpt: new Map(all.filter(x => x.excerpt).map(x => [x.id, x.excerpt])), complete };
     } catch (err) {
       console.error(err);
       state.hits = null;   // the index could not be read: search names instead
@@ -618,11 +792,22 @@ try {
     state.author = !state.author;
     try { localStorage.setItem('cairn-world:author', state.author ? '1' : '0'); } catch { /* not remembered */ }
     author.setAttribute('aria-pressed', state.author);
+    renderEditsBar();
     show();
   });
   $('q').addEventListener('focus', () => { if (state.q) pane('list'); });
   $('list').addEventListener('click', ev => { if (ev.target.closest('a')) pane('detail'); });
-  addEventListener('hashchange', () => { pane('detail'); show(); scrollTo(0, 0); });
+  // Back goes to the page before, within the explorer: each page it opens is numbered in the
+  // history's state, so with nothing before, Back goes home instead of off the site.
+  if (history.state?.depth == null) history.replaceState({ depth: 0 }, '');
+  let depth = history.state.depth;
+  addEventListener('hashchange', () => {
+    if (history.state?.depth == null) history.replaceState({ depth: depth + 1 }, '');
+    depth = history.state.depth;
+    pane('detail'); show(); scrollTo(0, 0);
+  });
+  $('back').addEventListener('click', () => { if ((history.state?.depth ?? 0) > 0) history.back(); else location.hash = `#/${state.view}/`; });
+  renderEditsBar();
   pane('detail');
   addEventListener('keydown', ev => { if (ev.key === '/' && document.activeElement !== $('q')) { ev.preventDefault(); $('q').focus(); } });
   show();

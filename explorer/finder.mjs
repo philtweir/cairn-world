@@ -62,6 +62,8 @@ export function makeFinder({ data, suffix, view, models, engine, h, put, icon })
   }
 
   return {
+    // A concept field's terms ({ id, label }), from its vocabulary.
+    terms: termsOf,
     // Filters need the substrate; text search the Pagefind index. A gated view has neither.
     canFilter: !!search?.substrate,
     canSearch: !!search?.pagefind,

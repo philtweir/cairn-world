@@ -12,9 +12,12 @@
 //                  because its SQL does not name the model, and with no filter (or a `not`) it
 //                  would read every model's resources
 // A model's tiles are also read directly (tiles_<graph id>.parquet), for Alizarin to hydrate.
+//
+// Edits made in this browser are a layer over all of these: see engine-sql.mjs.
 
 import * as duckdb from '@duckdb/duckdb-wasm';
 import initCompiler, { Compiler } from 'ros-madair';
+import { sqlString, draftTablesSql, viewsSql, tilesViewSql, overlaySql } from './engine-sql.mjs';
 
 // duckdb: the directory of duckdb-wasm's files; compiler: the compiler's WASM; substrate and
 // tables: the view's directories; graphs: the view's Arches model documents (JSON text); suffix:
@@ -56,10 +59,11 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
       throw new Error(`DuckDB could not load its Parquet reader (${err2?.message ?? err2})`);
     }
   }
-  await conn.query(`CREATE VIEW edges AS SELECT src_resource, src_node, src_nodegroup, src_tile, target_resource FROM read_parquet(${all('edges')})
-    UNION ALL SELECT src_resource, src_node, src_nodegroup, src_tile, target_resource FROM read_parquet('mentions.parquet')`);
-  await conn.query(`CREATE VIEW concept_index AS SELECT * FROM read_parquet(${all('concepts')})`);
-  await conn.query(`CREATE VIEW ordered_index AS SELECT * FROM read_parquet(${all('ordered')})`);
+  for (const sql of draftTablesSql()) await conn.query(sql);
+  let edited = false;   // whether the edit layer has anything in it
+  const file = f => `'${f}'`;
+  const views = async () => { for (const sql of viewsSql({ file, all, edited })) await conn.query(sql); };
+  await views();
   const has = prefix => files.some(f => f.startsWith(`${prefix}_`));
   const caps = [files.includes('concept_catalog.parquet'), has('edges'), has('concepts'), has('ordered'), false];
 
@@ -74,13 +78,20 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
     // The ids of a model's entries that match `where` (Rós Madair's query IR), or all of them.
     select: (graphid, where) => serial(async () => {
       const sql = compiler.compile(JSON.stringify({ model: graphid, measures: ['select_ids'], ...(where ? { where } : {}) }), ...caps);
-      await conn.query(`CREATE OR REPLACE VIEW tiles AS SELECT * FROM read_parquet('tiles_${graphid}.parquet')`);
+      await conn.query(tilesViewSql({ file, graphid, edited }));
       return (await conn.query(sql)).toArray().map(r => r.resource_id);
     }),
-    // A model's tiles for some of its entries, for Alizarin.
+    // The edited entries, as rows of each draft table ({ resources: [...], tiles: [...], ... },
+    // columns as in DRAFT_TABLES), replacing those there were.
+    overlay: drafts => serial(async () => {
+      for (const sql of overlaySql(drafts)) await conn.query(sql);
+      edited = (drafts.resources ?? []).length > 0;
+      await views();
+    }),
+    // A model's tiles for some of its entries, as published, for Alizarin.
     tiles: (graphid, ids) => rows(`SELECT resource_id, tileid, nodegroup_id, parenttile_id, sortorder, data FROM read_parquet('tiles_${graphid}.parquet')
       WHERE resource_id IN (${ids.map(sqlString).join(', ')}) ORDER BY resource_id, nodegroup_id, sortorder`),
   };
 }
 
-export const sqlString = s => `'${String(s).replace(/'/g, "''")}'`;
+export { sqlString };

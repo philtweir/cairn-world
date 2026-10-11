@@ -9,6 +9,7 @@
 </head>
 <body data-view="list">
 <header>
+  <button id="back" type="button" title="Back (to the page before, in the explorer)" aria-label="Back"><svg class="icon" aria-hidden="true"><use href="icons.svg#i-arrow-left"/></svg></button>
   <a class="brand" href="#/">Cairn World</a>
   <select id="view" aria-label="Universe or campaign"></select>
   <input id="q" type="search" placeholder="Search names and text  ( / )" aria-label="Search" autocomplete="off">
@@ -23,6 +24,7 @@
   <div class="row"><input id="gate-pw" type="password" autocomplete="current-password" required><button type="submit">Open</button></div>
   <p id="gate-msg" role="alert"></p>
 </form>
+<div id="edits" hidden role="region" aria-label="Edits in this browser"></div>
 <div id="app" hidden>
   <nav id="lenses" aria-label="Lenses"></nav>
   <aside id="side">

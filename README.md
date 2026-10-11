@@ -15,6 +15,7 @@ npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout o
 npm run set-password -- <layer>            # put a password in front of one view (see Layers)
 npm run globe -- <layer>                   # place a universe's places on its globe (see Maps)
 npm run terrain -- <layer>                 # its relief: remapped real elevation plus story edits (see Maps)
+npm run merge-edits -- <file>              # bake edits exported from the explorer into their layer (see Editing in the explorer)
 ```
 
 Needs Node 22+. Alizarin comes from npm, pinned to `2.0.0-alpha.139`; npm's `latest` tag is still
@@ -477,6 +478,55 @@ each row has a `source` field, and anything you publish built from it must credi
 
 Setting- or campaign-specific types (a "Bell" item, a module's monsters and spells) go in that
 layer's `data/`, using the same General models.
+
+## Editing in the explorer
+
+Turn on **Author** and an entry's page has **Edit**; the bar under the header adds a **New** entry
+of any model (its slug made from its name). An edit is a layer: the view's own layer, one step
+further up, kept in this browser (IndexedDB) until it is exported. It looks like editing the entry,
+and everything reads it as if it were published:
+
+- **Written as the layer's CSV.** An edit is the rows `layers/<view>/data/<model>.csv` would hold
+  (`explorer/drafts.mjs`): `ResourceID`, a cell per changed field, links by slug, terms by label,
+  `[[Name]]` references (written exact on save, as the build writes them, and refused if they match
+  nothing or several things). Only the fields changed are written, so an edit overrides no more
+  than it means to.
+- **Composed by Alizarin.** `explorer/store.mjs` builds the rows with Alizarin's CSV loader (as the
+  build builds a layer; a label that is not in its vocabulary is refused there and then) and
+  composes them over the published entry with `composeResourceLayers`. So the layer semantics are
+  Alizarin's own: a single-valued field in the edit replaces the one below; a repeatable field or
+  group (cardinality `n`: a faction's enemies, an NPC's ties) adds to what the layers below give it,
+  and the form offers only adding to one. Nothing below is removed.
+- **Seen by every query.** The composed entry goes into Alizarin's resource registry (its page,
+  its links) and into the query engine's overlay (`explorer/engine-sql.mjs`): tables of the
+  published Parquet's shape (`draft_resources`, `draft_tiles`, the melted concept and ordered
+  stores, edges and mentions), which the views read in place of the published rows of the edited
+  entries. Lists, counts, backlinks and Rós Madair's filters all see the edit. Search finds an
+  edited entry by its new name; its new text is not in the published index until the next build.
+- **Back is history.** The ← button in the header goes to the page before, within the explorer
+  (home if there is none).
+
+**Export** gives a file, `cairn-edits-<view>.json`: the layer's rows by model (and the names of
+any entries renamed, so references by an old name can follow). **Import** reads one back (in
+another browser, say); its rows replace the edits to the same entries. To bake the edits in:
+
+```
+npm run merge-edits -- cairn-edits-<view>.json    # --dry-run to see what it would do
+npm run check
+```
+
+`src/merge-edits.mjs` writes them into `layers/<view>/data/` with the same semantics: a
+single-valued cell replaces the layer's (on the entry's first row), a repeatable cell adds to it,
+a group entry is a row of its own after the entry's rows, an entry new to the layer goes at the
+end, and a column the file lacks is added to its header. Rows it does not change stay as they were,
+byte for byte, so the diff is the edit. A renamed entry's `[[Old Name]]` references, in the layer
+and the campaigns set in it, become `[[model/key|Old Name]]`, since the old name no longer resolves
+there. Then the build checks everything as usual.
+
+What the explorer does not edit: geometry (write WKT in the CSV), deleting an entry, or removing
+what a lower layer gives a repeatable field (a layer cannot do either). Edits made against one
+build can stop fitting the next (a link's target renamed away, say): the edits page
+(`#/<view>/@edits`) lists those as not applied, with the reason.
 
 ## Authoring
 
