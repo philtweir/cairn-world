@@ -1,8 +1,17 @@
 ResourceID,name,description,universes,published
 seven-silver-spheres,Seven Silver Spheres,"An introductory point-crawl for Cairn (2–3 hours) by Martin Orchard: pointlessmonument.itch.io. Words and maps are © Martin Orchard. These are condensed Warden notes for running it, not the adventure; get the booklet for the maps, handout and full text.
 
-The late Marcos has left each PC the same letter and annotated map: the Seven Silver Spheres, long thought lost, wait in the Temple of St. Rylan deep in the Forest of Dawn. The temple door opens only on an equinox, and Marcos warns them not to leave the old road or the trails. It is midday, two days before the Autumn Equinox, at the fork where the forest trail leaves the old road. Expect at least one night in the forest and another at the temple.
+The late Marcos has left each PC the same letter and annotated map: the Seven Silver Spheres, long thought lost, wait in the Temple of St. Rylan deep in the Forest of Dawn. The temple door opens only on an equinox, and Marcos warns them not to leave the old road or the trails. It is midday, a week before the Autumn Equinox (the booklet says two days; see Cairn 2e below), at the fork where the forest trail leaves the old road. Expect several nights in the forest and one at the temple.
 
 Running it: the Warden's map says what is at each point. Answer questions from the tables, give enough to make real choices, and use time and the forest's menace to keep the party moving. Backtracking is fine; it shows them more of the forest.
+
+**Running it in Cairn 2e.** The booklet was written before 2e's travel procedure, and its deadline is there for pressure, not arithmetic. Its author, Martin Orchard, suggested on r/cairnrpg how to run it so that the players use the procedure:
+
+- Give them a week rather than two days.
+- Treat every route between two points as a short forest trail, the old road included (broken, overgrown, no better than a trail by now): 3 watches (short +1, trail +1, forest +1), with a trail's 2-in-6 chance of getting lost. A lost party reaches a different point from the one they meant.
+- Use more encounters: [[rolltable/sss-travel-encounters|Travel Encounters]], with a reaction roll. On a Sign, give them a glimpse of somewhere they have not been yet: [[rolltable/sss-signs|Signs]].
+- Once nothing stands between the party and the temple (the last legs to the wall, from the Rising Sun or the Great Oak), skip the rolls: the porcelain soldiers keep that ground safe.
+
+The map is laid out to match. Each leg is a short path of 15 to 25 km, under one watch on a good road at Bith na Bró's reckoning (about 30 km a watch), which the forest stretches to three. From midday, a week gives about 20 watches to the equinox dawn, about 13 of them for travel once each day's camp is taken: the old road is 9, leaving time for a detour or two.
 
 **In Bith na Bró.** The Empire of this adventure is Bith na Bró's own past, between one and two thousand years before the present (the Warden picks), long before the Six Kingdoms and the Nine States, and before whatever made the world so different since. The Forest of Dawn is the valley of a river in the forested uplands just north of [[the Dells]], running down to the sea. The spheres are [[event/spheres-scattered|the Seven Spheres]] of Bith na Bró's lore, each with a colour and a strand of magic it holds in check; Hann has the Red and the Yellow. Whatever the party do with the other five, they can turn up again in later campaigns.","bith-na-bro,the-empire",true
