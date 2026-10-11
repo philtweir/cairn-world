@@ -1,0 +1,3 @@
+principal,name,member_of
+group:party,The party,
+group:warden,The Warden,group:party
