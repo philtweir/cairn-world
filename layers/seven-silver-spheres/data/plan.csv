@@ -1,0 +1,105 @@
+ResourceID,name,description,section,part_of,at_table,in_story,columns,entries
+taster,Seven Silver Spheres in 90 minutes,"A Warden's run plan for [[campaign/seven-silver-spheres|Seven Silver Spheres]] in one 90-minute session, as a prologue to a campaign in [[universe/bith-na-bro|Bith na Bró]]. The adventure is written for 2–3 hours; this gets it into 90 minutes by fixing the clock, capping the scenes at three before the temple, and leaving the side chambers to one roll each. Its parts, in order: before the session, the clock, the session itself scene by scene, and making the outcome canon.
+
+The notes in this view are condensed, not the adventure: you still need the booklet for the Warden's map, the player handout (Marcos's map) and the full text.
+
+Two things follow from where the adventure sits, on [[universe/bith-na-bro|Bith na Bró]] and [[universe/the-empire|the Empire]], its past:
+
+- **The PCs will not carry over.** The one-shot is a millennium or more before any Bith na Bró campaign. Use pregens and treat them as disposable; what carries over is where the spheres end up.
+- **The forest is on the campaign's map.** [[place/forest-of-dawn|The Forest of Dawn]] is the valley just north of [[place/the-dells|the Dells]], some 30–40 km from end to end (the Places lens draws it on the globe). Players who later travel the Dells can walk past where this happened.
+
+Like the rest of this view, the plan is behind its password, and only the Warden should open it. The rules it links to are in every view, so players can read them in the Bith na Bró view, which has no password.",,,,,,
+taster-prep,Before the session,"About 30 minutes, the day before.
+
+1. **Check the password** to this view still works, and read the [[campaign/seven-silver-spheres|campaign page]]: the premise in two paragraphs.
+2. **Decide the date.** The campaign leaves ""between one and two thousand years ago"" to the Warden ([[event/spheres-scattered|The Seven Spheres are scattered]]). Pick a number now; the epilogue needs it.
+3. **Pregens.** Three exist as placeholders: [[pc/bryn|Bryn]] (Half Witch), [[pc/gann|Gann]] (Marchguard) and [[pc/akshara|Akshara]] (Scrivener). For more players, roll extras now, not at the table ([[rule/character-creation|Character Creation]], [[rolltable/character-creation-backgrounds-table|Backgrounds]]): character creation at the table costs 15–20 minutes you do not have.
+4. **Note the lethality.** HP 3–5 against [[monstertype/thing-in-the-tavern|the Thing in the Tavern]]'s d10 bite: a PC can die in one exchange. That is Cairn working as intended; say so at the start.
+5. **Keep to hand** the six adventure tables below, the [[rolltable/core-rules-reactions-table|Reactions]], [[rolltable/procedures-wilderness-events-table|Wilderness Events]] and [[rolltable/core-rules-scars-table-table|Scars]] tables, and [[plan/taster-clock|the clock]].",1,taster,,,Table | Use it for,"[[rolltable/sss-lore|Lore, Secrets & Rumours]] (d6) | Answers to ""what do we know?"", campfire talk, the River Spirit's answers
+[[rolltable/sss-encounters|Random Encounters]] (d6) | A Wilderness Event of 1 (Encounter)
+[[rolltable/sss-treasures|Treasures]] (d6) | Temple side chambers
+[[rolltable/sss-relics|Relics]] (d6) | Temple side chambers; what the Thing pretends to offer
+[[rolltable/sss-spellbooks|Spellbooks]] (d6) | Temple side chambers
+[[rolltable/sss-minor-loot|Minor Loot]] (d6) | A Wilderness Event of 6 (Discovery), bodies, the goblin camp"
+taster-clock,The clock,"The party starts at midday, two days before the Autumn Equinox. The temple doors open at dawn on the equinox and close 24 hours later ([[event/autumn-equinox|The Autumn Equinox]]). A day is three [[rule/procedures-watches|watches]], and the night watch is normally [[rule/procedures-make-camp|camp]]:
+
+- **Two days before:** afternoon, leg 1 from the Fork; night, camp.
+- **Eve of the equinox:** morning, leg 2; afternoon, leg 3; night, camp.
+- **The equinox:** the doors open at 6am; morning, leg 4. The doors stay open through the afternoon and night, and close at 6am.
+
+**A condensed ruling, not the booklet's:** one leg (one route between two points) takes one day-watch. Every route from the Fork to the temple is four legs (the table), so the party arrives on the equinox morning with two watches to spare, if nothing goes wrong.
+
+On a trail, roll the 2-in-6 to get lost ([[rule/procedures-travel|Travel]], [[rolltable/procedures-path-difficulty-table-1|Path Difficulty]]); lost costs a watch. The road has no lost roll; it has the hazards instead. That is the real choice at the Fork, and the clock is what makes it a choice.
+
+Both levers for running late are in the rules, and both cost the party, not you:
+
+- **Push on through the night:** roll twice on Wilderness Events ([[rule/procedures-night|Night]]).
+- **Skip camp:** each PC takes a Fatigue and is _deprived_ ([[rule/procedures-sleep|Sleep]], [[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).",2,taster,,,Route | Legs | Its cost,"Old road: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/rising-sun-tavern|Rising Sun]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The goblin camp, the Thing's voice, the arrow trap and the sentries
+Trail west: [[place/the-fork|Fork]] › [[place/old-ford|Old Ford]] › [[place/sister-stones|Sister Stones]] › [[place/secret-well|Secret Well]] › [[route/well-passage|passage]] › [[place/temple-of-st-rylan|Temple]] | 4 | Getting lost; the Stones; the ivy on the well
+Swamp: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/great-oak|Great Oak]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The Cursed Oak, then the gatehouse anyway"
+taster-session,"The session, minute by minute","Seven parts, in order. **At 1:00, check:** if the party has not passed its second point, cut to the approach (""you push on through the night"": roll twice on Wilderness Events, take the Fatigue). The temple is the one scene you cannot skip; it sets the campaign's hook.",3,taster,,,At the table | Part | In the story,"0:00–0:10 | [[plan/taster-1-table|1. Set up the table]] | The reading of the will
+0:10–0:15 | [[plan/taster-2-fork|2. The Fork]] | Midday, two days out
+0:15–0:35 | [[plan/taster-3-first|3. First point]] | Afternoon, then camp
+0:35–0:55 | [[plan/taster-4-second|4. Second point]] | Eve of the equinox
+0:55–1:10 | [[plan/taster-5-approach|5. The approach]] | Night, then dawn
+1:10–1:25 | [[plan/taster-6-temple|6. The temple]] | The equinox
+1:25–1:30 | [[plan/taster-7-epilogue|7. Epilogue: where the spheres went]] | Bith na Bró"
+taster-1-table,1. Set up the table,"- **Pitch, one sentence:** a dead friend's letter sends you after seven lost silver spheres in a temple that opens one day a year, through a forest you have been told not to leave the paths of.
+- **Hand out the pregens** and [[document/marcos-map|Marcos's map]] (the booklet's handout). Read [[document/marcos-letter|the letter]] aloud.
+- **One question each:** what was [[npc/marcos|Marcos]] to you? The pregens have a tie already (Mentor, Relative, Colleague); let a player change it. This is the only character work there is room for, and it pays off at the end.
+
+**The rules in five sentences** (no more; teach the rest when it comes up):
+
+1. No classes: you are what you carry ([[rule/character-creation-inventory|Inventory]]).
+2. When something is risky, roll a d20 at or under STR, DEX or WIL; 1 succeeds, 20 fails ([[rule/core-rules-saves|Saves]]).
+3. Attacks always hit: roll the weapon's die, less armour ([[rule/core-rules-attacking-damage|Attacking & Damage]]).
+4. HP is how long you can avoid getting hurt; damage past it comes off STR, and you save or go down ([[rule/core-rules-critical-damage|Critical Damage]]).
+5. Running away, talking and sneaking are all good plans; fights are deadly ([[rule/overview-and-principles-principles-for-players|Principles for Players]]).",1,taster-session,0:00–0:10,The reading of the will,,
+taster-2-fork,2. The Fork,"[[place/the-fork|The Fork]]: the overgrown old road, or the grassy forest trail. Describe both, state the clock (the doors open at dawn the day after tomorrow), and let them pick. Teach the [[rule/procedures-wilderness-exploration-cycle|Wilderness Exploration Cycle]] here, once:
+
+1. You describe the point and what lies ahead; they pick a direction.
+2. Each PC takes one [[rule/procedures-wilderness-actions|Wilderness Action]] (usually all Travel); you roll a d6 on [[rolltable/procedures-wilderness-events-table|Wilderness Events]].
+3. Mark off torches, rations and Fatigue.
+
+Keep event results to a sentence unless they make a choice. Roll [[rolltable/sss-encounters|Random Encounters]] at most twice all session.",2,taster-session,0:10–0:15,"Midday, two days out",,
+taster-3-first,3. First point,"Whichever they reach first, it is a 20-minute scene with a decision in it, not a fight by default.
+
+- **[[place/bridge-of-saints|Bridge of Saints]]** (road). [[creature/bridge-goblins|2d6 goblins]] mid-revel round the statue of St. Rylan, defaced into [[npc/goblob|Goblob]]. Roll [[rule/core-rules-reactions|Reactions]]; they are superstitious about the statue, and that is the lever. Its staff is a [[itemtype/stone-torch-of-st-rylan|Stone Torch of St. Rylan]], and taking it is a provocation. If it comes to blows, goblins (WIL 8) check [[rule/core-rules-morale|Morale]] at the first casualty: most fights here end in a rout, which is quick.
+- **[[place/old-ford|Old Ford]]** (trail). [[npc/river-spirit|The River Spirit]] answers questions, but only from mid-river, where the current is hard work and the waterfall is round the bend. Answer from [[rolltable/sss-lore|Lore, Secrets & Rumours]]: this is where the players learn about Statera, the shadow and Hann, cheaply.
+
+**Camp** (night): one Wilderness Event roll, a Ration each, Fatigue cleared. If they talk round the fire, give them one Lore result. Two minutes, not ten.",3,taster-session,0:15–0:35,"Afternoon, then camp",,
+taster-4-second,4. Second point,"- **[[place/rising-sun-tavern|Rising Sun Tavern]].** The best scene in the adventure for a short slot: a voice behind a warded, barred cellar door, offering treasure. [[creature/the-thing|The Thing]] has none, and freed, it gives a head start and a cruel smile. Play the voice; the players' choice is the scene. The seal is [[npc/archmage-hann|Hann]]'s work, the first sign of him.
+- **[[place/sister-stones|The Sister Stones]].** Three ways past, each with its cost (a WIL save, a STR save, or the climb). Quick, and it teaches saves.
+- **[[place/great-oak|The Great Oak]].** [[monstertype/cursed-oak|The Cursed Oak]] is deaf, senses everything but the slightest movement, and burns. A stealth puzzle with a deadly answer if it fails (d8, _blast_: [[rule/core-rules-attack-modifiers|Attack Modifiers]]).",4,taster-session,0:35–0:55,Eve of the equinox,,
+taster-5-approach,5. The approach,"- **[[place/porcelain-gatehouse|Porcelain Gatehouse]]:** the arrow trap (d8, d6, d4, then dry; [[rule/procedures-traps|Traps]]) and [[creature/wall-sentries|the Porcelain Soldiers]], who attack only those who cross the battlements. Let the players watch the sentries change guard first; the eeriness is the point.
+- **[[place/secret-well|The Secret Well]]:** [[monstertype/creeping-ivy|the ivy]] on the well head, whose Critical Damage drags a victim down. Then the dark [[route/well-passage|passage]]: check who carries light ([[rule/procedures-light-sources|Light Sources]]; Gann has the lantern). The passage gets them into the grounds unseen, but the doors still open only at dawn.
+
+If they arrive in the night, they wait at the doors. Let them hear something in the trees.",5,taster-session,0:55–1:10,"Night, then dawn",,
+taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]]. Switch to the [[rule/procedures-dungeon-exploration-cycle|Dungeon Exploration Cycle]] only if they go into the side chambers. In order:
+
+1. The iron doors open at dawn. The mosaic of St. Rylan's life, and his potter's wheel ([[faction/faithful-of-statera|the Faithful of Statera]]).
+2. The hall: the ritual in iron and copper, seven pedestals, **five spheres**. Name their colours (green, blue, black, purple, pink) and give each a feeling when held close: they are the [[strand/envy|strands of magic]]. Describe the strands; do not explain them.
+3. [[document/priests-plea|The Last Priest's Plea]] beside the altar: every sphere taken weakens the ward on the shadow.
+4. [[document/hann-note|Hann's note]], 33 years old, on the two empty pedestals. The missing two are the [[relic/red-sphere|Red]] and the [[relic/yellow-sphere|Yellow]]: wrath and dread are already loose in the Empire, which has been declining for 33 years.
+5. **The choice.** Each sphere is _bulky_ and worth a place in high society ([[itemtype/silver-sphere|Silver Sphere]]). Take none, some or all. Let the shadow answer: lift one and the light changes; lift a second and something in the forest wakes ([[creature/the-shadow|The Shadow in the Forest]]).
+6. **Side chambers, if there is time:** one roll each on Treasures, Relics and Spellbooks, and stop. Spells cost a Fatigue to cast ([[rule/core-rules-casting-spells|Casting Spells]]); relics have uses and a recharge ([[rule/core-rules-relics|Relics]]).
+
+If they take spheres, the way out is the scene: a [[monstertype/shadow-dryad|shadow-possessed dryad]], the goblins, the Thing if they freed it. Run one obstacle and end on whether they get clear.",6,taster-session,1:10–1:25,The equinox,,
+taster-7-epilogue,7. Epilogue: where the spheres went,"Ask each player, in a sentence, what their PC did with what they took, and where they ended up. Then tell them what this was: Bith na Bró, the date you picked, and [[event/spheres-scattered|the Seven Spheres]] that the present remembers only as lore. Each holds a strand of magic in check (the table).
+
+End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land, the world will be wiped clean."" Their characters just decided how much of it came back.",7,taster-session,1:25–1:30,Bith na Bró,Sphere | Strand | At the start of play,"[[relic/red-sphere|Red]] | [[strand/wrath|Wrath]] (anger) | With Hann
+[[relic/yellow-sphere|Yellow]] | [[strand/dread|Dread]] (fear) | With Hann
+[[relic/green-sphere|Green]] | [[strand/envy|Envy]] | In the temple
+[[relic/blue-sphere|Blue]] | [[strand/sorrow|Sorrow]] | In the temple
+[[relic/black-sphere|Black]] | [[strand/despair|Despair]] | In the temple
+[[relic/purple-sphere|Purple]] | [[strand/pride|Pride]] | In the temple
+[[relic/pink-sphere|Pink]] | [[strand/delight|Delight]] | In the temple"
+taster-after,After the session: making it canon,"Write the outcome down the same day, in two layers, because different views see them (the table). Links point down the stack and campaigns cannot see each other, so nothing written in this layer reaches the coming campaign. Anything it must know goes into Bith na Bró: an Event after [[event/spheres-scattered|The Seven Spheres are scattered]], say, or a sphere's description. Keep the Bith na Bró version as the present remembers it, rumour and gaps included; the table's detail stays here.
+
+To write it, append rows to the layer's CSVs, or turn on **Author** in the right view (this one for what happened at the table, Bith na Bró's for canon), use **Edit** or **New**, then **Export**, and in the repository run `npm run merge-edits -- cairn-edits-<view>.json` and `npm run check`.
+
+Two things to know before relying on this plan:
+
+- This layer and the Empire's are still flagged as test layers (""remove when done""), though Bith na Bró now stands on them for its past. Keep them as the prologue and the flag should go; remove them and this plan goes with them.
+- The password keeps players from wandering in. It is not security: this layer's CSVs, the plan included, are in a public repository, and its data files are on the published site.",4,taster,,,What | Layer | Seen by,"What happened at the table: the PCs' fates, who freed the Thing, which spheres left with whom | Seven Silver Spheres | This one-shot only
+What the coming campaign should know: where each sphere went, how the scattering began | Bith na Bró | Every Bith na Bró campaign, Ravens in the Dells included"

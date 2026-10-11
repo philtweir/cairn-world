@@ -184,7 +184,7 @@ Warden's notes; it is not security. The layer's CSVs are in this public reposito
 files are on the site like any other view's. `--remove` takes the gate off.
 
 Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
-models in `layers/<key>/model/` (Bith na Bró's Strand of Magic is one), and Alizarin's `LayeredGraph` supports overlays, but the build does
+models in `layers/<key>/model/` (Bith na Bró's Strand of Magic and Seven Silver Spheres' Run Plan are two), and Alizarin's `LayeredGraph` supports overlays, but the build does
 not create overlay graphs yet.
 
 ## The interface: lenses from the ontology
@@ -603,7 +603,7 @@ Hollowmere"), "Linked from" backlinks, and a 1-hop relationship graph. URLs look
 `/#/<view>/<model>/<key>`. Switching view reloads the page, so each view starts with a clean ORM:
 the same entity differs between views. General-only entries (about 1,070 rules entries) are hidden
 until asked for. Rule text renders its markdown (lists, bold, italics), and Roll Tables render as
-tables.
+tables, as does any entry with a table in an `entries` field (`columns` heads it).
 
 There are no plain HTML pages: the site needs JavaScript, since the world is only read through
 Alizarin. As a check, the build reads each view back through the ORM with its own `GraphManager`
@@ -685,7 +685,7 @@ too: build and upload `dist/`.
 | `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map; places on the world globe (see Maps) |
 | `ravens-in-the-dells` | Campaign (solo) | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos. Set on Bith na Bró and the Empire (below) |
+| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos; a Run Plan for it as a 90-minute taster. Set on Bith na Bró and the Empire (below) |
 
 **The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
 stack is General › Bith na Bró › The Empire › the campaign, the Empire being Bith na Bró between
@@ -703,6 +703,14 @@ The spheres themselves are Bith na Bró's, so any of its campaigns can find them
 - The campaign layers its era on top: the spheres' item type and where they are (five in the
   temple, the Red and the Yellow with Archmage Hann), and its own spellbooks added to the strands'
   spells. The Ravens in the Dells see the spheres and strands, but not the temple or Hann.
+
+**Run Plan** (`layers/seven-silver-spheres/model/`, E29 Design or Procedure) is the Warden's plan
+for running the adventure as a 90-minute taster before a Bith na Bró campaign: the clock, the scenes
+with their times at the table and in the story, and which layer an outcome belongs in. Its parts are
+components of it (P148), so it reads as a tree under Texts & Lore, in `section` order, and its
+`[[references]]` put it under "Linked from" on each place, rule and table it uses. It is in the
+campaign's layer so that it is behind the same password as the adventure's notes: that keeps it out
+of players' way, but like the notes it is public in this repository.
 
 *Seven Silver Spheres* and The Empire are test layers, to be removed when done. *Seven Silver
 Spheres* is © Martin Orchard and is not openly licensed; both layers' `rights` say so. The layer condenses and

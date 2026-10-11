@@ -1,0 +1,9 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Text,string,1,E62_String,P3_has_note,,,,
+section,Section,number,1,E60_Number,P3_has_note,,,,
+part_of,Part of,resource-instance-list,1,E89_Propositional_Object,P148i_is_component_of,,,plan,
+at_table,At the table,string,1,E62_String,P3_has_note,,,,
+in_story,In the story,string,1,E62_String,P3_has_note,,,,
+columns,Columns,string,1,E62_String,P3_has_note,,,,
+entries,Table,string,1,E62_String,P3_has_note,,,,

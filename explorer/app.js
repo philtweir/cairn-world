@@ -70,10 +70,13 @@ const section = e => field(e, 'section') ?? Infinity;
 const inOrder = (a, b) => section(a) - section(b) || title(a).localeCompare(title(b));
 const HIDDEN = new Set(['name', 'description', 'entries', 'columns', 'die', 'mentions']);
 
+// A table in `entries` (a Roll Table's, or any model's with that field): `columns` heads every
+// column, or every one after the die.
 function rollTable(e) {
-  const head = [field(e, 'die') || 'Roll', ...(field(e, 'columns') ? field(e, 'columns').split(' | ') : [])];
   const rows = tableRows(field(e, 'entries'));
   const width = Math.max(...rows.map(r => r.length));
+  const columns = field(e, 'columns') ? field(e, 'columns').split(' | ') : [];
+  const head = columns.length === width ? columns : [field(e, 'die') || 'Roll', ...columns];
   return h('div', { class: 'wrap' }, h('table', {},
     head.length === width ? h('thead', {}, h('tr', {}, head.map(c => h('th', {}, c))))
       : field(e, 'die') && h('caption', {}, `Roll ${field(e, 'die')}`),
@@ -428,7 +431,7 @@ function renderDetail(e) {
     description && h('div', { class: 'text lead' }, md(blocks(description))),
     state.author && description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'References: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
       h('a', { class: 'ref rel-in' }, 'related the other way'), ' · ', h('a', { class: 'ref mention' }, 'mention only')),
-    e.model === 'rolltable' && field(e, 'entries') && rollTable(e),
+    field(e, 'entries') && rollTable(e),
     (stats.length || tags.length) ? h('div', { class: 'facts' },
       stats.map(f => h('span', { class: 'stat' }, label(f), h('b', {}, String(f.value), maxOf(f) && maxOf(f).value !== f.value ? h('small', {}, `/${maxOf(f).value}`) : null))),
       tags.map(f => h('span', { class: 'tag' }, h('small', {}, label(f)), plainValue(f)))) : null,
