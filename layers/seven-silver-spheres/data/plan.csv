@@ -6,7 +6,7 @@ The notes in this view are condensed, not the adventure: you still need the book
 Two things follow from where the adventure sits, on [[universe/bith-na-bro|Bith na Bró]] and [[universe/the-empire|the Empire]], its past:
 
 - **The PCs will not carry over.** The one-shot is a millennium or more before any Bith na Bró campaign. Use pregens and treat them as disposable; what carries over is where the spheres end up.
-- **The forest is on the campaign's map.** [[place/forest-of-dawn|The Forest of Dawn]] is the valley just north of [[place/the-dells|the Dells]], some 30–40 km from end to end (the Places lens draws it on the globe). Players who later travel the Dells can walk past where this happened.
+- **The forest is on the campaign's map.** [[place/forest-of-dawn|The Forest of Dawn]] is the valley just north of [[place/the-dells|the Dells]], about 60 km from the coast hills to the ridge at its head (the Places lens draws it on the globe). Players who later travel the Dells can walk past where this happened.
 
 Like the rest of this view, the plan is behind its password, and only the Warden should open it. The rules it links to are in every view, so players can read them in the Bith na Bró view, which has no password.",,,,,,
 taster-prep,Before the session,"About 30 minutes, the day before.
@@ -16,7 +16,9 @@ taster-prep,Before the session,"About 30 minutes, the day before.
 3. **Characters: pregens or rolled.** Three pregens exist: [[pc/bryn|Bryn]] (Half Witch), [[pc/gann|Gann]] (Marchguard) and [[pc/akshara|Akshara]] (Scrivener). Or give the session 10 more minutes and let the players roll their own, cut down to fit ([[plan/taster-1b-characters|1b. Roll characters]]); keep the pregens anyway, for anyone late or stuck. Full [[rule/character-creation|Character Creation]] takes 20–25 minutes at the table, which neither plan has.
 4. **Note the lethality.** HP 3–5 against [[monstertype/thing-in-the-tavern|the Thing in the Tavern]]'s d10 bite: a PC can die in one exchange. That is Cairn working as intended; say so at the start.
 5. **Print** what [[plan/taster-print|What to print]] lists, including the six adventure tables below, the [[rolltable/core-rules-reactions-table|Reactions]], [[rolltable/procedures-wilderness-events-table|Wilderness Events]] and [[rolltable/core-rules-scars-table-table|Scars]] tables, and [[plan/taster-clock|the clock]].",1,taster,,,Table | Use it for,"[[rolltable/sss-lore|Lore, Secrets & Rumours]] (d6) | Answers to ""what do we know?"", campfire talk, the River Spirit's answers
-[[rolltable/sss-encounters|Random Encounters]] (d6) | A Wilderness Event of 1 (Encounter)
+[[rolltable/sss-travel-encounters|Travel Encounters (2e)]] (d6) | A Wilderness Event of 1 (Encounter), with a Reactions roll
+[[rolltable/sss-signs|Signs (2e)]] (d6) | A Wilderness Event of 2 (Sign): a glimpse of somewhere not yet visited
+[[rolltable/sss-encounters|Random Encounters]] (d6) | The strange ones: a 6 on Travel Encounters
 [[rolltable/sss-treasures|Treasures]] (d6) | Temple side chambers
 [[rolltable/sss-relics|Relics]] (d6) | Temple side chambers; what the Thing pretends to offer
 [[rolltable/sss-spellbooks|Spellbooks]] (d6) | Temple side chambers
@@ -33,29 +35,29 @@ This plan: the clock, the routes, the session and the spheres | Warden | 3–4 s
 The six adventure tables | Warden | 1 side | [[plan/taster-prep|Before the session]]
 Rules tables, and the monsters' stat lines | Warden | 1 side | [[rolltable/core-rules-reactions-table|Reactions]], [[rolltable/procedures-wilderness-events-table|Wilderness Events]], [[rolltable/core-rules-scars-table-table|Scars]], [[rolltable/procedures-path-difficulty-table-1|Path Difficulty]]
 A day-and-watch grid, and the spheres' whereabouts | Warden | ½ side | [[plan/taster-clock|The clock]], [[plan/taster-7-epilogue|the epilogue]]"
-taster-clock,The clock,"The party starts at midday, two days before the Autumn Equinox. The temple doors open at dawn on the equinox and close 24 hours later ([[event/autumn-equinox|The Autumn Equinox]]). A day is three [[rule/procedures-watches|watches]], and the night watch is normally [[rule/procedures-make-camp|camp]]:
+taster-clock,The clock,"The adventure is set up for Cairn 2e's travel, as its author advises ([[campaign/seven-silver-spheres|the campaign page]] has the details). The party starts at midday on **day 1**, a week before the Autumn Equinox. The temple doors open at dawn on **day 8** and close 24 hours later ([[event/autumn-equinox|The Autumn Equinox]]). A day is three [[rule/procedures-watches|watches]]; the night watch is [[rule/procedures-make-camp|camp]], so a day has two watches of travel.
 
-- **Two days before:** afternoon, leg 1 from the Fork; night, camp.
-- **Eve of the equinox:** morning, leg 2; afternoon, leg 3; night, camp.
-- **The equinox:** the doors open at 6am; morning, leg 4. The doors stay open through the afternoon and night, and close at 6am.
+- **Every leg** (a route between two points), the old road included, is a short forest trail of **3 watches** ([[rule/procedures-travel-duration|Travel Duration]]): a day and a half.
+- **Every leg, a d6 to get lost: 1–2** ([[rule/procedures-travel|Travel]], [[rolltable/procedures-path-difficulty-table-1|Path Difficulty]]). Lost, they arrive at a different point from the one they meant: you pick one the route network joins, and it costs them a leg.
+- **No rolls on the last leg to the wall** (from the Rising Sun or the Great Oak): the porcelain soldiers keep that ground clear. Through the gatehouse, or along the well passage, takes no watches.
 
-**A condensed ruling, not the booklet's:** one leg (one route between two points) takes one day-watch. Every route from the Fork to the temple is four legs (the table), so the party arrives on the equinox morning with two watches to spare, if nothing goes wrong.
+Every route to the temple is three legs: **9 watches**, from about 13 of travel before the doors open. With nothing lost, the party is at the wall on the evening of day 5, with two days to spare (the table). **One wrong turn they can afford; two, they cannot**, unless they travel at night or skip camp. That is the pressure: let the players count it.
 
-On a trail, roll the 2-in-6 to get lost ([[rule/procedures-travel|Travel]], [[rolltable/procedures-path-difficulty-table-1|Path Difficulty]]); lost costs a watch. The road has no lost roll; it has the hazards instead. That is the real choice at the Fork, and the clock is what makes it a choice.
+**A condensed ruling for the taster, not the adventure's:** Cairn rolls [[rolltable/procedures-wilderness-events-table|Wilderness Events]] every watch, which is nine rolls a route. In 90 minutes, roll **once a leg**, and narrate camps in a sentence (a Ration each; Fatigue cleared). In the campaign, roll every watch.
 
-Both levers for running late are in the rules, and both cost the party, not you:
+The levers for running late are in the rules, and both cost the party, not you:
 
-- **Push on through the night:** roll twice on Wilderness Events ([[rule/procedures-night|Night]]).
-- **Skip camp:** each PC takes a Fatigue and is _deprived_ ([[rule/procedures-sleep|Sleep]], [[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).",4,taster,,,Route | Legs | Its cost,"Old road: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/rising-sun-tavern|Rising Sun]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The goblin camp, the Thing's voice, the arrow trap and the sentries
-Trail west: [[place/the-fork|Fork]] › [[place/old-ford|Old Ford]] › [[place/sister-stones|Sister Stones]] › [[place/secret-well|Secret Well]] › [[route/well-passage|passage]] › [[place/temple-of-st-rylan|Temple]] | 4 | Getting lost; the Stones; the ivy on the well
-Swamp: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/great-oak|Great Oak]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The Cursed Oak, then the gatehouse anyway"
+- **Travel at night:** roll Wilderness Events twice ([[rule/procedures-night|Night]]).
+- **Skip camp:** each PC takes a Fatigue and is _deprived_, and the going gets a step harder ([[rule/procedures-sleep|Sleep]], [[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).",4,taster,,,Route | Legs (watches) | Its cost,"Old road: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/rising-sun-tavern|Rising Sun]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 3 (9) | The goblin camp, the Thing's voice, the arrow trap and the sentries
+Trail west: [[place/the-fork|Fork]] › [[place/old-ford|Old Ford]] › [[place/sister-stones|Sister Stones]] › [[place/secret-well|Secret Well]] › [[route/well-passage|passage]] › [[place/temple-of-st-rylan|Temple]] | 3 (9) | The river; the Stones; the ivy on the well; no gatehouse
+Swamp: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/great-oak|Great Oak]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 3 (9) | The goblins, the Cursed Oak, then the gatehouse anyway"
 taster-session,"The session, minute by minute","Seven parts, in order, and an eighth (1b) if the players roll their own characters: the table gives both timings. **At 1:00 (1:10 with characters), check:** if the party has not passed its second point, cut to the approach (""you push on through the night"": roll twice on Wilderness Events, take the Fatigue). The temple is the one scene you cannot skip; it sets the campaign's hook.",5,taster,,,Part | Pregens (90 min) | Rolled (100 min) | In the story,"[[plan/taster-1-table|1. Set up the table]] | 0:00–0:10 | 0:00–0:05 | The reading of the will
 [[plan/taster-1b-characters|1b. Roll characters]] | (none) | 0:05–0:20 | The reading of the will
-[[plan/taster-2-fork|2. The Fork]] | 0:10–0:15 | 0:20–0:25 | Midday, two days out
-[[plan/taster-3-first|3. First point]] | 0:15–0:35 | 0:25–0:45 | Afternoon, then camp
-[[plan/taster-4-second|4. Second point]] | 0:35–0:55 | 0:45–1:05 | Eve of the equinox
-[[plan/taster-5-approach|5. The approach]] | 0:55–1:10 | 1:05–1:20 | Night, then dawn
-[[plan/taster-6-temple|6. The temple]] | 1:10–1:25 | 1:20–1:35 | The equinox
+[[plan/taster-2-fork|2. The Fork]] | 0:10–0:15 | 0:20–0:25 | Day 1, midday
+[[plan/taster-3-first|3. First point]] | 0:15–0:35 | 0:25–0:45 | Day 2, evening
+[[plan/taster-4-second|4. Second point]] | 0:35–0:55 | 0:45–1:05 | Day 4, midday
+[[plan/taster-5-approach|5. The approach]] | 0:55–1:10 | 1:05–1:20 | Day 5, evening, to the doors
+[[plan/taster-6-temple|6. The temple]] | 1:10–1:25 | 1:20–1:35 | Day 8, the equinox
 [[plan/taster-7-epilogue|7. Epilogue: where the spheres went]] | 1:25–1:30 | 1:35–1:40 | Bith na Bró"
 taster-1-table,1. Set up the table,"- **Pitch, one sentence:** a dead friend's letter sends you after seven lost silver spheres in a temple that opens one day a year, through a forest you have been told not to leave the paths of.
 - **Hand out the pregens** (or the backgrounds, for [[plan/taster-1b-characters|1b]]) and [[document/marcos-map|Marcos's map]] (the booklet's handout). Read [[document/marcos-letter|the letter]] aloud.
@@ -78,34 +80,34 @@ taster-1b-characters,"1b. Roll characters (optional, +10 minutes)","Cairn's [[ru
 6 | **The background's two d6 tables:** the character's special item or knack. Keep these whatever else is cut. | The background's page (""Linked from"" in the explorer)
 2 | **Virtue and Vice:** a d10 each. | [[rolltable/character-creation-virtue-table|Virtue]], [[rolltable/character-creation-vice-table|Vice]]
 1 | **Inventory:** ten slots, the backpack's six among them; bulky items take two. | [[rule/character-creation-inventory|Inventory]]"
-taster-2-fork,2. The Fork,"[[place/the-fork|The Fork]]: the overgrown old road, or the grassy forest trail. Describe both, state the clock (the doors open at dawn the day after tomorrow), and let them pick. Teach the [[rule/procedures-wilderness-exploration-cycle|Wilderness Exploration Cycle]] here, once:
+taster-2-fork,2. The Fork,"[[place/the-fork|The Fork]]: the overgrown old road, or the grassy forest trail. Describe both, state the clock (the doors open at dawn a week from now; each leg is a day and a half), and let them pick. Teach the [[rule/procedures-wilderness-exploration-cycle|Wilderness Exploration Cycle]] here, once:
 
 1. You describe the point and what lies ahead; they pick a direction.
-2. Each PC takes one [[rule/procedures-wilderness-actions|Wilderness Action]] (usually all Travel); you roll a d6 on [[rolltable/procedures-wilderness-events-table|Wilderness Events]].
+2. Each PC takes one [[rule/procedures-wilderness-actions|Wilderness Action]] (usually all Travel); you roll a d6 to see if they get lost, and a d6 on [[rolltable/procedures-wilderness-events-table|Wilderness Events]] (once a leg, in the taster: [[plan/taster-clock|the clock]]).
 3. Mark off torches, rations and Fatigue.
 
-Keep event results to a sentence unless they make a choice. Roll [[rolltable/sss-encounters|Random Encounters]] at most twice all session.
+Keep event results to a sentence unless they make a choice. An Encounter is [[rolltable/sss-travel-encounters|Travel Encounters]] with a Reactions roll; a Sign is [[rolltable/sss-signs|Signs]]. Let no more than two encounters reach the table all session.
 
-**Rolls here** ([[plan/crib-saves-here|all of them]]): Trails: a d6 each leg, lost on 1–2. Every watch: a d6 on Wilderness Events.",3,taster-session,0:10–0:15 (0:20–0:25 with characters),"Midday, two days out",,
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Every leg: a d6, lost on 1–2 (not on the last leg to the wall), and a d6 on Wilderness Events.",3,taster-session,0:10–0:15 (0:20–0:25 with characters),"Day 1, midday",,
 taster-3-first,3. First point,"Whichever they reach first, it is a 20-minute scene with a decision in it, not a fight by default.
 
 - **[[place/bridge-of-saints|Bridge of Saints]]** (road). [[creature/bridge-goblins|2d6 goblins]] mid-revel round the statue of St. Rylan, defaced into [[npc/goblob|Goblob]]. Roll [[rule/core-rules-reactions|Reactions]]; they are superstitious about the statue, and that is the lever. Its staff is a [[itemtype/stone-torch-of-st-rylan|Stone Torch of St. Rylan]], and taking it is a provocation. If it comes to blows, goblins (WIL 8) check [[rule/core-rules-morale|Morale]] at the first casualty: most fights here end in a rout, which is quick.
 - **[[place/old-ford|Old Ford]]** (trail). [[npc/river-spirit|The River Spirit]] answers questions, but only from mid-river, where the current is hard work and the waterfall is round the bend. Answer from [[rolltable/sss-lore|Lore, Secrets & Rumours]]: this is where the players learn about Statera, the shadow and Hann, cheaply.
 
-**Camp** (night): one Wilderness Event roll, a Ration each, Fatigue cleared. If they talk round the fire, give them one Lore result. Two minutes, not ten.
+**Camps:** a sentence each (a Ration each, Fatigue cleared). Once, if they talk round the fire, give them a Lore result. Two minutes, not ten.
 
-**Rolls here** ([[plan/crib-saves-here|all of them]]): Bridge: Reactions 2d6; sneaking or taking the staff, DEX; superstition, WIL; goblins' morale, WIL 8. Ford: holding the boat mid-river, STR _(a ruling)_.",4,taster-session,0:15–0:35 (0:25–0:45 with characters),"Afternoon, then camp",,
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Bridge: Reactions 2d6; sneaking or taking the staff, DEX; superstition, WIL; goblins' morale, WIL 8. Ford: holding the boat mid-river, STR _(a ruling)_.",4,taster-session,0:15–0:35 (0:25–0:45 with characters),"Day 2, evening",,
 taster-4-second,4. Second point,"- **[[place/rising-sun-tavern|Rising Sun Tavern]].** The best scene in the adventure for a short slot: a voice behind a warded, barred cellar door, offering treasure. [[creature/the-thing|The Thing]] has none, and freed, it gives a head start and a cruel smile. Play the voice; the players' choice is the scene. The seal is [[npc/archmage-hann|Hann]]'s work, the first sign of him.
 - **[[place/sister-stones|The Sister Stones]].** Three ways past, each with its cost (a WIL save, a STR save, or the climb). Quick, and it teaches saves.
 - **[[place/great-oak|The Great Oak]].** [[monstertype/cursed-oak|The Cursed Oak]] is deaf, senses everything but the slightest movement, and burns. A stealth puzzle with a deadly answer if it fails (d8, _blast_: [[rule/core-rules-attack-modifiers|Attack Modifiers]]).
 
-**Rolls here** ([[plan/crib-saves-here|all of them]]): Tavern: lying to the Thing, WIL; its bite past 0 HP, STR or d6 more STR. Stones: between, WIL or d4 WIL; around, STR. Oak: passing, DEX; off the path, STR _(a ruling)_.",5,taster-session,0:35–0:55 (0:45–1:05 with characters),Eve of the equinox,,
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Tavern: lying to the Thing, WIL; its bite past 0 HP, STR or d6 more STR. Stones: between, WIL or d4 WIL; around, STR. Oak: passing, DEX; off the path, STR _(a ruling)_.",5,taster-session,0:35–0:55 (0:45–1:05 with characters),"Day 4, midday",,
 taster-5-approach,5. The approach,"- **[[place/porcelain-gatehouse|Porcelain Gatehouse]]:** the arrow trap (d8, d6, d4, then dry; [[rule/procedures-traps|Traps]]) and [[creature/wall-sentries|the Porcelain Soldiers]], who attack only those who cross the battlements. Let the players watch the sentries change guard first; the eeriness is the point.
 - **[[place/secret-well|The Secret Well]]:** [[monstertype/creeping-ivy|the ivy]] on the well head, whose Critical Damage drags a victim down. Then the dark [[route/well-passage|passage]]: check who carries light ([[rule/procedures-light-sources|Light Sources]]; Gann has the lantern). The passage gets them into the grounds unseen, but the doors still open only at dawn.
 
-If they arrive in the night, they wait at the doors. Let them hear something in the trees.
+With nothing lost they reach the wall on day 5, and wait two days at the doors: food runs down (foraging is the Supply action), and the sentries change guard above them. Narrate the wait in a minute. Let them hear something in the trees.
 
-**Rolls here** ([[plan/crib-saves-here|all of them]]): Gatehouse: unaware, 2-in-6; arrows off STR. Wall: climbing, DEX. Well: climbing down, DEX; the ivy past 0 HP, STR or dragged down. Passage without light: WIL or panic.",6,taster-session,0:55–1:10 (1:05–1:20 with characters),"Night, then dawn",,
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Gatehouse: unaware, 2-in-6; arrows off STR. Wall: climbing, DEX. Well: climbing down, DEX; the ivy past 0 HP, STR or dragged down. Passage without light: WIL or panic.",6,taster-session,0:55–1:10 (1:05–1:20 with characters),"Day 5, evening, to the doors",,
 taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]]. Switch to the [[rule/procedures-dungeon-exploration-cycle|Dungeon Exploration Cycle]] only if they go into the side chambers. In order:
 
 1. The iron doors open at dawn. The mosaic of St. Rylan's life, and his potter's wheel ([[faction/faithful-of-statera|the Faithful of Statera]]).
@@ -117,7 +119,7 @@ taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]].
 
 If they take spheres, the way out is the scene: a [[monstertype/shadow-dryad|shadow-possessed dryad]], the goblins, the Thing if they freed it. Run one obstacle and end on whether they get clear.
 
-**Rolls here** ([[plan/crib-saves-here|all of them]]): Side chambers: a d6 on Dungeon Events if they linger or make noise. Carrying spheres: each is _bulky_ (two slots).",7,taster-session,1:10–1:25 (1:20–1:35 with characters),The equinox,,
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Side chambers: a d6 on Dungeon Events if they linger or make noise. Carrying spheres: each is _bulky_ (two slots).",7,taster-session,1:10–1:25 (1:20–1:35 with characters),"Day 8, the equinox",,
 taster-7-epilogue,7. Epilogue: where the spheres went,"Ask each player, in a sentence, what their PC did with what they took, and where they ended up. Then tell them what this was: Bith na Bró, the date you picked, and [[event/spheres-scattered|the Seven Spheres]] that the present remembers only as lore. Each holds a strand of magic in check (the table).
 
 End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land, the world will be wiped clean."" Their characters just decided how much of it came back.",8,taster-session,1:25–1:30 (1:35–1:40 with characters),Bith na Bró,Sphere | Strand | At the start of play,"[[relic/red-sphere|Red]] | [[strand/wrath|Wrath]] (anger) | With Hann
@@ -198,8 +200,8 @@ Anywhere | They run from a fight | **DEX** save | Caught; still in the fight
 Anywhere | Enemies' first loss; half lost | **WIL** save, the enemies | They flee or give up
 Anywhere | A stranger's mood is unclear | **2d6** Reactions | 2 hostile … 12 helpful
 Anywhere | A spell, in danger or _deprived_ | **WIL** save | Fatigue, a lost book, worse
-Each watch | Travelling | **d6** Wilderness Events | (the table)
-On a trail | Each leg | **d6**: lost on 1–2 | A watch lost finding the way
+Each leg (each watch, in the campaign) | Travelling | **d6** Wilderness Events | (the table): Encounter, Travel Encounters and Reactions; Sign, Signs
+Each leg, but not the last to the wall | Travelling | **d6**: lost on 1–2 | They reach a different point: a leg (3 watches) lost
 [[place/old-ford|Old Ford]] | Holding the boat mid-river to ask the spirit | **STR** save _(a ruling)_ | Swept downstream toward the waterfall: **DEX** or **STR** to get ashore
 [[place/sister-stones|Sister Stones]] | Walking between them | **WIL** save | **d4 WIL** damage
 [[place/sister-stones|Sister Stones]] | Going round them | **STR** save | No progress: try again, or another way
@@ -230,4 +232,4 @@ crib-lines,Lines to have ready,"- ""What do you do?"" (after every description: 
 - ""That takes you past zero. Take the rest off your **STR**, then save **STR** against the new number.""
 - ""They've lost one. [Rolls WIL for them.] They break and run.""
 - ""Does anyone do anything else before night?"" (then camp: a Ration each, Fatigue cleared)
-- ""You've a watch's travel before the doors open. Road or trail?""",6,taster-crib,,,,
+- ""The road's three legs: nine watches. You've about thirteen before the doors open. Road or trail?""",6,taster-crib,,,,
