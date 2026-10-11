@@ -70,13 +70,29 @@ export function refRelation(from, to, back) {
 
 // Every [[reference]] in an entity's text becomes a derived "Mentions" link (P67 refers to: the
 // text refers to its referent), so mentions show up in backlinks and graphs like any link.
+// `idOf` gives a reference's target id (or null).
+export function withMentions(e, idOf) {
+  const texts = e.fields.flatMap(f => (typeof f.value === 'string' ? [f.value] : f.datatype === 'semantic' ? (f.value ?? []).flatMap(i => i.fields.map(c => c.value).filter(v => typeof v === 'string')) : []));
+  const ids = [...new Set(texts.flatMap(refsIn).map(r => idOf(r.target)).filter(id => id && id !== e.id))];
+  if (ids.length) e.fields.push({ alias: 'mentions', label: 'Mentions', datatype: 'resource-instance-list', targets: ['*'], collection: null, rule: null, property: P67, value: ids, derived: true });
+  return e;
+}
 function addMentions(entities) {
   const resolve = resolverFor(entities);
-  for (const e of entities) {
-    const texts = e.fields.flatMap(f => (typeof f.value === 'string' ? [f.value] : f.datatype === 'semantic' ? (f.value ?? []).flatMap(i => i.fields.map(c => c.value).filter(v => typeof v === 'string')) : []));
-    const ids = [...new Set(texts.flatMap(refsIn).map(r => resolve(r.target)?.id).filter(id => id && id !== e.id))];
-    if (ids.length) e.fields.push({ alias: 'mentions', label: 'Mentions', datatype: 'resource-instance-list', targets: ['*'], collection: null, rule: null, property: P67, value: ids, derived: true });
+  for (const e of entities) withMentions(e, t => resolve(t)?.id);
+}
+
+// One resource (an ORM model instance) as an entity; `entry` ({ key, layers }) is from the
+// manifest's list when there is one, else given.
+async function readEntity(m, e, entry = m.entries?.find(x => x.id === e.id)) {
+  const fields = [];
+  for (const n of m.nodes.filter(x => !x.parent)) {
+    const value = n.datatype === 'semantic'
+      ? await readGroup(e, n, m.nodes.filter(c => c.parent === n.alias))
+      : await readField(e, n);
+    fields.push(fieldOf(n, value));
   }
+  return { model: m.alias, id: e.id, key: entry?.key ?? e.id, layers: entry?.layers ?? [], fields };
 }
 
 export async function readEntities(graphManager, manifest, onProgress = () => {}) {
@@ -84,23 +100,18 @@ export async function readEntities(graphManager, manifest, onProgress = () => {}
   for (const m of manifest.models) {
     // get() accepts the display name ("Monster Type") as well as the class name ("MonsterType").
     const all = await (await graphManager.get(m.name)).all();
-    const entryOf = new Map(m.entries.map(e => [e.id, e]));
-    const top = m.nodes.filter(n => !n.parent);
-    for (const e of all) {
-      const entry = entryOf.get(e.id);
-      const fields = [];
-      for (const n of top) {
-        const value = n.datatype === 'semantic'
-          ? await readGroup(e, n, m.nodes.filter(c => c.parent === n.alias))
-          : await readField(e, n);
-        fields.push(fieldOf(n, value));
-      }
-      entities.push({ model: m.alias, id: e.id, key: entry?.key ?? e.id, layers: entry?.layers ?? [], fields });
-    }
+    for (const e of all) entities.push(await readEntity(m, e));
     onProgress(m, entities.length);
   }
   addMentions(entities);
   return entities;
+}
+
+// Just one entry, read on its own: Alizarin asks its client for that resource alone. Its
+// mentions are added by the caller (withMentions), which can resolve references without the view.
+export async function readOne(graphManager, manifest, alias, id, entry) {
+  const m = manifest.models.find(x => x.alias === alias);
+  return readEntity(m, await (await graphManager.get(m.name)).find(id), entry);
 }
 
 // Every outgoing link of an entity: { id, label }. Links inside a group are labelled with the

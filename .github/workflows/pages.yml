@@ -28,11 +28,13 @@ jobs:
           cache: npm
       - run: npm ci
       # The Rós Madair emitter (a release binary the build fetches for the ros-madair version
-      # installed), kept between runs.
+      # installed) and DuckDB's Parquet extension (which the site serves), kept between runs.
       - uses: actions/cache@v4
         with:
-          path: .cache/ros-madair
-          key: ros-madair-emit-${{ hashFiles('node_modules/ros-madair/package.json') }}
+          path: |
+            .cache/ros-madair
+            .cache/duckdb-extensions
+          key: fetched-${{ hashFiles('node_modules/ros-madair/package.json', 'node_modules/@duckdb/duckdb-wasm/package.json') }}
       - run: npm run check
       - run: npm run build
       - uses: actions/configure-pages@v5

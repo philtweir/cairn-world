@@ -21,6 +21,7 @@ import * as A from 'alizarin/inline-full';
 import { parseCsv, toCsv } from './csv.mjs';
 import { buildExplorer } from './build-explorer.mjs';
 import { buildSearch } from './search-index.mjs';
+import { writeTables } from './tables.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
 import { makeResolver, REF } from './refs.mjs';
@@ -529,14 +530,19 @@ write('views.json', {
   layers: Object.fromEntries(shippedLayers.map(l => [l, describe(layers[l])])),
 });
 
+// Each view's manifest as built, with every entry's id, key and layers. Published without those
+// lists, which grow with the world (the explorer reads them from views/<view>/tables/ instead).
+const fullManifest = {};
 for (const v of viewKeys) {
   const index = {};
   // `overrides` is the layer audit (what each upper layer changes), for the view's home page.
-  const manifest = { view: v, models: [], overrides: views[v].overrides };
+  const manifest = fullManifest[v] = { view: v, models: [], overrides: views[v].overrides };
   for (const m of usedModels) {
     const vm = views[v].models[m.alias];
     if (!vm) continue;
     const gid = m.built.graph.graphid;
+    // Arches' resource descriptors: the name, which Rós Madair's tiles carry as descriptor_name.
+    for (const r of vm.resources) r.resourceinstance.descriptors = { name: r.resourceinstance.name };
     index[gid] = [`views/${v}/bundles/${gid}.json`];
     write(`views/${v}/bundles/${gid}.json`, { business_data: { resources: vm.resources } });
     for (const r of vm.resources) write(`views/${v}/resources/${r.resourceinstance.resourceinstanceid}.json`, { business_data: { resources: [r] } });
@@ -555,16 +561,51 @@ for (const v of viewKeys) {
     });
   }
   write(`views/${v}/index.json`, index);
-  write(`views/${v}/manifest.json`, manifest);
+  write(`views/${v}/manifest.json`, { ...manifest, models: manifest.models.map(({ entries, ...m }) => m) });
 }
 
-// Search and filtering for each open view (src/search-index.mjs): a Rós Madair substrate and a
-// Pagefind index. A gated view gets neither.
+// ---- 8. Read each view back through the ORM ----------------------------------------------
+// A check, not output: every view must load in Alizarin exactly as the explorer will load it. The
+// same resource id carries different data in different views, so each view gets its own
+// GraphManager and StaticStore. Vocabularies (RDM) are shared and identical across views.
+
+const dataPath = f => path.join(DIST, 'data', f);
+const generalOnly = {};   // view -> ids of the entries only General has
+for (const v of viewKeys) {
+  const index = JSON.parse(fs.readFileSync(dataPath(`views/${v}/index.json`), 'utf8'));
+  const manifest = fullManifest[v];
+  const client = new A.client.ArchesClientLocal({
+    allGraphFile: () => dataPath('graphs.json'),
+    graphIdToGraphFile: id => dataPath(`graphs/${id}.json`),
+    graphIdToResourcesFiles: id => (index[id] ?? []).map(dataPath),
+    resourceIdToFile: id => dataPath(`views/${v}/resources/${id}.json`),
+    collectionIdToFile: id => dataPath(`collections/${id}.json`),
+  });
+  const store = new A.StaticStore();
+  store.archesClient = client;
+  A.RDM.archesClient = client;
+  const gm = new A.GraphManager(client, store);
+  await gm.initialize();
+  const entities = await readEntities(gm, manifest);
+  const expected = manifest.models.reduce((n, m) => n + m.entries.length, 0);
+  if (entities.length !== expected) { console.error(`error: view ${v} read back ${entities.length} entries through the ORM, expected ${expected}`); process.exit(1); }
+  // The view's tables (src/tables.mjs): its entries, and the links its [[references]] make.
+  const graphOf = Object.fromEntries(manifest.models.map(m => [m.alias, m.graphid]));
+  await writeTables(dataPath(`views/${v}/tables`), {
+    resources: entities.map(e => ({ resource_id: e.id, model: e.model, graph_id: graphOf[e.model], key: e.key, name: String(e.fields.find(f => f.alias === 'name')?.value ?? e.key), layers: e.layers, general: e.layers.length === 1 && e.layers[0] === GENERAL })),
+    mentions: entities.flatMap(e => (e.fields.find(f => f.derived)?.value ?? []).map(t => ({ src_resource: e.id, src_node: 'mentions', src_nodegroup: 'mentions', src_tile: null, target_resource: t }))),
+  });
+  generalOnly[v] = new Set(entities.filter(e => e.layers.length === 1 && e.layers[0] === GENERAL).map(e => e.id));
+}
+// Every view's Rós Madair substrate, which the explorer reads everything from, and, for an open
+// view, its Pagefind index (src/search-index.mjs).
 {
-  const search = await buildSearch(ROOT, DIST, open.map(v => ({
+  const search = await buildSearch(ROOT, DIST, viewKeys.map(v => ({
     key: v,
     models: usedModels.filter(m => views[v].models[m.alias]).map(m => ({ alias: m.alias, graphid: m.built.graph.graphid })),
     resources: usedModels.flatMap(m => views[v].models[m.alias]?.resources ?? []),
+    text: !layers[v].gate,
+    general: generalOnly[v],
   })));
   const meta = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));
   for (const d of meta.views) if (search[d.key]) d.search = search[d.key];
@@ -585,30 +626,5 @@ for (const v of viewKeys) {
   write('views.json', { build: hash.digest('hex').slice(0, 12), ...views });
 }
 
-// ---- 8. Read each view back through the ORM ----------------------------------------------
-// A check, not output: every view must load in Alizarin exactly as the explorer will load it. The
-// same resource id carries different data in different views, so each view gets its own
-// GraphManager and StaticStore. Vocabularies (RDM) are shared and identical across views.
-
-const dataPath = f => path.join(DIST, 'data', f);
-for (const v of viewKeys) {
-  const index = JSON.parse(fs.readFileSync(dataPath(`views/${v}/index.json`), 'utf8'));
-  const manifest = JSON.parse(fs.readFileSync(dataPath(`views/${v}/manifest.json`), 'utf8'));
-  const client = new A.client.ArchesClientLocal({
-    allGraphFile: () => dataPath('graphs.json'),
-    graphIdToGraphFile: id => dataPath(`graphs/${id}.json`),
-    graphIdToResourcesFiles: id => (index[id] ?? []).map(dataPath),
-    resourceIdToFile: id => dataPath(`views/${v}/resources/${id}.json`),
-    collectionIdToFile: id => dataPath(`collections/${id}.json`),
-  });
-  const store = new A.StaticStore();
-  store.archesClient = client;
-  A.RDM.archesClient = client;
-  const gm = new A.GraphManager(client, store);
-  await gm.initialize();
-  const entities = await readEntities(gm, manifest);
-  const expected = manifest.models.reduce((n, m) => n + m.entries.length, 0);
-  if (entities.length !== expected) { console.error(`error: view ${v} read back ${entities.length} entries through the ORM, expected ${expected}`); process.exit(1); }
-}
 await buildExplorer(ROOT, DIST, JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8')).build);
 console.log(`wrote ${rel(DIST)}/: explorer and tile store for ${viewKeys.length} view(s), each read back through the ORM`);

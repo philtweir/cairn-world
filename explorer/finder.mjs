@@ -1,19 +1,19 @@
 // Finding entries without reading them all: filters over the view's Rós Madair substrate (run by
-// query-engine.mjs, loaded on first use) and text search over its Pagefind index (both built by
-// src/search-index.mjs). Results are entry ids, so they work whether or not the entries themselves
-// are loaded.
+// query-engine.mjs) and text search over its Pagefind index (both built by src/search-index.mjs).
+// Results are entry ids (with a search match's record), so no entry is read to find it.
 //
 // A filter is a set of conditions on one model's fields, compiled as Rós Madair query IR:
 //   concept field  is one of its collection's terms         { concept: { path, op: 'is', value } }
 //   link field     links to a given entry, to anything, or to nothing
 //                                                           { has_link: { path, target? } }, { not: ... }
 //   geometry       overlaps the box a map is showing        { bbox: { path, min_lng, ... } }
-// Numbers are not indexed by this Rós Madair release (only dates are ordered), so they have no
-// filter yet.
+//   number         within a range                           { range: { path, lo, hi } }
+// A number is indexed as round(value x 10^decimals), `decimals` from the node's config (default 6),
+// as Rós Madair's emitter scales it, so the range is scaled the same way.
 
-const FILTERABLE = d => d === 'concept' || d === 'concept-list' || d === 'resource-instance' || d === 'resource-instance-list' || d === 'geojson-feature-collection';
+const FILTERABLE = d => ['concept', 'concept-list', 'resource-instance', 'resource-instance-list', 'geojson-feature-collection', 'number'].includes(d);
 
-export function makeFinder({ data, suffix, view, models, h, put, icon }) {
+export function makeFinder({ data, suffix, view, models, engine, h, put, icon }) {
   const search = view.search ?? null;
   const graphText = new Map();   // graphid -> the model's Arches JSON (text), fetched once
   const graph = gid => graphText.get(gid) ?? graphText.set(gid, fetch(`${data}/graphs/${gid}.json${suffix}`).then(r => r.text())).get(gid);
@@ -29,17 +29,7 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
       .map(l => ({ id: l.id, label: l.value })).sort((a, b) => a.label.localeCompare(b.label));
   };
 
-  let engine = null;
-  const getEngine = () => (engine ??= (async () => {
-    const graphs = await Promise.all(models.map(m => graph(m.graphid)));
-    // The engine bundle, beside app.js, and its WASM: paths by their own versions (set by
-    // src/build-explorer.mjs), not the data's, so they stay cached across deploys. A URL in a
-    // variable, so the bundler leaves it to load later.
-    const at = p => new URL(p, import.meta.url).href;
-    const url = at(__ENGINE__.js);
-    const { openEngine } = await import(url);
-    return openEngine({ duckdb: at(__ENGINE__.duckdb), compiler: at(__ENGINE__.compiler), substrate: `${data}/${search.substrate}`, graphs, suffix });
-  })().catch(err => { engine = null; throw err; }));   // a failed load is tried again next time
+  const getEngine = async () => engine;
 
   let pagefind = null;
   const getPagefind = () => (pagefind ??= (async () => {
@@ -76,6 +66,9 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
     canFilter: !!search?.substrate,
     canSearch: !!search?.pagefind,
     active: () => results.size > 0,
+    // Which models a filter is set on, and the ids that pass among some models.
+    filtered: alias => results.has(alias),
+    ids: aliases => aliases.flatMap(a => [...(results.get(a) ?? [])]),
     // Whether an entry passes the filters: models without a filter drop out while any is set.
     passes: e => !results.size || !!results.get(e.model)?.has(e.id),
     clear() { conditions.clear(); results = new Map(); runs++; },
@@ -85,7 +78,7 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
       const box = h('div', { class: 'filters' });
       const status = h('p', { class: 'fstatus', role: 'status' });
       const apply = async () => {
-        status.textContent = engine ? 'Filtering…' : 'Loading the query engine (DuckDB)…';
+        status.textContent = 'Filtering…';
         try { if (await run()) { status.textContent = ''; onChange(); } }
         catch (err) { console.error(err); status.textContent = `Filtering failed: ${err?.message ?? err}`; }
       };
@@ -113,7 +106,7 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
               h('option', { value: '' }, 'Any'), h('option', { value: 'some' }, 'Has one'), h('option', { value: 'none' }, 'Has none'),
               search?.pagefind && h('option', { value: 'to' }, 'Is…'));
             const list = h('datalist', { id: `fl-${m.alias}-${n.alias}` });
-            const input = h('input', { type: 'search', list: list.id, placeholder: 'Type a name', 'aria-label': `${n.name}: which`, hidden: true });
+            const input = h('input', { type: 'search', list: list.id, placeholder: 'Type a name', 'aria-label': `${m.name}: ${n.name}: which`, hidden: true });
             const found = new Map();
             sel.value = current?.mode ?? '';
             if (current?.mode === 'to') { input.hidden = false; input.value = current.label; }
@@ -141,6 +134,18 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
             };
             return h('label', {}, h('span', {}, n.name), h('div', { class: 'frow' }, sel, input, list));
           }
+          if (n.datatype === 'number') {
+            const lo = h('input', { type: 'number', step: 'any', placeholder: 'from', 'aria-label': `${m.name}: ${n.name}: from`, value: current?.lo ?? '' });
+            const hi = h('input', { type: 'number', step: 'any', placeholder: 'to', 'aria-label': `${m.name}: ${n.name}: to`, value: current?.hi ?? '' });
+            const change = async () => {
+              if (lo.value === '' && hi.value === '') { set(m.alias, n.alias, null); return; }
+              const d = Math.min(18, JSON.parse(await graph(m.graphid)).graph[0].nodes.find(x => x.alias === n.alias)?.config?.decimals ?? 6);
+              const scale = v => Math.round(Number(v) * 10 ** d);
+              set(m.alias, n.alias, { lo: lo.value, hi: hi.value, where: { range: { path: n.alias, lo: lo.value === '' ? -(2 ** 53) : scale(lo.value), hi: hi.value === '' ? 2 ** 53 : scale(hi.value) } } });
+            };
+            lo.onchange = change; hi.onchange = change;
+            return h('label', {}, h('span', {}, n.name), h('div', { class: 'frow' }, lo, '–', hi));
+          }
           // Geometry: the box the map on screen is showing.
           const show = h('span', { class: 'fbox' }, current ? current.label : 'Anywhere');
           const use = h('button', { type: 'button' }, 'Use the map’s view');
@@ -163,7 +168,8 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
       return box;
     },
 
-    // Text search: the best matches, in rank order, that `accept` lets through, up to `limit`
+    // Text search: the best matches, in rank order, whose records (id, model, key, title, general)
+    // `accept` lets through, up to `limit`
     // (each match's details are a small file of their own, so they are read only as needed, and
     // reading stops once there are enough).
     async search(q, accept, limit) {
@@ -173,7 +179,7 @@ export function makeFinder({ data, suffix, view, models, h, put, icon }) {
       let read = 0;
       for (; read < s.results.length && hits.length < limit; read += 40) {
         const ds = await Promise.all(s.results.slice(read, read + 40).map(r => r.data()));
-        for (const d of ds) if (hits.length < limit && accept(d.meta.id)) hits.push({ id: d.meta.id, excerpt: d.excerpt });
+        for (const d of ds) if (hits.length < limit && accept(d.meta)) hits.push({ id: d.meta.id, excerpt: d.excerpt, meta: d.meta });
       }
       // `complete`: every match was looked at, so the hits are all there are (in view).
       return { hits, complete: read >= s.results.length };

@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { build } from 'esbuild';
 
 // Icons: Lucide (lucide-static, ISC), monochrome line icons that take the text colour. Lens icons
@@ -20,6 +21,10 @@ function buildIconSprite(root, dist) {
   });
   fs.writeFileSync(path.join(dist, 'icons.svg'), `<svg xmlns="http://www.w3.org/2000/svg"><!-- Lucide icons, ISC licence: https://lucide.dev -->${symbols.join('')}</svg>\n`);
 }
+
+// The DuckDB inside @duckdb/duckdb-wasm (1.32.0 is DuckDB v1.4.3), whose extensions are fetched for
+// it: change with the package.
+const DUCKDB_EXTENSIONS = { version: 'v1.4.3' };
 
 // `version` (the data build hash) is added to the page's script and stylesheet URLs, so a new
 // deploy's page never runs a cached older bundle.
@@ -46,6 +51,27 @@ export async function buildExplorer(root, dist, version) {
   for (const f of ['duckdb-eh.wasm', 'duckdb-browser-eh.worker.js']) fs.copyFileSync(path.join(root, 'node_modules/@duckdb/duckdb-wasm/dist', f), path.join(out, engine.duckdb, f));
   fs.mkdirSync(path.dirname(path.join(out, engine.compiler)), { recursive: true });
   fs.copyFileSync(path.join(root, 'node_modules/ros-madair/ros_madair_wasm_bg.wasm'), path.join(out, engine.compiler));
+  // DuckDB's Parquet reader is an extension duckdb-wasm fetches on first use, by default from
+  // extensions.duckdb.org; served from the site instead (fetched once into .cache/), so the
+  // explorer does not depend on that host. The engine uses it only if its DuckDB is the version
+  // it was fetched for, and falls back to extensions.duckdb.org if it cannot be read.
+  const ext = `${DUCKDB_EXTENSIONS.version}/wasm_eh/parquet.duckdb_extension.wasm`;
+  const cached = path.join(root, '.cache', 'duckdb-extensions', ext);
+  if (!fs.existsSync(cached)) {
+    try {
+      fs.mkdirSync(path.dirname(cached), { recursive: true });
+      execFileSync('curl', ['-sfL', '--retry', '3', '-o', `${cached}.part`, `https://extensions.duckdb.org/${ext}`]);
+      fs.renameSync(`${cached}.part`, cached);
+    } catch {
+      fs.rmSync(`${cached}.part`, { force: true });
+      console.warn(`warning: could not fetch DuckDB's Parquet extension (${ext}); the explorer will fetch it from extensions.duckdb.org`);
+    }
+  }
+  if (fs.existsSync(cached)) {
+    engine.extensions = { version: DUCKDB_EXTENSIONS.version, repository: `${engine.duckdb}extensions` };
+    fs.mkdirSync(path.dirname(path.join(out, engine.extensions.repository, ext)), { recursive: true });
+    fs.copyFileSync(cached, path.join(out, engine.extensions.repository, ext));
+  }
 
   await build({
     entryPoints: [path.join(root, 'explorer/app.js')],

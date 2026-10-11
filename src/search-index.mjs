@@ -9,8 +9,12 @@
 //   dist/data/views/<view>/pagefind/   a Pagefind index of every entry's text (its name, and every
 //     text value in its tiles), one record per entry, its meta carrying the entry's id and model.
 //
-// A view behind a password gate gets neither. The gate only keeps casual visitors out (its data is
-// published like any other), but an index would make what it holds easy to find without passing it.
+// Every view gets a substrate (the explorer reads everything from it); only an open one gets a
+// Pagefind index. The gate only keeps casual visitors out (its data is published like any other),
+// but a text index would make what it holds easy to find without passing it.
+//
+// views: [{ key, models: [{ alias, graphid }], resources, text: build a Pagefind index,
+//   general: ids only General has }]
 //
 // The emitter is Rós Madair's release binary for the same version as the `ros-madair` package (one
 // compiler, two consumers: they must agree), fetched once into .cache/ros-madair/<version>/, or
@@ -51,7 +55,6 @@ function texts(v, out) {
   return out;
 }
 
-// views: [{ key, models: [{ alias, graphid }], resources: [business-data resource] }]
 export async function buildSearch(root, dist, views) {
   const bin = emitter(root);
   const done = {};
@@ -70,6 +73,8 @@ export async function buildSearch(root, dist, views) {
       fs.rmSync(work, { recursive: true, force: true });
     }
 
+    done[v.key] = { substrate: `views/${v.key}/substrate/`, tables: `views/${v.key}/tables/` };
+    if (!v.text) continue;
     const { index, errors } = await pagefind.createIndex({ forceLanguage: 'en' });
     if (errors.length) throw new Error(`pagefind: ${errors.join('; ')}`);
     const aliasOf = Object.fromEntries(v.models.map(m => [m.graphid, m.alias]));
@@ -81,7 +86,8 @@ export async function buildSearch(root, dist, views) {
         url: `#/${v.key}/${model}/${ri.legacyid}`, content, language: 'en',
         // No Pagefind filters: it writes their values in a different order each build, and the
         // build must give the same bytes from the same data. The explorer checks meta.model.
-        meta: { title: ri.name, id: ri.resourceinstanceid, model, key: ri.legacyid },
+        // `general`: only General has it (hidden unless asked for).
+        meta: { title: ri.name, id: ri.resourceinstanceid, model, key: ri.legacyid, ...(v.general?.has(ri.resourceinstanceid) ? { general: '1' } : {}) },
       });
       if (res.errors.length) throw new Error(`pagefind ${ri.legacyid}: ${res.errors.join('; ')}`);
     }
@@ -90,7 +96,7 @@ export async function buildSearch(root, dist, views) {
     const w = await index.writeFiles({ outputPath: pf });
     if (w.errors.length) throw new Error(`pagefind: ${w.errors.join('; ')}`);
     await index.deleteIndex();
-    done[v.key] = { substrate: `views/${v.key}/substrate/`, pagefind: `views/${v.key}/pagefind/` };
+    done[v.key].pagefind = `views/${v.key}/pagefind/`;
   }
   await pagefind.close();
   return done;

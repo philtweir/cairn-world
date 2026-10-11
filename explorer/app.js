@@ -1,10 +1,11 @@
-// Cairn World explorer: loads the tile store with Alizarin in the browser, reads every entry
-// through its ORM, and shows it through lenses taken from the ontology (src/lenses.mjs): a home
+// Cairn World explorer: reads a view as it is needed (explorer/store.mjs: the view's Rós Madair
+// substrate and tables through DuckDB, an entry's fields through Alizarin) and shows it through lenses taken from the ontology (src/lenses.mjs): a home
 // page for the view's root entry, one page per lens, detail pages and a 1-hop graph.
 // Everything user-visible is built with DOM text nodes; data never goes through innerHTML.
 
 import * as A from 'alizarin';
-import { readEntities, backlinks, links, resolverFor, refRelation } from '../src/world-read.mjs';
+import { links, refRelation } from '../src/world-read.mjs';
+import { makeStore } from './store.mjs';
 import { blocks, inline, tableRows } from '../src/md.mjs';
 import { assignLenses } from '../src/lenses.mjs';
 import { drawLens } from './lens-views.mjs';
@@ -15,6 +16,7 @@ import { makeFinder, excerptNodes } from './finder.mjs';
 const DATA = new URL('./data', import.meta.url).href;
 let V = '';   // ?v=<build>, set from views.json
 const LIST_LIMIT = 200;
+const LENS_LIMIT = 500;   // entries a lens lays out at most
 const GRAPH_LIMIT = 14;
 
 const $ = id => document.getElementById(id);
@@ -51,7 +53,7 @@ const md = nodes => nodes.map(n => {
   if (typeof n === 'string') return n;
   if (n.t === 'ref') {
     const href = n.target.includes('/') ? `#/${[state.view, ...n.target.split('/')].map(encodeURIComponent).join('/')}` : null;
-    const t = state.resolve?.(n.target);
+    const t = state.byId.get(state.store?.refId(n.target));
     if (!href && !t) return md(n.c);
     if (!state.author || !t) return h('a', { href: href ?? route(t), class: 'ref' }, md(n.c));
     const rel = refRelation(textOf, t, state.back);
@@ -74,10 +76,9 @@ function rollTable(e) {
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, md(inline(c)))))))));
 }
 
-const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, author: (() => { try { return localStorage.getItem('cairn-world:author') === '1'; } catch { return false; } })(), ontology: null, lenses: [], lensOf: {}, root: null, overrides: [], finder: { passes: () => true, canFilter: false, canSearch: false }, hits: null, filterScope: null };
+const state = { view: null, viewsMeta: null, models: [], byId: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, author: (() => { try { return localStorage.getItem('cairn-world:author') === '1'; } catch { return false; } })(), ontology: null, lenses: [], lensOf: {}, root: null, overrides: [], store: null, counts: {}, finder: { passes: () => true, canFilter: false, canSearch: false }, hits: null, filterScope: null };
 
 const title = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
-const text = e => e.fields.map(f => (typeof f.value === 'string' ? f.value : '')).join(' ').toLowerCase();
 const route = e => `#/${state.view}/${e.model}/${e.key}`;
 // Entries that come only from General are the shared rules reference, hidden by default.
 const isGeneral = e => e.layers.length === 1 && e.layers[0] === 'general';
@@ -108,38 +109,46 @@ async function load() {
   fillViews();
   const v = state.viewsMeta.views.find(x => x.key === state.view);
   if (v.gate) await unlock(v);
-  const [manifest, index, ontology] = await Promise.all([
+  const [manifest, ontology] = await Promise.all([
     fetch(`${DATA}/views/${state.view}/manifest.json${V}`).then(r => r.json()),
-    fetch(`${DATA}/views/${state.view}/index.json${V}`).then(r => r.json()),
     fetch(`${DATA}/ontology.json${V}`).then(r => r.json()),
   ]);
   state.ontology = ontology;
+  state.models = manifest.models;
+  state.matches = Object.assign({}, ...manifest.models.map(m => m.matches ?? {}));
+  state.modelOf = Object.fromEntries(manifest.models.map(m => [m.alias, m]));
+  ({ lenses: state.lenses, lensOf: state.lensOf } = assignLenses(ontology, manifest.models.map(m => ({ alias: m.alias, ontology: m.ontology }))));
+  state.overrides = manifest.overrides ?? [];
+
+  // The database (DuckDB over the view's Parquet: explorer/query-engine.mjs, a bundle of its own
+  // named by its version, so it stays cached across deploys) and Alizarin, side by side.
+  status('Opening the world…');
+  const graphs = await Promise.all(manifest.models.map(m => fetch(`${DATA}/graphs/${m.graphid}.json${V}`).then(r => r.text())));
+  const at = p => new URL(p, import.meta.url).href;
+  const engine = import(at(__ENGINE__.js)).then(({ openEngine }) => openEngine({
+    duckdb: at(__ENGINE__.duckdb), compiler: at(__ENGINE__.compiler),
+    extensions: __ENGINE__.extensions ? { ...__ENGINE__.extensions, repository: at(__ENGINE__.extensions.repository) } : null,
+    substrate: `${DATA}/${v.search.substrate}`, tables: `${DATA}/${v.search.tables}`, graphs, suffix: V,
+  }));
   await A.wasmReady;
+  // Alizarin reads graphs and vocabularies as static files; its resources come from the
+  // substrate (the store answers getResource from the Parquet).
   const archesClient = new A.client.ArchesClientRemoteStatic(DATA, {
     allGraphFile: () => `graphs.json${V}`,
     graphToGraphFile: meta => `graphs/${meta.graphid}.json${V}`,
     graphIdToGraphFile: id => `graphs/${id}.json${V}`,
-    graphIdToResourcesFiles: id => (index[id] ?? []).map(f => f + V),
-    resourceIdToFile: id => `views/${state.view}/resources/${id}.json${V}`,
     collectionIdToFile: id => `collections/${id}.json${V}`,
   });
   A.graphManager.archesClient = archesClient;
   A.staticStore.archesClient = archesClient;
   A.RDM.archesClient = archesClient;
+  state.engine = await engine;
+  state.store = makeStore({ engine: state.engine, A, client: archesClient, manifest, state });
   await A.graphManager.initialize();
-
-  state.models = manifest.models;
-  state.matches = Object.assign({}, ...manifest.models.map(m => m.matches ?? {}));
-  state.modelOf = Object.fromEntries(manifest.models.map(m => [m.alias, m]));
-  state.entities = await readEntities(A.graphManager, manifest, (m, n) => status(`Reading ${m.name}… (${n} entries)`));
-  for (const e of state.entities) { state.byId.set(e.id, e); state.byRoute.set(`${e.model}/${e.key}`, e); }
-  state.back = backlinks(state.entities);
-  state.resolve = resolverFor(state.entities);
-  ({ lenses: state.lenses, lensOf: state.lensOf } = assignLenses(ontology, manifest.models.map(m => ({ alias: m.alias, ontology: m.ontology }))));
+  state.counts = await state.store.counts(state.view);
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
-  state.root = state.entities.find(e => e.key === state.view && e.layers[0] === state.view) ?? null;
-  state.overrides = manifest.overrides ?? [];
-  state.finder = makeFinder({ data: DATA, suffix: V, view: state.viewsMeta.views.find(x => x.key === state.view), models: manifest.models, h, put, icon });
+  [state.root = null] = await state.store.full([state.store.idOf(v.kind, state.view)]);
+  state.finder = makeFinder({ data: DATA, suffix: V, view: v, models: manifest.models, engine: state.engine, h, put, icon });
 }
 
 // ---- Password gate ----------------------------------------------------------------------------
@@ -205,7 +214,7 @@ function fillViews() {
 
 // ---- Sidebar --------------------------------------------------------------------------------
 
-const visible = e => (state.rules || !isGeneral(e)) && e !== state.root;
+const visible = e => (state.rules || !isGeneral(e)) && e.id !== state.root?.id;
 const lensById = id => state.lenses.find(l => l.id === id);
 const inLens = (lens, e) => state.lensOf[e.model] === lens.id;
 // The land under maps, and its relief: from the topmost layer in this view's stack that has each,
@@ -224,63 +233,70 @@ const basemap = () => (state.basemap ??= (() => {
   } : null));
 })());
 const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
-// A search runs on the view's text index when it has one (state.hits, the matches in rank order),
-// else over the loaded text.
-const matches = e => {
-  if (state.filter.size && !state.filter.has(e.model)) return false;
-  if (!state.finder.passes(e)) return false;
-  if (!state.q) return true;
-  if (state.hits) return state.hits.rank.has(e.id);
-  return title(e).toLowerCase().includes(state.q) || text(e).includes(state.q);
-};
+// How many entries a model shows (General-only ones only when asked for; never the root).
+const shownCount = alias => { const c = state.counts[alias]; if (!c) return 0; return c.n - (state.rules ? 0 : c.general) - (state.root?.model === alias ? 1 : 0); };
 
-// The list shows the current lens (or, on the home page, everything); a search looks everywhere.
-function renderSide(currentId) {
+// The list: the current lens's entries (or, on the home page, everything), a page at a time; a
+// search (the view's text index, else names) or a filter narrows it. Read as it is drawn, so a
+// later draw supersedes one still reading.
+let sideDraws = 0;
+async function renderSide(currentId) {
+  const mine = ++sideDraws;
   const scope = !state.q && state.scope ? lensById(state.scope) : null;
-  const inScope = e => visible(e) && (!scope || inLens(scope, e));
+  const scopeModels = state.models.filter(m => (!scope || state.lensOf[m.alias] === scope.id) && shownCount(m.alias));
   put($('scope'), state.q ? 'Search: everything' : scope ? scope.label : 'Everything');
-  const counts = {};
-  for (const e of state.entities) if (inScope(e)) counts[e.model] = (counts[e.model] ?? 0) + 1;
-  put($('chips'), state.models.filter(m => counts[m.alias]).map(m =>
+  put($('chips'), scopeModels.map(m =>
     h('button', {
       class: 'chip', type: 'button', 'aria-pressed': state.filter.has(m.alias),
       onclick: () => { state.filter.has(m.alias) ? state.filter.delete(m.alias) : state.filter.add(m.alias); renderSide(currentId); },
-    }, m.name, h('small', {}, counts[m.alias]))));
+    }, m.name, h('small', {}, shownCount(m.alias)))));
 
-  // The filter panel: for the models in the list. Moving to another lens starts it afresh.
+  // The filter panel: for the models in the lens. Moving to another lens starts it afresh.
   const filters = $('filters');
   filters.hidden = !state.finder.canFilter;
   const lens = state.scope ? lensById(state.scope) : null;
-  const panelModels = state.models.filter(m => (lens ? lens.models.includes(m.alias) : true) && state.entities.some(e => e.model === m.alias && visible(e)));
+  const panelModels = state.models.filter(m => (lens ? lens.models.includes(m.alias) : true) && shownCount(m.alias));
   const scopeKey = panelModels.map(m => m.alias).join(' ');
   if (state.finder.canFilter && scopeKey !== state.filterScope) {
     state.filterScope = scopeKey;
     state.finder.clear();
     // A change of filter re-asks the search, whose best matches depend on it.
-    put($('filter-panel'), state.finder.panel(panelModels, () => (state.q && state.finder.canSearch ? $('q').dispatchEvent(new Event('input')) : renderSide(currentId))));
+    put($('filter-panel'), state.finder.panel(panelModels, () => (state.q ? $('q').dispatchEvent(new Event('input')) : renderSide(currentId))));
   }
+  $('rules-count').textContent = `(${Object.values(state.counts).reduce((n, c) => n + c.general, 0)})`;
 
-  const nRules = state.entities.filter(isGeneral).length;
-  $('rules-count').textContent = `(${nRules})`;
-
+  const chosen = scopeModels.filter(m => !state.filter.size || state.filter.has(m.alias)).map(m => m.alias);
+  let rows, total = null;
   const rank = state.q && state.hits?.rank;
-  const rows = state.entities.filter(e => inScope(e) && matches(e))
-    .sort((a, b) => state.models.findIndex(m => m.alias === a.model) - state.models.findIndex(m => m.alias === b.model) || (rank ? rank.get(a.id) - rank.get(b.id) : title(a).localeCompare(title(b))));
-  const shown = rows.slice(0, LIST_LIMIT);
+  if (state.q && state.hits) rows = state.hits.list;
+  else if (state.q) rows = await state.store.named(state.q, { general: state.rules, limit: LIST_LIMIT });
+  else if (state.finder.active()) {
+    const ids = state.finder.ids(chosen);
+    rows = await state.store.page({ models: chosen.filter(a => state.finder.filtered(a)), general: state.rules, ids, limit: LIST_LIMIT });
+    total = ids.length;
+  } else {
+    rows = await state.store.page({ models: chosen, general: state.rules, limit: LIST_LIMIT });
+    total = chosen.reduce((n, a) => n + shownCount(a), 0);
+  }
+  if (mine !== sideDraws) return;
+  rows = rows.filter(e => visible(e) && (!state.filter.size || state.filter.has(e.model)));
+  if (rank) rows.sort((a, b) => state.models.findIndex(m => m.alias === a.model) - state.models.findIndex(m => m.alias === b.model) || rank.get(a.id) - rank.get(b.id));
+  const perModel = alias => (total === null || state.finder.active() ? rows.filter(r => r.model === alias).length : shownCount(alias));
   // Grouped by model, each entry marked with its model's colour.
   const items = [];
-  shown.forEach((e, i) => {
-    if (!i || shown[i - 1].model !== e.model) items.push(h('li', { class: 'grp' }, state.modelOf[e.model].name, h('small', {}, rows.filter(r => r.model === e.model).length)));
+  rows.forEach((e, i) => {
+    if (!i || rows[i - 1].model !== e.model) items.push(h('li', { class: 'grp' }, state.modelOf[e.model].name, h('small', {}, perModel(e.model))));
     const ex = rank && state.hits.excerpt.get(e.id);
     items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: colourOf(e.model) }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)),
       ex && h('span', { class: 'ex' }, excerptNodes(h, ex)))));
   });
   put($('list'), [
     ...items,
-    rows.length > shown.length && h('li', { class: 'more' }, `${rows.length - shown.length} more — narrow with search or a filter.`),
+    total !== null && total > rows.length && h('li', { class: 'more' }, `${total - rows.length} more — narrow with search or a filter.`),
     rank && !state.hits.complete && h('li', { class: 'more' }, `The best ${LIST_LIMIT} text matches; add words to narrow the search.`),
     !rows.length && h('li', { class: 'more' }, 'Nothing matches.'),
   ]);
+  if (currentId) document.querySelector('#list [aria-current=true]')?.scrollIntoView({ block: 'nearest' });
 }
 
 // ---- Detail ---------------------------------------------------------------------------------
@@ -299,6 +315,23 @@ function chipRow(items, max = 10) {
   const row = h('div', { class: 'chips-row' }, items.slice(0, max));
   if (items.length > max) row.append(h('button', { type: 'button', class: 'more-btn', onclick: ev => { ev.target.replaceWith(...items.slice(max)); } }, `+${items.length - max} more`));
   return row;
+}
+
+// Before an entry's page: what it shows besides itself, read in full: everything it links to and
+// everything that links to it (its connections and graph), the places of the events among them,
+// and the places those lie within, up to six deep (its map); and the rules its fields cite.
+async function neighbourhood(id) {
+  const { store } = state;
+  const [e] = await store.full([id]);
+  if (!e) return null;
+  const back = await store.backOf(id);
+  const near = await store.full([...links(e).map(l => l.id), ...back.map(b => b.from.id)]);
+  await store.full(near.filter(n => state.lensOf[n.model] === 'time').flatMap(n => links(n).map(l => l.id)));
+  const P = state.lenses.find(l => l.layout === 'places')?.anchor;
+  let up = [...state.byId.values()].filter(x => x.full);
+  for (let depth = 0; depth < 6 && up.length; depth++) up = await store.full(up.flatMap(x => links(x).filter(l => l.property === P).map(l => l.id)).filter(t => !state.byId.get(t)?.full));
+  await store.know(state.modelOf[e.model].nodes.map(n => n.rule?.id).filter(Boolean));
+  return e;
 }
 
 function renderDetail(e) {
@@ -450,7 +483,7 @@ function renderLensBar(active) {
   put($('lenses'),
     h('a', { href: `#/${state.view}/`, 'aria-current': active === 'home' ? 'page' : false }, 'Home'),
     state.lenses.map(l => {
-      const n = state.entities.filter(e => visible(e) && inLens(l, e)).length;
+      const n = l.models.reduce((k, m) => k + shownCount(m), 0);
       return n ? h('a', { href: `#/${state.view}/@${l.id}`, 'aria-current': active === l.id ? 'page' : false, title: `${l.crmLabel} (CIDOC-CRM): ${l.comment}` }, l.icon && icon(l.icon), l.label, h('small', {}, n)) : null;
     }));
 }
@@ -459,7 +492,6 @@ function renderHome() {
   textOf = state.root;
   const v = state.viewsMeta.views.find(x => x.key === state.view);
   const r = state.root;
-  const own = e => e.layers.includes(state.view);
   const description = r?.fields.find(f => f.alias === 'description')?.value;
   put($('detail'),
     h('div', { class: 'kind' }, `${v.kind} · ${v.stack.map(layerName).join(' › ')}`),
@@ -472,9 +504,9 @@ function renderHome() {
       return h('div', { class: 'text lead' }, md(bs.slice(0, 1)), h('details', { class: 'readmore' }, h('summary', {}, 'Read more'), md(bs.slice(1))));
     })(),
     h('div', { class: 'lenscards' }, state.lenses.map(l => {
-      const all = state.entities.filter(e => e !== r && inLens(l, e));
-      const here = all.filter(own).length, general = all.filter(isGeneral).length, inherited = all.length - here - general;
-      if (!all.length) return null;
+      const sum = k => l.models.reduce((n, m) => n + (state.counts[m]?.[k] ?? 0) - (k !== 'general' && r?.model === m ? 1 : 0), 0);
+      const here = sum('own'), general = sum('general'), inherited = sum('n') - here - general;
+      if (!sum('n')) return null;
       return h('a', { class: 'lenscard', href: `#/${state.view}/@${l.id}` },
         l.icon && h('div', { class: 'cardicon', 'aria-hidden': 'true' }, icon(l.icon)),
         state.author && h('div', { class: 'kind' }, l.class.replace(/^.*\//, '').replace(/_/g, ' ')),
@@ -484,7 +516,7 @@ function renderHome() {
         h('p', { class: 'counts' }, [here && `${here} here`, inherited && `${inherited} inherited`, general && `${general} General`].filter(Boolean).join(' · ')));
     })),
     state.overrides.length ? [h('h2', {}, `Changed in ${v.name}`), h('ul', { class: 'rel' }, state.overrides.filter(o => o.layers.at(-1) === state.view).map(o => {
-      const e = state.byRoute.get(`${o.model}/${o.key}`);
+      const e = state.byId.get(state.store.idOf(o.model, o.key));
       const what = [o.overrides.length && `overrides ${o.overrides.join(', ')}`, o.adds.length && `adds to ${o.adds.join(', ')}`, o.sets.length && `sets ${o.sets.join(', ')}`].filter(Boolean).join('; ');
       return e ? h('li', {}, h('a', { href: route(e) }, title(e)), h('span', { class: 'm' }, `${state.modelOf[e.model].name} · ${what}`)) : null;
     }))] : null,
@@ -492,8 +524,16 @@ function renderHome() {
   document.title = `${r ? title(r) : v.name} · Cairn World`;
 }
 
-function renderLens(lens) {
-  const entries = state.entities.filter(e => visible(e) && inLens(lens, e));
+// A lens lays out its entries in full (at most LENS_LIMIT), with what they link to in brief.
+async function lensEntries(lens) {
+  const page = await state.store.page({ models: lens.models, general: state.rules, limit: LENS_LIMIT });
+  const entries = (await state.store.full(page.map(e => e.id))).filter(visible);
+  await state.store.know(entries.flatMap(e => links(e).map(l => l.id)));
+  return entries;
+}
+
+function renderLens(lens, entries) {
+  const total = lens.models.reduce((n, m) => n + shownCount(m), 0);
   const anchor = state.ontology.properties[lens.anchor];
   put($('detail'),
     h('a', { class: 'back', href: `#/${state.view}/` }, '← Home'),
@@ -502,27 +542,40 @@ function renderLens(lens) {
     lens.summary && h('p', {}, lens.summary),
     lens.comment && h('p', { class: 'scope' }, `CIDOC-CRM, ${lens.crmLabel}: ${lens.comment}`),
     anchor && h('p', { class: 'note' }, `Laid out by ${lens.anchor.replace(/^.*\//, '').replace(/_/g, ' ')}.`),
+    total > entries.length && h('p', { class: 'note' }, `Showing the first ${entries.length} of ${total} entries; the list finds the rest.`),
     drawLens(ctx(), lens, entries),
-    !state.rules && state.entities.some(e => isGeneral(e) && inLens(lens, e)) && h('p', { class: 'note' }, 'General entries are hidden; tick "Include General" to add them.'));
+    !state.rules && lens.models.some(m => state.counts[m]?.general) && h('p', { class: 'note' }, 'General entries are hidden; tick "Include General" to add them.'));
   document.title = `${lens.label} · Cairn World`;
 }
 
-function show() {
+// Each draw reads what it needs first; a later navigation supersedes one still reading.
+let shows = 0;
+async function show() {
+  const mine = ++shows;
   const [view, a, b] = hashParts();
   // The ORM's caches belong to one view, so moving to another view reloads the page.
   if (view && view !== state.view) { location.reload(); return; }
   const lens = a?.startsWith('@') ? lensById(a.slice(1)) : null;
-  const e = !lens && a && b ? state.byRoute.get(`${a}/${b}`) : null;
+  const id = !lens && a && b ? state.store.idOf(a, b) : null;
+  const [known] = id ? await state.store.know([id]) : [];
   // A link to a General entry must open even while General is hidden in the list.
-  if (e && isGeneral(e) && !state.rules) { state.rules = true; $('rules').checked = true; }
-  state.scope = lens?.id ?? (e ? state.lensOf[e.model] : null);
-  if (e) renderDetail(e);
-  else if (lens) renderLens(lens);
-  else if (a) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: `#/${state.view}/` }, 'Back home'));
-  else renderHome();
-  renderLensBar(lens?.id ?? (e ? state.lensOf[e.model] : 'home'));
-  renderSide(e?.id);
-  if (e) document.querySelector('#list [aria-current=true]')?.scrollIntoView({ block: 'nearest' });
+  if (known && isGeneral(known) && !state.rules) { state.rules = true; $('rules').checked = true; }
+  state.scope = lens?.id ?? (known ? state.lensOf[known.model] : null);
+  renderLensBar(lens?.id ?? (known ? state.lensOf[known.model] : 'home'));
+  renderSide(known?.id);
+  const reading = setTimeout(() => { if (mine === shows) put($('detail'), h('p', { class: 'empty' }, 'Reading…')); }, 150);
+  try {
+    if (known) { const e = await neighbourhood(known.id); if (mine === shows) renderDetail(e); }
+    else if (lens) { const entries = await lensEntries(lens); if (mine === shows) renderLens(lens, entries); }
+    else if (a) put($('detail'), h('p', { class: 'empty' }, 'No such entry.'), h('a', { href: `#/${state.view}/` }, 'Back home'));
+    else {
+      await state.store.know(state.overrides.map(o => state.store.idOf(o.model, o.key)));
+      if (mine === shows) renderHome();
+    }
+  } catch (err) {
+    console.error(err);
+    if (mine === shows) put($('detail'), h('p', { class: 'empty' }, `Could not read this: ${err?.message ?? err}`));
+  } finally { clearTimeout(reading); }
 }
 
 try {
@@ -534,7 +587,7 @@ try {
   // and focusing the search box brings its results back.
   const pane = v => { document.body.dataset.view = v; };
   // With a text index the search asks it (for the best matches the list can show, among the
-  // entries in view and through the filters); without one, the list matches the loaded text.
+  // entries in view and through the filters); without one, the list matches names.
   let asked = 0;
   $('q').addEventListener('input', async ev => {
     state.q = ev.target.value.trim().toLowerCase();
@@ -544,13 +597,17 @@ try {
     await new Promise(r => setTimeout(r, 150));
     if (mine !== asked) return;
     try {
-      const ok = id => { const e = state.byId.get(id); return !!e && visible(e) && (!state.filter.size || state.filter.has(e.model)) && state.finder.passes(e); };
+      // A match's record says what the list needs (id, model, slug, name, whether only General has
+      // it), so no entry is read to list it.
+      const ok = m => (state.rules || !m.general) && m.id !== state.root?.id && (!state.filter.size || state.filter.has(m.model)) && state.finder.passes(m);
       const { hits, complete } = await state.finder.search(q, ok, LIST_LIMIT);
       if (mine !== asked) return;
-      state.hits = { rank: new Map(hits.map((x, i) => [x.id, i])), excerpt: new Map(hits.map(x => [x.id, x.excerpt])), complete };
+      const list = hits.map(x => state.byId.get(x.id) ?? state.byId.set(x.id, { model: x.meta.model, id: x.id, key: x.meta.key, layers: x.meta.general ? ['general'] : [], light: true,
+        fields: [{ alias: 'name', label: 'Name', datatype: 'string', targets: [], collection: null, rule: null, property: null, value: x.meta.title }] }).get(x.id));
+      state.hits = { list, rank: new Map(hits.map((x, i) => [x.id, i])), excerpt: new Map(hits.map(x => [x.id, x.excerpt])), complete };
     } catch (err) {
       console.error(err);
-      state.hits = null;   // the index could not be read: search the loaded text instead
+      state.hits = null;   // the index could not be read: search names instead
     }
     renderSide();
   });
