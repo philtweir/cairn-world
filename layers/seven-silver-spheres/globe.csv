@@ -1,12 +1,12 @@
 ResourceID,earth,map,note
-forest-of-dawn,,"dells POLYGON ((6.4 -0.1, 7.3 0, 8.1 -0.4, 8.7 -1.3, 9 -2.6, 9.1 -3.9, 9 -5.2, 8.8 -6.3, 8.3 -7.3, 7.6 -7.8, 6.8 -7.5, 6.2 -6.7, 5.7 -5.6, 5.1 -4.5, 4.8 -3.3, 5 -2.5, 5.6 -1.6, 6 -0.8, 6.4 -0.1))","The valley of the Veleka (Earth's, remapped), in the Strandzha uplands just north of the Dells: old oak and beech forest, Thracian megaliths, a river to the sea."
-the-fork,,dells POINT (7.05 -0.5),"South of the river, where the old road enters the forest from the Dells side."
-bridge-of-saints,,dells POINT (7.62 -1.42),"Where the old road crosses, at the river's bend west towards the sea."
-old-ford,,dells POINT (6.25 -1.86),Downstream of the bridge.
-sister-stones,,dells POINT (5.6 -3.55),
-rising-sun-tavern,,dells POINT (7.45 -3.3),"On the old road, west of the river."
-great-oak,,dells POINT (8.0 -4.35),"In the riverside swamp where the river loops, off the old road."
-secret-well,,dells POINT (6.6 -5.55),"The ruined village outside the wall, where it has no gate."
-porcelain-wall,,"dells LINESTRING (6.3 -6.25, 6.8 -6.05, 7.3 -5.95, 7.8 -5.9, 8.3 -5.95, 8.8 -6.1)",Across the head of the valley.
-porcelain-gatehouse,,dells POINT (7.3 -5.95),Where the old road meets the wall.
-temple-of-st-rylan,,dells POINT (7.3 -6.85),"In the cliff at the valley's head, near the river's source."
+forest-of-dawn,,"dells POLYGON ((6.6 2, 7.8 1.8, 8.6 0.6, 9.2 -1.4, 9.4 -3.6, 9.5 -6, 9.6 -8.2, 9.3 -9.9, 8.4 -10.7, 7.4 -11, 6.4 -10.6, 6.25 -10, 6.3 -9, 6.2 -8, 6.05 -7, 5.7 -6, 5.25 -5, 5.1 -4, 5.05 -3, 5.15 -2, 5.25 -1, 5.35 0, 5.5 1.2, 6.6 2))","The valley of the Veleka (Earth's, remapped) and the uplands round it: the Strandzha forest, just north of the Dells, about 60 km from the coast hills to the ridge at its head; its western edge is the coast. Laid out so that each leg between two points is a short path (15 to 25 km, under one watch on a good road): see the campaign's notes on travel."
+the-fork,,dells POINT (7.2 1.3),"Where the old road comes up from the Dells into the forest, south of the river."
+old-ford,,dells POINT (5.55 -2.35),Near the river's mouth; the waterfall round the bend below drops towards the sea.
+bridge-of-saints,,dells POINT (7.85 -1.8),"Where the old road crosses, just above the river's bend towards the sea."
+rising-sun-tavern,,dells POINT (7.3 -6.1),"On the old road, high on the west side of the valley."
+sister-stones,,dells POINT (6.1 -5.4),On the seaward slopes.
+great-oak,,dells POINT (8.1 -5.0),"In a swamp on the valley floor, where the river slows."
+secret-well,,dells POINT (7.25 -9.4),"The ruined village just outside the wall, where it has no gate."
+porcelain-wall,,"dells LINESTRING (6.45 -9.8, 7.1 -9.68, 7.6 -9.6, 8.2 -9.55, 8.8 -9.6, 9.3 -9.7)",Across the head of the valley.
+porcelain-gatehouse,,dells POINT (7.6 -9.6),Where the old road meets the wall.
+temple-of-st-rylan,,dells POINT (7.45 -9.95),"In the cliff at the valley's head, just inside the wall."

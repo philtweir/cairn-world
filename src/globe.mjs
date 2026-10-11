@@ -19,7 +19,8 @@
 // neither keeps no geometry. `globe.dry` in layer.json lists places with no rivers or lakes (a
 // desert, say): Natural Earth's rivers stop at their edge, and their lakes go. Natural Earth data
 // is public domain; it comes from the world-atlas package (a dev dependency: the site never needs
-// it).
+// it). `globe.water` lists the places meant to be in the water (a sea, a lake, rocks off a coast):
+// every other place given a position must be on the drawn land, or the script stops.
 //
 // A campaign layer's layer.json can say `globe.on: <universe>`: its places go on that universe's
 // globe and regional maps (plus any `globe.maps` of its own), and only its place.csv is written.
@@ -284,6 +285,28 @@ const asMulti = geoms => ({ type: 'MultiPolygon', coordinates: geoms.filter(Bool
 
 // ---- main --------------------------------------------------------------------------------------
 
+// The places a layer puts on a map (or at an Earth point) that the drawn land does not hold: each
+// is an error unless `globe.water` lists it (a sea, a lake). The drawn land is the basemap's 1:50m
+// detail where a regional map has it, else its 1:110m land; the relief and rivers share its coast
+// (src/terrain.mjs keeps Earth's), so a place on the land is on land in every drawing.
+function offLand(features, positioned, water) {
+  const detail = features.filter(f => /-detail$/.test(f.properties.kind) && /^(land|unnamed)/.test(f.properties.kind));
+  const coarse = features.filter(f => f.properties.kind === 'land' || f.properties.kind === 'unnamed');
+  const inBox = (b, [x, y]) => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+  const onLand = p => { const near = detail.filter(f => inBox(f.bbox, p)); return (near.length ? near : coarse).some(f => geoContains(f, p)); };
+  const flat = c => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
+  return [...positioned].filter(([id]) => !water.includes(id)).flatMap(([id, g]) => {
+    const off = flat(g.coordinates).filter(p => !onLand(p));
+    return off.length ? [`${id}: ${off.length === 1 && g.type === 'Point' ? 'off the land' : `${off.length} of its ${flat(g.coordinates).length} points off the land`}`] : [];
+  });
+}
+function checkLand(features, positioned, water, key) {
+  const bad = offLand(features, positioned, water);
+  if (!bad.length) return;
+  console.error(`layers/${key}: places drawn in the sea (move them onto the land, or list a sea or lake in layer.json globe.water):\n  ${bad.join('\n  ')}`);
+  process.exit(1);
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const key = process.argv[2];
   if (!key) { console.error('usage: npm run globe -- <layer>'); process.exit(1); }
@@ -302,7 +325,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // What each place is: Earth's countries or a WKT shape, or a point on a regional map.
   const rows = parseCsv(fs.readFileSync(path.join(dir, 'globe.csv'), 'utf8'));
   const head = rows[0], col = n => head.indexOf(n);
-  const geometryOf = new Map();
+  const geometryOf = new Map(), positioned = new Map();
   for (const r of rows.slice(1).filter(r => r[0])) {
     const [id, earth, onMap] = [r[0], r[col('earth')] ?? '', r[col('map')] ?? ''];
     let g = null;
@@ -325,6 +348,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       g = round(dropSpecks(remap.project(forD3(earthShape(countries, earth, `globe.csv ${id}`))), 2e-6), 2);
     }
     if (g) geometryOf.set(id, g);
+    if (g && (onMap || /^[A-Z]+\s*\(/.test(earth))) positioned.set(id, g);
   }
 
   // Write the geometry column, leaving every other cell as it is.
@@ -335,8 +359,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const known = new Set(place.slice(1).map(r => r[0]));
   for (const id of geometryOf.keys()) if (!known.has(id)) throw new Error(`globe.csv lists "${id}", which is not in ${path.relative(ROOT, placeFile)}`);
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
-  fs.writeFileSync(placeFile, toCsv(place));
-  if (on) { console.log(`layers/${key}: ${geometryOf.size} place geometries, on the globe of ${on}`); process.exit(0); }
+  const water = [...(globe.water ?? []), ...(on ? settings.globe.water ?? [] : [])];
+  // Written only once the places are checked (below, for a universe, once its land is drawn).
+  const writePlaces = () => fs.writeFileSync(placeFile, toCsv(place));
+  if (on) {
+    checkLand(JSON.parse(fs.readFileSync(path.join(ROOT, 'layers', on, 'basemap.json'), 'utf8')).features, positioned, water, key);
+    writePlaces();
+    console.log(`layers/${key}: ${geometryOf.size} place geometries, on the globe of ${on}`);
+    process.exit(0);
+  }
 
   // The globe's land, for the explorer to draw under its maps, in two kinds: `land`, every place's
   // Earth shape together (the world's named lands), and `unnamed`, the rest of Earth's land, which
@@ -415,6 +446,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     .filter(poly => !isDry(geoCentroid({ type: 'Polygon', coordinates: poly })));
   const lakeGeom = dropSpecks(round({ type: 'MultiPolygon', coordinates: lakes }, 2), 3e-6);
   if (lakeGeom) features.push({ type: 'Feature', properties: { kind: 'lake', source: 'Natural Earth 1:50m lakes (public domain), remapped' }, geometry: lakeGeom });
+  checkLand(features, positioned, water, key);
+  writePlaces();
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));
   console.log(`layers/${key}: ${geometryOf.size} place geometries; basemap ${(fs.statSync(path.join(dir, 'basemap.json')).size / 1024).toFixed(0)} KB`);
 }

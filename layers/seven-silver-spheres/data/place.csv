@@ -1,34 +1,34 @@
 ResourceID,name,description,kind,status,within,geometry
-forest-of-dawn,The Forest of Dawn,"A forested valley under an ancient shadow. Its old imperial road and animal trails are the only safe ways through; off them, the forest is all shadow, and there is no trace of imperial authority left.",Region,,,"POLYGON ((-10.624 27.747, -10.644 27.778, -10.664 27.814, -10.694 27.854, -10.704 27.89, -10.689 27.944, -10.659 27.994, -10.634 28.043, -10.603 28.079, -10.563 28.093, -10.527 28.07, -10.502 28.025, -10.492 27.976, -10.487 27.917, -10.492 27.859, -10.507 27.801, -10.538 27.76, -10.578 27.742, -10.624 27.747))"
-the-fork,The Fork,"""Begin here."" The forest trail leaves the old road. The road is worn, overgrown flagstone with saplings pushing through; the trail is grassy, following animal tracks, but the gap in the trees stays clear until near the Porcelain Wall.",Landmark,,forest-of-dawn,POINT (-10.591 27.765)
+forest-of-dawn,The Forest of Dawn,"A forested valley under an ancient shadow. Its old imperial road and animal trails are the only safe ways through; off them, the forest is all shadow, and there is no trace of imperial authority left.",Region,,,"POLYGON ((-10.613 27.652, -10.669 27.688, -10.677 27.742, -10.682 27.787, -10.687 27.832, -10.692 27.877, -10.689 27.922, -10.682 27.967, -10.659 28.012, -10.641 28.057, -10.634 28.102, -10.629 28.147, -10.631 28.192, -10.624 28.219, -10.573 28.237, -10.522 28.223, -10.477 28.187, -10.462 28.111, -10.467 28.012, -10.472 27.904, -10.482 27.805, -10.512 27.715, -10.553 27.661, -10.613 27.652))"
+the-fork,The Fork,"""Begin here."" The forest trail leaves the old road. The road is worn, overgrown flagstone with saplings pushing through; the trail is grassy, following animal tracks, but the gap in the trees stays clear until near the Porcelain Wall.",Landmark,,forest-of-dawn,POINT (-10.583 27.684)
 old-ford,Old Ford,"- A battered but usable rowboat waits on the near bank.
 - A river spirit greets anyone who starts across, and answers questions, but only from the middle of the river.
 - Keeping pace with the current is hard work.
-- Round a bend downstream is a sudden waterfall.",Site,,forest-of-dawn,POINT (-10.631 27.826)
+- Round a bend downstream is a sudden waterfall.",Site,,forest-of-dawn,POINT (-10.666 27.848)
 sister-stones,The Sister Stones,"- Two menhirs, always in shadow whatever the hour, with the trail running between them.
 - Walking between them brings back memories of your own anger and cruelty: WIL save or take 1d4 WIL damage.
 - Going around them is like wading through invisible, chest-high mud: STR save to make progress.
-- Climbing over a stone avoids both; the only obstacle is the climb.",Landmark,,forest-of-dawn,POINT (-10.664 27.902)
+- Climbing over a stone avoids both; the only obstacle is the climb.",Landmark,,forest-of-dawn,POINT (-10.639 27.985)
 rising-sun-tavern,Rising Sun Tavern,"- Ruins of a big wood-and-stone inn; its sign, an orange sun, lies on the ground.
 - Inside, a rotting taproom that once served pilgrims and travellers. The cellar is intact.
-- Behind a warded, barred cellar door, a clear, cultured voice offers treasure in return for its freedom.",Site,Ruined,forest-of-dawn,POINT (-10.57 27.89)
+- Behind a warded, barred cellar door, a clear, cultured voice offers treasure in return for its freedom.",Site,Ruined,forest-of-dawn,POINT (-10.578 28.016)
 secret-well,The Secret Well,"- A roofless ruined village outside the Porcelain Wall. There is no gate on this stretch; the wall is 20ft high and watched by Porcelain Soldiers.
 - In the middle, a ruined well smothered in creeping ivy.
-- 50ft down, a damp passage runs under the wall: the old escape route from the temple.",Site,Ruined,forest-of-dawn,POINT (-10.613 27.992)
+- 50ft down, a damp passage runs under the wall: the old escape route from the temple.",Site,Ruined,forest-of-dawn,POINT (-10.581 28.165)
 bridge-of-saints,Bridge of Saints,"- A long stone bridge, decorated with statues and carvings of the faithful of Statera, visible from a distance.
 - In front of it, the grassed-over remains of a small village, now a goblin camp.
 - A stone statue of St. Rylan in the middle of the camp has been defaced into Goblob, The Best Goblin.
-- The statue's staff still shines with magical light; broken off, it is a Stone Torch of St. Rylan.",Site,Goblin camp,forest-of-dawn,POINT (-10.562 27.806)
+- The statue's staff still shines with magical light; broken off, it is a Stone Torch of St. Rylan.",Site,Goblin camp,forest-of-dawn,POINT (-10.55 27.823)
 great-oak,The Great Oak,"- A huge dead oak in the middle of a riverside swamp, on its own small island; the only path runs right past it.
 - Close up, bones and feathers show in the nooks of its branches and trunk.
-- Crossing the swamp itself needs care: the antlers of two deer that sank show what happens.",Landmark,,forest-of-dawn,POINT (-10.543 27.938)
-porcelain-wall,The Porcelain Wall,"A grey stone wall closing off the head of the forested valley, named for the porcelain sentries that have guarded it for centuries. Climbable, but crossing the battlements sets the sentries on you; otherwise they only change guard now and then, which is eerie to watch.",Landmark,,forest-of-dawn,"LINESTRING (-10.629 28.023, -10.603 28.014, -10.578 28.01, -10.553 28.007, -10.527 28.01, -10.502 28.016)"
+- Crossing the swamp itself needs care: the antlers of two deer that sank show what happens.",Landmark,,forest-of-dawn,POINT (-10.538 27.967)
+porcelain-wall,The Porcelain Wall,"A grey stone wall closing off the head of the forested valley, named for the porcelain sentries that have guarded it for centuries. Climbable, but crossing the battlements sets the sentries on you; otherwise they only change guard now and then, which is eerie to watch.",Landmark,,forest-of-dawn,"LINESTRING (-10.621 28.183, -10.588 28.177, -10.563 28.174, -10.532 28.171, -10.502 28.174, -10.477 28.178)"
 porcelain-gatehouse,Porcelain Gatehouse,"- The gatehouse in the Porcelain Wall; its doors fell long ago.
-- **Arrow trap**: holes along the left-hand wall, pressure plates in the floor. Arrows deal d8, then d6, then d4, then nothing as the trap runs dry over four attacks.",Site,Trapped,porcelain-wall,POINT (-10.578 28.01)
+- **Arrow trap**: holes along the left-hand wall, pressure plates in the floor. Arrows deal d8, then d6, then d4, then nothing as the trap runs dry over four attacks.",Site,Trapped,porcelain-wall,POINT (-10.563 28.174)
 temple-of-st-rylan,Temple of St. Rylan,"Built into the cliff in the style of the IIIrd Emperor, some 400 years ago, behind an overgrown courtyard of cracked flagstones crossed by animal trails.
 
 - The great iron doors open at dawn (6am) on an equinox and close 24 hours later. Nothing else opens them.
 - Beyond, a corridor with a mosaic of the holy life of St. Rylan, then a vaulted hall with a fine tiled floor. A vast ritual etched in iron and copper links seven pedestals; only five spheres remain.
 - Beside the altar on the far wall, the last priest's carved plea: leave the spheres alone. They are all that keeps the forest's shadow from spreading, and every one taken weakens the magic.
 - On the empty pedestals, a note from Archmage Hann, 33 years old, promising to return the two missing spheres once his ""very important work"" is done.
-- The side chambers still hold minor treasure, buried in centuries of debris.",Site,Opens at the equinox,forest-of-dawn,POINT (-10.578 28.05)
+- The side chambers still hold minor treasure, buried in centuries of debris.",Site,Opens at the equinox,forest-of-dawn,POINT (-10.57 28.189)

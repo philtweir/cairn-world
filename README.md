@@ -407,6 +407,17 @@ in its own units (`dells POLYGON ((x y, ...))`), with a radius in km:
 
 The shapes are seeded noise, so a bake is repeatable, at scales down to twice the image's cell.
 
+**One coast.** The coast is Earth's in every drawing: no edit makes land of the sea or sea of the
+land, so the relief, the rivers found from it, and the coast the maps draw (Natural Earth, in
+`basemap.json`) agree to within Natural Earth's 1:50m generalisation (a kilometre or two). An edit
+that lifts the ground eases in over the last 5 km before the sea (Earth's distance to it, on a
+2 km grid over each detailed area), so a range that reaches the shore comes down to it instead of
+standing in it as a cliff. And `npm run globe` stops if a place it positions (a point or shape on a
+map, or an Earth point) lies off the drawn land, unless `layer.json` lists it in `globe.water`
+(a sea, a lake, rocks off a coast: Bith na Bró's The Sea and the Fist of Glass). A campaign placed
+on a universe's globe is checked against that universe's land. Redrawing a coastline on purpose
+would be a change to the basemap, not to the relief.
+
 **Rivers and lakes.** Real ones, so they run down the same valleys as the relief: Natural Earth
 1:50m rivers (in three widths by its rank; the stretches through lakes left out) and lakes,
 remapped by `npm run globe` into `basemap.json`. In each regional map's detailed area, where Natural
@@ -586,6 +597,12 @@ The build passes `target_model` to Alizarin as model names in its `graphs` colum
 the graph ids Alizarin derives from those names match the models it built. Link cells are resolved
 by the build itself, because a link may only reach entries visible from its layer.
 
+**Routes and travel.** A route can carry Cairn 2e's travel figures: `distance` (Short, Medium,
+Long), `terrain` (Easy, Tough, Perilous) and `watches`, the total the Warden counts, each citing its
+rule. The total is written out rather than worked out, because a campaign may count a route
+differently from its kind (*Seven Silver Spheres* travels its broken roads as trails); it is a
+number, so the explorer's filters can ask for, say, every route of 3 watches or fewer.
+
 **Add a vocabulary term:** add a row to `model/vocab.csv`. Concept cells in the data must match a
 label exactly.
 
@@ -691,7 +708,16 @@ too: build and upload `dist/`.
 stack is General › Bith na Bró › The Empire › the campaign, the Empire being Bith na Bró between
 one and two thousand years before the present. The Forest of Dawn is the valley of the Veleka
 (Earth's, remapped: the Strandzha uplands, old oak forest and Thracian megaliths) just north of the
-Dells map, its places laid out along the river the relief already has (`globe.csv` in the layer).
+Dells map, its places laid out along the river the relief already has (`globe.csv` in the layer),
+about 60 km from the coast hills to the ridge at its head.
+
+It is set up for Cairn 2e, following Martin Orchard's own advice on r/cairnrpg for running it with
+2e's travel procedure: a week rather than the booklet's two days; every route, the broken old road
+included, a short forest trail of 3 watches with a 2-in-6 chance of getting lost; more encounters
+(a Travel Encounters table from the adventure's creatures and the rulebook's animals) and Signs that
+point at places not yet visited; no rolls on the last legs to the wall. The map is to that scale:
+each leg is 15 to 25 km, a short path (under a watch on a good road, at Bith na Bró's 30 km or so a
+watch) that the forest makes three. Routes record it in General's travel fields (below).
 The spheres themselves are Bith na Bró's, so any of its campaigns can find them later:
 
 - Bith na Bró defines a model of its own, **Strand of Magic** (`layers/bith-na-bro/model/`: a

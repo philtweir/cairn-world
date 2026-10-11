@@ -35,3 +35,15 @@ sss-encounters,Random Encounters,d6,,"1 | A dead wolf, rotting with black mould.
 4 | A small waystone that turns to follow the party.
 5 | 1d6 Forest Goblins on a spider hunt.
 6 | A dryad possessed by the shadow, screaming without a voice.",6,seven-silver-spheres,"forest-goblin,shadow-dryad",Seven Silver Spheres by Martin Orchard (pointlessmonument.itch.io); condensed Warden notes
+sss-travel-encounters,Travel Encounters (2e),d6,,"1 | 1d6 **Forest Goblins**, out hunting spiders and arguing loudly over a kill.
+2 | 1d4 **Porcelain Soldiers** walking a patrol no one has ordered for centuries, moss on their shoulders.
+3 | 1d6 **Wolves**, thin, following at a distance.
+4 | A **Boar**, rooting up what is left of the old road.
+5 | A **Black Bear** fishing at a stream.
+6 | Something stranger: roll on [[rolltable/sss-encounters|Random Encounters]].",7,seven-silver-spheres,"forest-goblin,porcelain-soldier,wolf,boar,black-bear","Written for this repository after Martin Orchard's advice on running Seven Silver Spheres in Cairn 2e (r/cairnrpg)"
+sss-signs,Signs (2e),d6,,"1 | A pilgrims' notice nailed to a tree, mostly rotted away: ""...do not stop at the [[place/rising-sun-tavern|Rising Sun]]. What is in the cellar...""
+2 | Goblin scrawl on a rock: a goblin in a crown, and an arrow towards the [[Bridge of Saints]].
+3 | At night, the clink of porcelain on stone from up the valley, towards [[the Porcelain Wall]].
+4 | Bones and feathers tied in the trees, more of them the nearer the swamp of [[the Great Oak]].
+5 | A carved stone well-cover dragged onto the path and left, from the ruined village by [[the Secret Well]].
+6 | Two tall stones on a ridge, in shadow though the sun is full on them: [[the Sister Stones]].",8,seven-silver-spheres,,"Written for this repository after Martin Orchard's advice on running Seven Silver Spheres in Cairn 2e (r/cairnrpg)"

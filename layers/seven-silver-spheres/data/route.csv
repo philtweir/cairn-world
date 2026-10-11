@@ -1,14 +1,14 @@
-ResourceID,name,description,kind,connects,hazards
-road-fork-bridge,Old Road: the Fork to the Bridge of Saints,"Worn, overgrown flagstones.",Road,"the-fork,bridge-of-saints",
-road-bridge-tavern,Old Road: Bridge of Saints to the Rising Sun,Crosses the river at the Bridge of Saints and climbs north.,Road,"bridge-of-saints,rising-sun-tavern",
-road-tavern-gatehouse,Old Road: Rising Sun to the Porcelain Gatehouse,"The road's last stretch, up to the wall.",Road,"rising-sun-tavern,porcelain-gatehouse",
-road-gatehouse-temple,Through the Gatehouse,Through the trapped gatehouse into the temple courtyard.,Road,"porcelain-gatehouse,temple-of-st-rylan",wall-sentries
-trail-fork-ford,Trail: the Fork to Old Ford,The forest trail strikes north from the fork to the river.,Trail,"the-fork,old-ford",
-trail-ford-stones,Trail: Old Ford to the Sister Stones,,Trail,"old-ford,sister-stones",
-trail-ford-tavern,Trail: Old Ford to the Rising Sun,,Trail,"old-ford,rising-sun-tavern",
-trail-ford-bridge,Trail: Old Ford to the Bridge of Saints,"Along the north bank, joining the old road just past the bridge.",Trail,"old-ford,bridge-of-saints",
-trail-stones-well,Trail: the Sister Stones to the Secret Well,,Trail,"sister-stones,secret-well",
-trail-tavern-well,Trail: the Rising Sun to the Secret Well,,Trail,"rising-sun-tavern,secret-well",
-trail-bridge-oak,Trail: the old road to the Great Oak,Leaves the old road north of the bridge for the swamp.,Trail,"bridge-of-saints,great-oak",the-cursed-oak
-trail-oak-gatehouse,Trail: the Great Oak to the Porcelain Gatehouse,,Trail,"great-oak,porcelain-gatehouse",the-cursed-oak
-well-passage,The Well Passage,"A damp passage from the bottom of the well, under the Porcelain Wall, into the temple grounds: the priests' escape route.",Passage,"secret-well,temple-of-st-rylan",well-ivy
+ResourceID,name,description,kind,connects,hazards,distance,terrain,watches
+road-fork-bridge,Old Road: the Fork to the Bridge of Saints,"Worn, overgrown flagstones.",Road,"the-fork,bridge-of-saints",,Short,Tough,3
+road-bridge-tavern,Old Road: Bridge of Saints to the Rising Sun,Crosses the river at the Bridge of Saints and climbs north.,Road,"bridge-of-saints,rising-sun-tavern",,Short,Tough,3
+road-tavern-gatehouse,Old Road: Rising Sun to the Porcelain Gatehouse,"The road's last stretch, up to the wall. The porcelain soldiers keep the approach to the wall clear: no getting-lost roll and no Wilderness Events on this leg.",Road,"rising-sun-tavern,porcelain-gatehouse",,Short,Tough,3
+road-gatehouse-temple,Through the Gatehouse,Through the trapped gatehouse into the temple courtyard.,Road,"porcelain-gatehouse,temple-of-st-rylan",wall-sentries,,,
+trail-fork-ford,Trail: the Fork to Old Ford,The forest trail strikes north from the fork to the river.,Trail,"the-fork,old-ford",,Short,Tough,3
+trail-ford-stones,Trail: Old Ford to the Sister Stones,,Trail,"old-ford,sister-stones",,Short,Tough,3
+trail-ford-tavern,Trail: Old Ford to the Rising Sun,,Trail,"old-ford,rising-sun-tavern",,Short,Tough,3
+trail-ford-bridge,Trail: Old Ford to the Bridge of Saints,"Along the north bank, joining the old road just past the bridge.",Trail,"old-ford,bridge-of-saints",,Short,Tough,3
+trail-stones-well,Trail: the Sister Stones to the Secret Well,,Trail,"sister-stones,secret-well",,Short,Tough,3
+trail-tavern-well,Trail: the Rising Sun to the Secret Well,,Trail,"rising-sun-tavern,secret-well",,Short,Tough,3
+trail-bridge-oak,Trail: the old road to the Great Oak,Leaves the old road north of the bridge for the swamp.,Trail,"bridge-of-saints,great-oak",the-cursed-oak,Short,Tough,3
+trail-oak-gatehouse,Trail: the Great Oak to the Porcelain Gatehouse,The porcelain soldiers keep the approach to the wall clear: no getting-lost roll and no Wilderness Events on this leg.,Trail,"great-oak,porcelain-gatehouse",the-cursed-oak,Short,Tough,3
+well-passage,The Well Passage,"A damp passage from the bottom of the well, under the Porcelain Wall, into the temple grounds: the priests' escape route.",Passage,"secret-well,temple-of-st-rylan",well-ivy,,,

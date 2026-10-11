@@ -1,6 +1,9 @@
-alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
 name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
 description,Description,string,1,E62_String,P3_has_note,,,
 kind,Kind,concept,1,E55_Type,P2_has_type,,Route Kind,
 connects,Connects,resource-instance-list,n,E53_Place,cairn:connects,,,place
 hazards,Hazards,resource-instance-list,n,E18_Physical_Thing,P53i_is_former_or_current_location_of,,,creature
+distance,Distance,concept,1,E55_Type,P2_has_type,,Path Distance,,procedures-path-difficulty
+terrain,Terrain,concept,1,E55_Type,P2_has_type,,Terrain Difficulty,,procedures-terrain-difficulty
+watches,Watches,number,1,E60_Number,P3_has_note,,,,procedures-travel-duration
