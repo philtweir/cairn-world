@@ -1,5 +1,5 @@
 ResourceID,name,description,section,part_of,at_table,in_story,columns,entries
-taster,Seven Silver Spheres in 90 minutes,"A Warden's run plan for [[campaign/seven-silver-spheres|Seven Silver Spheres]] in one 90-minute session, as a prologue to a campaign in [[universe/bith-na-bro|Bith na Bró]]. The adventure is written for 2–3 hours; this gets it into 90 minutes by fixing the clock, capping the scenes at three before the temple, and leaving the side chambers to one roll each, or 100 minutes if the players roll their own characters. Its parts, in order: before the session, what to print, the clock, the session itself scene by scene, and making the outcome canon.
+taster,Seven Silver Spheres in 90 minutes,"A Warden's run plan for [[campaign/seven-silver-spheres|Seven Silver Spheres]] in one 90-minute session, as a prologue to a campaign in [[universe/bith-na-bro|Bith na Bró]]. The adventure is written for 2–3 hours; this gets it into 90 minutes by fixing the clock, capping the scenes at three before the temple, and leaving the side chambers to one roll each, or 100 minutes if the players roll their own characters. Its parts, in order: before the session, what to print, the Warden's crib sheet (keep it open all session), the clock, the session itself scene by scene, and making the outcome canon.
 
 The notes in this view are condensed, not the adventure: you still need the booklet for the Warden's map, the player handout (Marcos's map) and the full text.
 
@@ -46,10 +46,10 @@ On a trail, roll the 2-in-6 to get lost ([[rule/procedures-travel|Travel]], [[ro
 Both levers for running late are in the rules, and both cost the party, not you:
 
 - **Push on through the night:** roll twice on Wilderness Events ([[rule/procedures-night|Night]]).
-- **Skip camp:** each PC takes a Fatigue and is _deprived_ ([[rule/procedures-sleep|Sleep]], [[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).",3,taster,,,Route | Legs | Its cost,"Old road: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/rising-sun-tavern|Rising Sun]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The goblin camp, the Thing's voice, the arrow trap and the sentries
+- **Skip camp:** each PC takes a Fatigue and is _deprived_ ([[rule/procedures-sleep|Sleep]], [[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).",4,taster,,,Route | Legs | Its cost,"Old road: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/rising-sun-tavern|Rising Sun]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The goblin camp, the Thing's voice, the arrow trap and the sentries
 Trail west: [[place/the-fork|Fork]] › [[place/old-ford|Old Ford]] › [[place/sister-stones|Sister Stones]] › [[place/secret-well|Secret Well]] › [[route/well-passage|passage]] › [[place/temple-of-st-rylan|Temple]] | 4 | Getting lost; the Stones; the ivy on the well
 Swamp: [[place/the-fork|Fork]] › [[place/bridge-of-saints|Bridge of Saints]] › [[place/great-oak|Great Oak]] › [[place/porcelain-gatehouse|Gatehouse]] › [[place/temple-of-st-rylan|Temple]] | 4 | The Cursed Oak, then the gatehouse anyway"
-taster-session,"The session, minute by minute","Seven parts, in order, and an eighth (1b) if the players roll their own characters: the table gives both timings. **At 1:00 (1:10 with characters), check:** if the party has not passed its second point, cut to the approach (""you push on through the night"": roll twice on Wilderness Events, take the Fatigue). The temple is the one scene you cannot skip; it sets the campaign's hook.",4,taster,,,Part | Pregens (90 min) | Rolled (100 min) | In the story,"[[plan/taster-1-table|1. Set up the table]] | 0:00–0:10 | 0:00–0:05 | The reading of the will
+taster-session,"The session, minute by minute","Seven parts, in order, and an eighth (1b) if the players roll their own characters: the table gives both timings. **At 1:00 (1:10 with characters), check:** if the party has not passed its second point, cut to the approach (""you push on through the night"": roll twice on Wilderness Events, take the Fatigue). The temple is the one scene you cannot skip; it sets the campaign's hook.",5,taster,,,Part | Pregens (90 min) | Rolled (100 min) | In the story,"[[plan/taster-1-table|1. Set up the table]] | 0:00–0:10 | 0:00–0:05 | The reading of the will
 [[plan/taster-1b-characters|1b. Roll characters]] | (none) | 0:05–0:20 | The reading of the will
 [[plan/taster-2-fork|2. The Fork]] | 0:10–0:15 | 0:20–0:25 | Midday, two days out
 [[plan/taster-3-first|3. First point]] | 0:15–0:35 | 0:25–0:45 | Afternoon, then camp
@@ -84,20 +84,28 @@ taster-2-fork,2. The Fork,"[[place/the-fork|The Fork]]: the overgrown old road, 
 2. Each PC takes one [[rule/procedures-wilderness-actions|Wilderness Action]] (usually all Travel); you roll a d6 on [[rolltable/procedures-wilderness-events-table|Wilderness Events]].
 3. Mark off torches, rations and Fatigue.
 
-Keep event results to a sentence unless they make a choice. Roll [[rolltable/sss-encounters|Random Encounters]] at most twice all session.",3,taster-session,0:10–0:15 (0:20–0:25 with characters),"Midday, two days out",,
+Keep event results to a sentence unless they make a choice. Roll [[rolltable/sss-encounters|Random Encounters]] at most twice all session.
+
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Trails: a d6 each leg, lost on 1–2. Every watch: a d6 on Wilderness Events.",3,taster-session,0:10–0:15 (0:20–0:25 with characters),"Midday, two days out",,
 taster-3-first,3. First point,"Whichever they reach first, it is a 20-minute scene with a decision in it, not a fight by default.
 
 - **[[place/bridge-of-saints|Bridge of Saints]]** (road). [[creature/bridge-goblins|2d6 goblins]] mid-revel round the statue of St. Rylan, defaced into [[npc/goblob|Goblob]]. Roll [[rule/core-rules-reactions|Reactions]]; they are superstitious about the statue, and that is the lever. Its staff is a [[itemtype/stone-torch-of-st-rylan|Stone Torch of St. Rylan]], and taking it is a provocation. If it comes to blows, goblins (WIL 8) check [[rule/core-rules-morale|Morale]] at the first casualty: most fights here end in a rout, which is quick.
 - **[[place/old-ford|Old Ford]]** (trail). [[npc/river-spirit|The River Spirit]] answers questions, but only from mid-river, where the current is hard work and the waterfall is round the bend. Answer from [[rolltable/sss-lore|Lore, Secrets & Rumours]]: this is where the players learn about Statera, the shadow and Hann, cheaply.
 
-**Camp** (night): one Wilderness Event roll, a Ration each, Fatigue cleared. If they talk round the fire, give them one Lore result. Two minutes, not ten.",4,taster-session,0:15–0:35 (0:25–0:45 with characters),"Afternoon, then camp",,
+**Camp** (night): one Wilderness Event roll, a Ration each, Fatigue cleared. If they talk round the fire, give them one Lore result. Two minutes, not ten.
+
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Bridge: Reactions 2d6; sneaking or taking the staff, DEX; superstition, WIL; goblins' morale, WIL 8. Ford: holding the boat mid-river, STR _(a ruling)_.",4,taster-session,0:15–0:35 (0:25–0:45 with characters),"Afternoon, then camp",,
 taster-4-second,4. Second point,"- **[[place/rising-sun-tavern|Rising Sun Tavern]].** The best scene in the adventure for a short slot: a voice behind a warded, barred cellar door, offering treasure. [[creature/the-thing|The Thing]] has none, and freed, it gives a head start and a cruel smile. Play the voice; the players' choice is the scene. The seal is [[npc/archmage-hann|Hann]]'s work, the first sign of him.
 - **[[place/sister-stones|The Sister Stones]].** Three ways past, each with its cost (a WIL save, a STR save, or the climb). Quick, and it teaches saves.
-- **[[place/great-oak|The Great Oak]].** [[monstertype/cursed-oak|The Cursed Oak]] is deaf, senses everything but the slightest movement, and burns. A stealth puzzle with a deadly answer if it fails (d8, _blast_: [[rule/core-rules-attack-modifiers|Attack Modifiers]]).",5,taster-session,0:35–0:55 (0:45–1:05 with characters),Eve of the equinox,,
+- **[[place/great-oak|The Great Oak]].** [[monstertype/cursed-oak|The Cursed Oak]] is deaf, senses everything but the slightest movement, and burns. A stealth puzzle with a deadly answer if it fails (d8, _blast_: [[rule/core-rules-attack-modifiers|Attack Modifiers]]).
+
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Tavern: lying to the Thing, WIL; its bite past 0 HP, STR or d6 more STR. Stones: between, WIL or d4 WIL; around, STR. Oak: passing, DEX; off the path, STR _(a ruling)_.",5,taster-session,0:35–0:55 (0:45–1:05 with characters),Eve of the equinox,,
 taster-5-approach,5. The approach,"- **[[place/porcelain-gatehouse|Porcelain Gatehouse]]:** the arrow trap (d8, d6, d4, then dry; [[rule/procedures-traps|Traps]]) and [[creature/wall-sentries|the Porcelain Soldiers]], who attack only those who cross the battlements. Let the players watch the sentries change guard first; the eeriness is the point.
 - **[[place/secret-well|The Secret Well]]:** [[monstertype/creeping-ivy|the ivy]] on the well head, whose Critical Damage drags a victim down. Then the dark [[route/well-passage|passage]]: check who carries light ([[rule/procedures-light-sources|Light Sources]]; Gann has the lantern). The passage gets them into the grounds unseen, but the doors still open only at dawn.
 
-If they arrive in the night, they wait at the doors. Let them hear something in the trees.",6,taster-session,0:55–1:10 (1:05–1:20 with characters),"Night, then dawn",,
+If they arrive in the night, they wait at the doors. Let them hear something in the trees.
+
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Gatehouse: unaware, 2-in-6; arrows off STR. Wall: climbing, DEX. Well: climbing down, DEX; the ivy past 0 HP, STR or dragged down. Passage without light: WIL or panic.",6,taster-session,0:55–1:10 (1:05–1:20 with characters),"Night, then dawn",,
 taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]]. Switch to the [[rule/procedures-dungeon-exploration-cycle|Dungeon Exploration Cycle]] only if they go into the side chambers. In order:
 
 1. The iron doors open at dawn. The mosaic of St. Rylan's life, and his potter's wheel ([[faction/faithful-of-statera|the Faithful of Statera]]).
@@ -107,7 +115,9 @@ taster-6-temple,6. The temple,"[[place/temple-of-st-rylan|Temple of St. Rylan]].
 5. **The choice.** Each sphere is _bulky_ and worth a place in high society ([[itemtype/silver-sphere|Silver Sphere]]). Take none, some or all. Let the shadow answer: lift one and the light changes; lift a second and something in the forest wakes ([[creature/the-shadow|The Shadow in the Forest]]).
 6. **Side chambers, if there is time:** one roll each on Treasures, Relics and Spellbooks, and stop. Spells cost a Fatigue to cast ([[rule/core-rules-casting-spells|Casting Spells]]); relics have uses and a recharge ([[rule/core-rules-relics|Relics]]).
 
-If they take spheres, the way out is the scene: a [[monstertype/shadow-dryad|shadow-possessed dryad]], the goblins, the Thing if they freed it. Run one obstacle and end on whether they get clear.",7,taster-session,1:10–1:25 (1:20–1:35 with characters),The equinox,,
+If they take spheres, the way out is the scene: a [[monstertype/shadow-dryad|shadow-possessed dryad]], the goblins, the Thing if they freed it. Run one obstacle and end on whether they get clear.
+
+**Rolls here** ([[plan/crib-saves-here|all of them]]): Side chambers: a d6 on Dungeon Events if they linger or make noise. Carrying spheres: each is _bulky_ (two slots).",7,taster-session,1:10–1:25 (1:20–1:35 with characters),The equinox,,
 taster-7-epilogue,7. Epilogue: where the spheres went,"Ask each player, in a sentence, what their PC did with what they took, and where they ended up. Then tell them what this was: Bith na Bró, the date you picked, and [[event/spheres-scattered|the Seven Spheres]] that the present remembers only as lore. Each holds a strand of magic in check (the table).
 
 End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land, the world will be wiped clean."" Their characters just decided how much of it came back.",8,taster-session,1:25–1:30 (1:35–1:40 with characters),Bith na Bró,Sphere | Strand | At the start of play,"[[relic/red-sphere|Red]] | [[strand/wrath|Wrath]] (anger) | With Hann
@@ -124,5 +134,100 @@ To write it, append rows to the layer's CSVs, or turn on **Author** in the right
 Two things to know before relying on this plan:
 
 - This layer and the Empire's are still flagged as test layers (""remove when done""), though Bith na Bró now stands on them for its past. Keep them as the prologue and the flag should go; remove them and this plan goes with them.
-- The password keeps players from wandering in. It is not security: this layer's CSVs, the plan included, are in a public repository, and its data files are on the published site.",5,taster,,,What | Layer | Seen by,"What happened at the table: the PCs' fates, who freed the Thing, which spheres left with whom | Seven Silver Spheres | This one-shot only
+- The password keeps players from wandering in. It is not security: this layer's CSVs, the plan included, are in a public repository, and its data files are on the published site.",6,taster,,,What | Layer | Seen by,"What happened at the table: the PCs' fates, who freed the Thing, which spheres left with whom | Seven Silver Spheres | This one-shot only
 What the coming campaign should know: where each sphere went, how the scattering began | Bith na Bró | Every Bith na Bró campaign, Ravens in the Dells included"
+taster-crib,The Warden's crib sheet,"For a first-time Warden, and one who knows Pathfinder: keep this open all session. Its parts are the loop you run all evening, when to roll and what, a fight from start to finish, harm outside a fight, every save this adventure asks for and where, and some lines to have ready.
+
+The one idea under all of it: **the players say what their characters do; you say what happens.** Most of the time nobody rolls. A roll is for a risk the players have chosen to take, and they should know what it is before the dice land ([[rule/overview-and-principles-fiction-first|Fiction First]], [[rule/saves-save-principles|Save Principles]]).",3,taster,,,,
+crib-loop,"The loop, and unlearning Pathfinder","What you do, over and over, all session ([[rule/procedures-wilderness-exploration-cycle|Wilderness]] and [[rule/procedures-dungeon-exploration-cycle|Dungeon]] cycles are this same loop with bookkeeping):
+
+1. **Describe** where they are, what they can see, hear and smell, and anything dangerous, plainly. Answer every question honestly; there are no perception rolls in Cairn ([[rule/knowledge-and-perception-introduction|Knowledge and Perception]], [[rule/overview-and-principles-information|Information]]).
+2. **Ask ""what do you do?""** If an answer is vague, offer a choice: ""so, the road or the trail?"" ([[rule/overview-and-principles-choice|Choice]]).
+3. **Resolve it.** Sensible and not risky: it just happens. Risky: say what could go wrong, then call for a save ([[plan/crib-roll|Roll or not]]). Impossible: say no, and offer what they could do instead.
+4. **Consequences:** say what changed, mark off what was used (torches, rations, Fatigue), and go back to 1.
+
+Danger is always telegraphed, the deadlier the more obvious ([[rule/overview-and-principles-danger|Danger]]). If you are about to kill someone and they did not see it coming, stop and describe it first.",1,taster-crib,,,In Pathfinder | In Cairn,"Skill checks against a DC | A save: d20 **at or under** STR, DEX or WIL. No modifiers, no DCs. 1 succeeds, 20 fails.
+Perception and Knowledge rolls | None. Tell them what their characters would see or know; the [[rule/overview-and-principles-die-of-fate|Die of Fate]] (d6, 4+ good) if unsure.
+Initiative order, creature by creature | Sides: the PCs act, then their enemies. Round 1 only, each PC saves DEX to act.
+Attack rolls against AC | None. Attacks hit; roll damage, less armour (at most 3).
+HP is health; 0 is dying | HP is luck and dodging, back after a short rest. Wounds are STR loss, and the STR save after.
+Classes, levels, feats, XP | None. You are what you carry; you grow from what happens.
+Fighting is the main event | Fighting is the last resort, and it is deadly. Talking, sneaking and running are good plans."
+crib-roll,"Roll or not, and which","Ask in this order ([[rule/saves-when-to-save|When To Save]], [[rule/saves-save-principles|Save Principles]]):
+
+1. **Is there a real risk, with a failure that matters?** If not, no roll: it happens. If the plan is clever, no roll either.
+2. **Is it a risk to a character?** Call for a save, and **say the stakes first:** ""make a DEX save; if you fail, you fall into the swamp.""
+3. **Is it just chance, with nobody acting** (does she know the old script? is anyone at the camp?)? Roll the [[rule/core-rules-die-of-fate|Die of Fate]]: a d6, 4 or more goes the party's way.
+4. **Is it how a stranger takes them?** Roll [[rolltable/core-rules-reactions-table|Reactions]]: 2d6, from 2 hostile to 12 helpful. Then play the result.
+
+**Saves**: d20, **equal or under** the attribute succeeds; 1 always succeeds, 20 always fails ([[rule/core-rules-saves|Saves]]). Only one roll per risk: if several PCs try something together, **whoever is most at risk rolls** (usually the lowest attribute). Two sides pushing against each other: again, whoever is most at risk rolls; monsters rarely roll at all, except for morale and Critical Damage. A failed save need not be all or nothing: make the outcome fit the effort they put in.",2,taster-crib,,,Save | For,"**STR** | Lifting, forcing, holding on, swimming against a current, resisting poison, staying up after a wound ([[rule/core-rules-attributes|Attributes]])
+**DEX** | Acting in round 1, dodging, climbing, sneaking, balancing, running away from a fight
+**WIL** | Persuading, deceiving, intimidating, resisting fear or magic, keeping control in the dark, casting a spell in danger"
+crib-combat,Running a fight,"**Before it starts.** Telegraph it: the goblins see you, the oak creaks. Give them a choice: talk, back off, sneak round, or fight. If the enemy's mood is unclear, roll [[rolltable/core-rules-reactions-table|Reactions]] first. If they still fight:
+
+1. **Round 1: every PC makes a DEX save to act.** Fail: they lose their turn this round ([[rule/core-rules-rounds|Rounds]]). If the PCs set the ambush, waive it.
+2. **The PCs declare, then resolve.** All the PCs say what they do, then roll; their results land together. Each may move about 40ft and take one action: attack, cast a spell, move again, or something else sensible ([[rule/core-rules-actions|Actions]]). Anything risky beyond attacking (a shove off the bridge) is a save.
+3. **Damage.** Attacks hit: roll the weapon's die, take off the target's armour, take the rest off HP ([[rule/core-rules-attacking-damage|Attacking & Damage]]). Several attackers on one target: roll them all, **keep the single highest**. Fighting from weakness (cover, bound, a long shot) is _impaired_: d4. From advantage (a helpless foe, a daring move) it is _enhanced_: d12. _Blast_ hits everyone in the area, a roll for each ([[rule/core-rules-attack-modifiers|Attack Modifiers]]).
+4. **The enemies' turn**, the same way. Then a new round: the PCs go first, no DEX saves now.
+
+**When damage lands on a PC:**
+
+- **HP left:** nothing worse; they were lucky.
+- **HP to exactly 0:** a Scar. Look up the HP lost in that attack on [[rolltable/core-rules-scars-table-table|Scars]] (lost 3 → entry 3).
+- **Past 0:** the rest comes off **STR**, and they **save STR at the new score** straight away. Pass: still fighting. Fail: **Critical Damage**. A PC can only crawl, and dies within the hour unless someone tends them (bandages stabilise). Some monsters do worse on a failed save ([[rule/core-rules-critical-damage|Critical Damage]]). STR 0 is death ([[rule/core-rules-attribute-loss|Attribute Loss]]).
+
+**When damage lands on a monster:** the same, but a failed Critical Damage save means it is dead.
+
+**Morale.** Enemies save **WIL** when they lose their first, and again when they are down to half; a lone foe saves at 0 HP. Fail: they flee or give up ([[rule/core-rules-morale|Morale]]). Use it: most fights should end in a rout, not to the last goblin.
+
+**Running away** takes a DEX save and somewhere safe to run to ([[rule/core-rules-retreat|Retreat]]).
+
+**A big group** (six goblins or more, say) can fight as one **detachment**: one stat block, its attacks _enhanced_ and _blast_, individuals' attacks on it _impaired_; Critical Damage routs it ([[rule/core-rules-detachments|Detachments]]). Simpler to run than six goblins, and scarier.
+
+**Panic.** Surrounded, in the dark without light, or facing their worst fear: a WIL save or panic. Panicked: 0 HP, no turn in round 1, attacks _impaired_; a WIL save as their action to snap out of it ([[rule/procedures-panic|Panic]]).
+
+**After.** A few moments' rest and a drink restores all HP, if it is safe ([[rule/core-rules-healing-recovery|Healing & Recovery]]). Lost STR, DEX and WIL take a week. A dead PC's player takes a pregen at once, joining as soon as it makes sense ([[rule/core-rules-character-death|Character Death]]).",3,taster-crib,,,,
+crib-harm,"Harm outside a fight, magic and burdens","- **Traps and hazards hit attributes, not HP:** usually STR or DEX. Armour counts only where it would ([[rule/procedures-traps|Traps]], [[rule/core-rules-attribute-loss|Attribute Loss]]). So the gatehouse arrows (d8, then d6, d4) come off **STR**, and can kill a weak character outright. Make sure they have seen the holes in the wall first.
+- **Traps are found by looking.** A careful character who searches or describes how they cross gets every clue, and no roll. Someone walking in unaware sets it off as the fiction says, or on a 2-in-6.
+- **Spells:** hold the book in both hands, read it aloud, take a **Fatigue**. Cast in danger or while _deprived_, you may call for a **WIL** save; a failure costs as much as the spell would have done ([[rule/core-rules-casting-spells|Casting Spells]]). **Relics** cost no Fatigue, but have uses ([[rule/core-rules-relics|Relics]]).
+- **Fatigue** takes an inventory slot until a night's rest; no free slot, drop something. **Deprived** (no food, no sleep): no HP back, no Fatigue cleared ([[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]).
+- **Inventory:** ten slots, and a full ten means 0 HP. A _bulky_ item takes two; a silver sphere is _bulky_ ([[rule/character-creation-inventory|Inventory]]). Three spheres fill a backpack (six slots); a PC carrying them has little room for anything else.
+- **Light:** a torch lights 40ft and can be lit 3 times; a lantern burns an oil can's 6 uses. No light underground: panic ([[rule/procedures-light|Light]]).",4,taster-crib,,,,
+crib-saves-here,"Every roll in this adventure, place by place","The notes call for some of these; the rest are what Cairn's rules give for what is there. Mine, where the notes say only ""hard work"" or ""care"", are marked _(a ruling)_: change them if you like, but say the stakes before the roll.",5,taster-crib,,,Where | When | Roll | On a fail,"Anywhere | A fight starts | **DEX** save, each PC | Loses round 1
+Anywhere | They run from a fight | **DEX** save | Caught; still in the fight
+Anywhere | Enemies' first loss; half lost | **WIL** save, the enemies | They flee or give up
+Anywhere | A stranger's mood is unclear | **2d6** Reactions | 2 hostile … 12 helpful
+Anywhere | A spell, in danger or _deprived_ | **WIL** save | Fatigue, a lost book, worse
+Each watch | Travelling | **d6** Wilderness Events | (the table)
+On a trail | Each leg | **d6**: lost on 1–2 | A watch lost finding the way
+[[place/old-ford|Old Ford]] | Holding the boat mid-river to ask the spirit | **STR** save _(a ruling)_ | Swept downstream toward the waterfall: **DEX** or **STR** to get ashore
+[[place/sister-stones|Sister Stones]] | Walking between them | **WIL** save | **d4 WIL** damage
+[[place/sister-stones|Sister Stones]] | Going round them | **STR** save | No progress: try again, or another way
+[[place/sister-stones|Sister Stones]] | Climbing over | **DEX** save only if hurried or hampered | A fall: **d4 STR** _(a ruling)_
+[[place/bridge-of-saints|Bridge of Saints]] | Sneaking past the camp, or taking the staff | **DEX** save | Spotted; roll Reactions, with the staff they are hostile
+[[place/bridge-of-saints|Bridge of Saints]] | Playing on their superstition | **WIL** save, or no roll if it is clever | They see through it
+[[place/bridge-of-saints|Bridge of Saints]] | Goblins in a fight | Morale **WIL 8** | Rout
+[[place/rising-sun-tavern|Rising Sun]] | Lying to or bargaining with the Thing | **WIL** save, or no roll | It sees through them, and says so, pleasantly
+[[place/rising-sun-tavern|Rising Sun]] | Bitten past 0 HP | **STR** save | Critical Damage: it drains blood, **d6 STR** more
+[[place/great-oak|Great Oak]] | Passing the oak on the only path | **DEX** save (it senses all but the slightest movement) | It lashes: d8 _blast_ at everyone near
+[[place/great-oak|Great Oak]] | Leaving the path into the swamp | **STR** save _(a ruling)_ | Stuck and sinking; another save, or help
+[[place/great-oak|Great Oak]] | Attacking it with fire | Fire's attacks _enhanced_, d12 _(a ruling: it is vulnerable to fire)_ | —
+[[place/secret-well|Secret Well]] | Climbing 50ft down (no roll with a rope and time) | **DEX** save | A fall: **d6 STR** or more _(a ruling)_
+[[place/secret-well|Secret Well]] | The ivy, past 0 HP | **STR** save | Paralysed, dragged down the well
+[[route/well-passage|Well passage]] | Without light | **WIL** save | Panic
+[[place/porcelain-gatehouse|Gatehouse]] | Crossing the plates unaware | 2-in-6, or as the fiction says | Arrows: d8, d6, d4 off **STR**, then dry
+[[place/porcelain-wall|Porcelain Wall]] | Climbing it | **DEX** save | A fall; on the battlements, the sentries attack
+[[place/temple-of-st-rylan|Temple]] | Long in one place, or loud | **d6** Dungeon Events | (the table)"
+crib-lines,Lines to have ready,"- ""What do you do?"" (after every description: then wait)
+- ""You can see/hear/smell… What do you do?"" (never ""roll Perception"")
+- ""That's risky. Make a **DEX** save. If you fail, [this happens]. Still want to?""
+- ""Who's most at risk? You roll.""
+- ""You can't do that, but you could…""
+- ""So: A or B?"" (when a plan is vague)
+- ""Everyone, roll **DEX** to act before they do.""
+- ""Everyone say what you're doing, then we roll.""
+- ""Roll your weapon's die. … Take off their armour: that's [n] damage.""
+- ""That takes you past zero. Take the rest off your **STR**, then save **STR** against the new number.""
+- ""They've lost one. [Rolls WIL for them.] They break and run.""
+- ""Does anyone do anything else before night?"" (then camp: a Ration each, Fatigue cleared)
+- ""You've a watch's travel before the doors open. Road or trail?""",6,taster-crib,,,,
