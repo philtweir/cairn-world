@@ -35,7 +35,8 @@ if (process.argv.includes('--remove')) {
   }
   if (!pw) { console.error('No password given.'); process.exit(1); }
   const salt = crypto.randomBytes(12).toString('hex');
-  settings.gate = { salt, sha256: crypto.createHash('sha256').update(`${salt}:${pw}`).digest('hex') };
+  // A new password keeps what the gate stands for (its principal, in a closed view: src/access.mjs).
+  settings.gate = { salt, sha256: crypto.createHash('sha256').update(`${salt}:${pw}`).digest('hex'), ...(settings.gate?.principal ? { principal: settings.gate.principal } : {}) };
 }
 if (Object.keys(settings).length) fs.writeFileSync(file, JSON.stringify(settings, null, 2) + '\n');
 else fs.rmSync(file, { force: true });

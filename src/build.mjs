@@ -24,6 +24,7 @@ import { parseCsv, toCsv } from './csv.mjs';
 import { buildExplorer } from './build-explorer.mjs';
 import { buildSearch } from './search-index.mjs';
 import { writeTables } from './tables.mjs';
+import { readAccess, resolveAccess } from './access.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
 import { makeResolver, REF } from './refs.mjs';
@@ -250,6 +251,9 @@ function readSettings(key) {
   if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
   if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
+  // Who may see what of this layer's view (src/access.mjs): closed, and whom to view it as by default.
+  if (settings.access && (typeof settings.access !== 'object' || Object.keys(settings.access).some(k => !['closed', 'default'].includes(k)))) problem(`${rel(file)} access takes "closed" and "default"`);
+  if (settings.gate?.principal && !settings.access?.closed) problem(`${rel(file)} gate.principal only applies to a closed view ("access": { "closed": true })`);
   // A basemap (src/globe.mjs writes one) is the land, rivers and lakes the explorer draws under this
   // layer's maps; rivers.json (src/terrain.mjs) the rivers found in its detailed areas.
   const drawing = name => {
@@ -272,7 +276,7 @@ function readSettings(key) {
       if (!(Array.isArray(img.bbox) && img.bbox.length === 4)) problem(`${rel(reliefFile)}: ${img.file} needs a bbox`);
     }
   }
-  return { rights: r ?? null, gate: settings.gate ?? null, test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), relief };
+  return { rights: r ?? null, gate: settings.gate ?? null, access: settings.access ?? null, grants: readAccess(LAYERS_DIR, key, problem), test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), relief };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -482,11 +486,30 @@ for (const v of viewKeys) {
   views[v] = view;
 }
 
+// A closed view's grants, from every layer in its stack, resolved to its entries (src/access.mjs).
+for (const v of viewKeys) {
+  if (!layers[v].access?.closed) continue;
+  const stack = layers[v].stack;
+  const ms = models.filter(m => views[v].models[m.alias]);
+  views[v].access = resolveAccess({
+    view: v, stack, problem,
+    access: Object.fromEntries(stack.map(k => [k, layers[k].grants])),
+    models: ms.map(m => ({ alias: m.alias, nodes: m.built.graph.nodes.filter(n => n.alias).map(n => ({ alias: n.alias, nodegroup_id: n.nodegroup_id })) })),
+    entries: ms.flatMap(m => views[v].models[m.alias].entries.map(e => ({ ...e, model: m.alias }))),
+    settings: layers[v].access, gate: layers[v].gate,
+  });
+}
+if (problems.length) bail();
+
 const totalOwn = layerKeys.reduce((n, k) => n + Object.values(built[k]).reduce((x, l) => x + l.length, 0), 0);
 console.log(`ok: ${models.length} models, ${layerKeys.length} layers, ${totalOwn} layer entries, ${viewKeys.length} view(s): ${viewKeys.join(', ') || 'none'}`);
 for (const v of viewKeys) for (const o of views[v].overrides) {
   const what = [o.overrides.length && `overrides ${o.overrides.join(', ')}`, o.adds.length && `adds to ${o.adds.join(', ')}`, o.sets.length && `sets ${o.sets.join(', ')}`].filter(Boolean).join('; ');
   console.log(`  ${v}: ${o.model}/${o.key} (${o.layers.join(' > ')}): ${what}`);
+}
+for (const v of viewKeys) {
+  const a = views[v].access;
+  if (a) console.log(`  ${v}: closed; ${a.principals.length} principal(s), ${a.grants.length} grant(s) to epoch ${a.epochs.length}${a.held ? `, ${a.held} held back for later epochs` : ''}`);
 }
 const hidden = Object.values(layers).filter(l => l.kind !== 'general' && !viewKeys.includes(l.key)).map(l => l.key);
 if (hidden.length) console.log(`  not published (use --all to preview): ${hidden.join(', ')}`);
@@ -533,7 +556,7 @@ const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack,
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,
-  views: viewKeys.map(v => describe(layers[v])),
+  views: viewKeys.map(v => ({ ...describe(layers[v]), ...(views[v].access ? { access: { default: views[v].access.default, epochs: views[v].access.epochs, principals: views[v].access.principals } } : {}) })),
   layers: Object.fromEntries(shippedLayers.map(l => [l, describe(layers[l])])),
 });
 
@@ -601,6 +624,7 @@ for (const v of viewKeys) {
   await writeTables(dataPath(`views/${v}/tables`), {
     resources: entities.map(e => ({ resource_id: e.id, model: e.model, graph_id: graphOf[e.model], key: e.key, name: String(e.fields.find(f => f.alias === 'name')?.value ?? e.key), layers: e.layers, general: e.layers.length === 1 && e.layers[0] === GENERAL })),
     mentions: entities.flatMap(e => (e.fields.find(f => f.derived)?.value ?? []).map(t => ({ src_resource: e.id, src_node: 'mentions', src_nodegroup: 'mentions', src_tile: null, target_resource: t }))),
+    access: views[v].access?.grants ?? null,
   });
   generalOnly[v] = new Set(entities.filter(e => e.layers.length === 1 && e.layers[0] === GENERAL).map(e => e.id));
 }
@@ -611,7 +635,7 @@ for (const v of viewKeys) {
     key: v,
     models: usedModels.filter(m => views[v].models[m.alias]).map(m => ({ alias: m.alias, graphid: m.built.graph.graphid })),
     resources: usedModels.flatMap(m => views[v].models[m.alias]?.resources ?? []),
-    text: !layers[v].gate,
+    text: !layers[v].gate && !views[v].access,
     general: generalOnly[v],
   })));
   const meta = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));

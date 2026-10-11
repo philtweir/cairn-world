@@ -17,7 +17,7 @@
 
 import * as duckdb from '@duckdb/duckdb-wasm';
 import initCompiler, { Compiler } from 'ros-madair';
-import { sqlString, draftTablesSql, viewsSql, tilesViewSql, overlaySql } from './engine-sql.mjs';
+import { sqlString, draftTablesSql, viewsSql, tilesViewSql, overlaySql, windowSql, readable } from './engine-sql.mjs';
 
 // duckdb: the directory of duckdb-wasm's files; compiler: the compiler's WASM; substrate and
 // tables: the view's directories; graphs: the view's Arches model documents (JSON text); suffix:
@@ -39,7 +39,8 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
   const conn = await db.connect();
   const url = (dir, f) => new URL(`${f}${suffix}`, new URL(dir, location.href)).href;
   const files = manifest.artifacts.map(a => a.path).filter(p => p.endsWith('.parquet'));
-  const own = ['resources.parquet', 'mentions.parquet'];
+  // The view's own tables (a closed view's grants among them, access.parquet).
+  const own = tableManifest.artifacts.length ? tableManifest.artifacts.map(a => a.path) : ['resources.parquet', 'mentions.parquet'];
   const where = f => (own.includes(f) ? tables : substrate);
   // How each file is read. DuckDB in the browser reads a file over HTTP a piece at a time, one
   // request after another (its size, its footer, then the row groups a query needs), and a query
@@ -91,8 +92,9 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
   await conn.query('SET parquet_metadata_cache = true').catch(() => {});
   for (const sql of draftTablesSql()) await conn.query(sql);
   let edited = false;   // whether the edit layer has anything in it
+  let windowed = false; // whether a closed view's window is on (engine-sql.mjs)
   const file = f => `'${f}'`;
-  const views = async () => { for (const sql of viewsSql({ file, all, edited })) await conn.query(sql); };
+  const views = async () => { for (const sql of viewsSql({ file, all, edited, windowed })) await conn.query(sql); };
   await views();
   const has = prefix => files.some(f => f.startsWith(`${prefix}_`));
   const caps = [files.includes('concept_catalog.parquet'), has('edges'), has('concepts'), has('ordered'), false];
@@ -110,7 +112,7 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
       await ready([graphid]);
       return serial(async () => {
         const sql = compiler.compile(JSON.stringify({ model: graphid, measures: ['select_ids'], ...(where ? { where } : {}) }), ...caps);
-        await conn.query(tilesViewSql({ file, graphid, edited }));
+        await conn.query(tilesViewSql({ file, graphid, edited, windowed }));
         return (await conn.query(sql)).toArray().map(r => r.resource_id);
       });
     },
@@ -123,11 +125,19 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
       edited = (drafts.resources ?? []).length > 0;
       await views();
     }),
-    // A model's tiles for some of its entries, as published, for Alizarin.
+    // A closed view's window: what one principal (and its groups) may see up to an epoch
+    // ({ principals, epoch }), or null for everything.
+    window: spec => serial(async () => {
+      if (spec) await conn.query(windowSql(spec));
+      windowed = !!spec;
+      await views();
+    }),
+    // A model's tiles for some of its entries, as published (and as far as the window lets them
+    // be read), for Alizarin.
     async tiles(graphid, ids) {
       await ready([graphid]);
       return rows(`SELECT resource_id, tileid, nodegroup_id, parenttile_id, sortorder, data FROM read_parquet('tiles_${graphid}.parquet')
-        WHERE resource_id IN (${ids.map(sqlString).join(', ')}) ORDER BY resource_id, nodegroup_id, sortorder`);
+        WHERE resource_id IN (${ids.map(sqlString).join(', ')})${windowed ? ` AND ${readable('resource_id', 'nodegroup_id')}` : ''} ORDER BY resource_id, nodegroup_id, sortorder`);
     },
   };
 }

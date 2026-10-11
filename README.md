@@ -31,7 +31,8 @@ anything that ships it, including this site.
 | `model/vocab.csv` | Controlled vocabularies: `collection_name,concept_label[,match]` (`rules/vocab.csv` adds the ones generated from the rules' tables) |
 | `layers/<key>/data/<alias>.csv` | One universe or campaign: its entries, overrides and additions (see Layers) |
 | `layers/<key>/model/` | Optional: models only that layer and its descendants use |
-| `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
+| `layers/<key>/layer.json` | Layer settings: `rights` (required), optional password `gate`, optional `access` (see Layers), optional `test` note, optional `globe` (see Maps). `layers/general/layer.json` is General's |
+| `layers/<key>/access/` | Optional: who may see what of a closed view, and from when: `principals.csv`, `epochs.csv`, `grants.csv` (see Layers) |
 | `layers/<key>/globe.csv`, `basemap.json` | Optional: what each place is on Earth or on a regional map, and the globe's land, for `npm run globe` (see Maps) |
 | `layers/<key>/terrain.csv`, `relief.json`, `relief-*.webp`, `rivers.json` | Optional: story edits to the relief, the shaded-relief images, and the rivers found in detailed areas, for `npm run terrain` (see Maps) |
 | `rules/<alias>.csv` | Generated reference data from the Cairn rules (see below); never edit |
@@ -207,6 +208,39 @@ loads the view, and remembers it in that browser (`Lock` in the header forgets i
 never the default view. This keeps players from wandering into the
 Warden's notes; it is not security. The layer's CSVs are in this public repository, and its data
 files are on the site like any other view's. `--remove` takes the gate off.
+
+**Who may see what, and from when** (`layers/<key>/access/`, `src/access.mjs`). Role-based access
+with a clock, written as data and with nothing game-specific in it:
+
+| File | Columns | |
+|---|---|---|
+| `principals.csv` | `principal,name,member_of` | `user:<slug>` or `group:<slug>`; `everyone` is built in. A member has its groups' grants, and theirs in turn |
+| `epochs.csv` | `epoch,name,date` | The layer's clock, 1, 2, ... (0, before any, is implicit). Its last row is now |
+| `grants.csv` | `principal,target,fields,permission,from` | `target`: `*`, `layer:<key>`, `model:<alias>` or `<model>/<key>`. `fields`: aliases, or blank for the whole entry (a field in a group grants the group). `permission`: `read`, or `discover` (that it exists, and its name). `from`: the epoch it starts at |
+
+A view is closed when its `layer.json` says `"access": { "closed": true, "default": "<principal>" }`.
+In a closed view, the grants of *every* layer in its stack apply, so a universe or era can say what
+is common knowledge for the campaigns set in it, while its own view, not closed, stays open to
+everyone. Grants never end, so the window only grows: at epoch T a principal sees everything its
+grants allowed at any epoch up to T. A grant whose epoch has not come yet (later than the last row of
+its layer's `epochs.csv`) is held back and not published at all: write the next session's reveals
+ahead, and add the epoch's row when it has been played. Grants from layers below the view's own
+apply from the start.
+
+In the explorer a closed view has **Viewing as** and **as of**: one principal (its groups' grants
+included) at one epoch. Lists, counts, links, filters, maps and pages all go through that window:
+an entry it does not name is not there, one it only `discover`s shows its name and nothing else,
+fields it does not grant are absent, and a `[[reference]]` to something outside it is just its
+words. A gate with a `"principal"` is then that principal's password rather than a door: anyone
+can open the view, and viewing as that principal (or a member of it) asks for the password. Closed
+views get no text index, as gated ones don't.
+
+The build checks every row (principals declared, targets and fields that exist, epochs in order)
+and writes the grants, resolved to entry ids and nodegroups, to `views/<view>/tables/access.parquet`
+(`principal, resource_id, nodegroup_id, permission, from`). That file is the boundary: ids and
+ordinals only, so another reader, Rós Madair's windowing when it has one, can enforce the same grants
+without knowing this site. Here they are enforced only in the explorer: as with the gate, every
+published file still holds everything, for anyone who goes looking.
 
 Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
 models in `layers/<key>/model/` (Bith na Bró's Strand of Magic and Seven Silver Spheres' Run Plan are two), and Alizarin's `LayeredGraph` supports overlays, but the build does
@@ -755,7 +789,7 @@ too: build and upload `dist/`.
 | `antenexus` | Era of Bith na Bró | The Antenexus, the present age: the Six Kingdoms and Nine States and their realms, the Engineers, the churches, the Order of the White Raven, the Dells' settlements and recent history |
 | `ravens-in-the-dells` | Campaign (solo), set in the Antenexus | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Era of Bith na Bró, **test** | The First Empire: player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, password gate, **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
+| `seven-silver-spheres` | Campaign, closed (the party by default; the Warden behind the password), **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
 
 **The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
 stack is General › Bith na Bró › The First Empire › the campaign, the First Empire being the era
@@ -788,8 +822,9 @@ for running the adventure as a 90-minute taster before a Bith na Bró campaign: 
 with their times at the table and in the story, and which layer an outcome belongs in. Its parts are
 components of it (P148), so it reads as a tree under Texts & Lore, in `section` order, and its
 `[[references]]` put it under "Linked from" on each place, rule and table it uses. It is in the
-campaign's layer so that it is behind the same password as the adventure's notes: that keeps it out
-of players' way, but like the notes it is public in this repository.
+campaign's layer, and the view is closed (`access/`): the party sees what it has been shown, session
+by session, and the Run Plan and the adventure's notes only as the Warden, behind the password.
+That keeps them out of players' way, but like the notes they are public in this repository.
 
 *Seven Silver Spheres* and The Empire are test layers, to be removed when done. *Seven Silver
 Spheres* is © Martin Orchard and is not openly licensed; both layers' `rights` say so. The layer condenses and

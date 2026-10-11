@@ -56,7 +56,8 @@ const md = nodes => nodes.map(n => {
   if (n.t === 'ref') {
     const href = n.target.includes('/') ? `#/${[state.view, ...n.target.split('/')].map(encodeURIComponent).join('/')}` : null;
     const t = state.byId.get(state.store?.refId(n.target));
-    if (!href && !t) return md(n.c);
+    // Outside a closed view's window, a reference is only its words.
+    if ((!href && !t) || (href && !state.store?.visible(state.store.refId(n.target)))) return md(n.c);
     if (!state.author || !t) return h('a', { href: href ?? route(t), class: 'ref' }, md(n.c));
     const rel = refRelation(textOf, t, state.back);
     return h('a', { href: href ?? route(t), class: `ref ${rel}`, title: REL_TITLE[rel] ?? false }, md(n.c));
@@ -115,7 +116,8 @@ async function load() {
   }
   fillViews();
   const v = state.viewsMeta.views.find(x => x.key === state.view);
-  if (v.gate) await unlock(v);
+  // A closed view's gate is a principal's credential, asked for when viewing as it (src/access.mjs).
+  if (v.gate && !v.gate.principal) await unlock(v);
   const [manifest, ontology] = await Promise.all([
     fetch(`${DATA}/views/${state.view}/manifest.json${V}`).then(r => r.json()),
     fetch(`${DATA}/ontology.json${V}`).then(r => r.json()),
@@ -158,6 +160,18 @@ async function load() {
   // Edits made in this browser: a layer over the view, in place before anything is read.
   state.drafts = await openDrafts(state.view, state.viewsMeta.build);
   if (state.drafts.list().length) state.editProblems = await state.store.applyEdits(state.drafts);
+  // A closed view: seen as one principal, up to one epoch (src/access.mjs).
+  if (v.access) {
+    const a = v.access, current = a.epochs.length;
+    const stored = k => { try { return localStorage.getItem(`cairn-world:${k}:${state.view}`); } catch { return null; } };
+    const ok = p => p && (!p.gated || remembered(v));
+    // Whom it was last seen as here, else (past the gate) the gate's principal, else the default.
+    const want = a.principals.find(p => p.id === stored('as')) ?? (remembered(v) ? a.principals.find(p => p.id === v.gate.principal) : null);
+    state.as = ok(want) ? want : a.principals.find(p => p.id === a.default);
+    const at = stored('asof');
+    state.asOf = at === null || at === 'latest' || !(Number(at) >= 0 && Number(at) <= current) ? current : Number(at);
+    await state.store.setWindow({ principals: state.as.groups, epoch: state.asOf });
+  }
   // A campaign shows what it uses (explorer/store.mjs, scope) unless asked for its whole world.
   state.campaign = v.kind === 'campaign';
   state.scoped = state.campaign && (() => { try { return localStorage.getItem('cairn-world:scoped') !== '0'; } catch { return true; } })();
@@ -219,7 +233,7 @@ function fillViews() {
   // Grouped by universe: the universe itself, then its campaigns.
   put($('view'), groupViews(state.viewsMeta).map(g => h('optgroup', { label: g.label },
     g.views.map(v => h('option', { value: v.key, selected: v.key === state.view },
-      `${'\u2003'.repeat(v.depth ?? 0)}${v.kind === 'universe' ? `${v.name} (universe)` : v.kind === 'era' ? `${v.name} (era)` : v.name}${v.gate ? ' · locked' : ''}`)))));
+      `${'\u2003'.repeat(v.depth ?? 0)}${v.kind === 'universe' ? `${v.name} (universe)` : v.kind === 'era' ? `${v.name} (era)` : v.name}${v.gate && !v.gate.principal ? ' · locked' : ''}`)))));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
   document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
@@ -435,6 +449,7 @@ function renderDetail(e) {
     map,
     head,
     editedBanner(e),
+    e.nameOnly && h('p', { class: 'note' }, 'Known only by name, so far.'),
     description && h('div', { class: 'text lead' }, md(blocks(description))),
     state.author && description && /\[\[/.test(description) && h('div', { class: 'reflegend' }, 'References: ', h('a', { class: 'ref rel' }, 'related'), ' · ',
       h('a', { class: 'ref rel-in' }, 'related the other way'), ' · ', h('a', { class: 'ref mention' }, 'mention only')),
@@ -811,6 +826,22 @@ try {
     renderSide();
   });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
+  // A closed view: whom it is seen as, and as of when. Changing either reloads (as a view does).
+  const view = state.viewsMeta.views.find(x => x.key === state.view);
+  if (view.access) {
+    const a = view.access, set = (k, val) => { try { localStorage.setItem(`cairn-world:${k}:${state.view}`, val); } catch { /* not remembered */ } };
+    put($('as'), a.principals.map(p => h('option', { value: p.id, selected: p.id === state.as.id }, `${p.name}${p.gated && !remembered(view) ? ' (password)' : ''}`)));
+    put($('asof'), [{ epoch: 0, name: 'The start' }, ...a.epochs].map(x => h('option', { value: x.epoch, selected: x.epoch === state.asOf }, x.epoch === a.epochs.length ? `${x.name} (latest)` : x.name)));
+    $('asof-wrap').hidden = !a.epochs.length;
+    $('access-wrap').hidden = false;
+    $('as').addEventListener('change', async ev => {
+      const p = a.principals.find(x => x.id === ev.target.value);
+      if (p.gated && !remembered(view)) { $('access-wrap').hidden = true; await unlock(view); }
+      set('as', p.id);
+      location.reload();
+    });
+    $('asof').addEventListener('change', ev => { set('asof', Number(ev.target.value) === a.epochs.length ? 'latest' : ev.target.value); location.reload(); });
+  }
   $('scoped').checked = state.scoped;
   $('scoped').addEventListener('change', async ev => {
     state.scoped = ev.target.checked;

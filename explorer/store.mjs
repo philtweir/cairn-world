@@ -12,6 +12,10 @@
 // rows built by Alizarin's CSV loader (as the build builds a layer) and composed over the
 // published entry by Alizarin's layer composition, then put where both readers look: Alizarin's
 // resource registry, and the query engine's overlay (so lists, counts, links and filters see it).
+//
+// A closed view (src/access.mjs) is read through a window, one principal's grants up to an epoch
+// (setWindow): the engine's views hold only what it lets through, so everything here does too.
+// An entry it names but lets nothing of be read is known by its name only (`nameOnly`).
 
 import { readOne, withMentions, links } from '../src/world-read.mjs';
 import { makeResolver, normName, refsIn, REF } from '../src/refs.mjs';
@@ -100,7 +104,11 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
         for (const id of want) {
           const r = rowOf.get(id);
           if (!r) continue;
+          if (nameOnly?.has(id)) { state.byId.set(id, { ...light(r), light: false, full: true, nameOnly: true }); continue; }
           const e = withMentions(await readOne(A.graphManager, manifest, r.model, id, { key: r.key, layers: r.layers ?? [] }), refId);
+          // A window may let some fields be read and not the name's: the name is known all the same.
+          const name = e.fields.find(f => f.alias === 'name');
+          if (name && name.value == null) name.value = r.name;
           e.full = true;
           state.byId.set(id, e);
           tilesOf.delete(id);
@@ -233,6 +241,16 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
   // on through a universe's own entry (which mentions the whole world). A table in the engine, so
   // lists, counts and lenses filter on it; remade when the edits change.
   let scopeOn = false, scopeIds = null;
+  // The window (a closed view's): what is known of the view, and what only by name.
+  let visibleIds = null, nameOnly = null;
+  async function setWindow(spec) {
+    await engine.window(spec);
+    visibleIds = spec ? new Set((await engine.rows('SELECT DISTINCT resource_id FROM win')).map(r => r.resource_id)) : null;
+    nameOnly = spec ? new Set((await engine.rows(`SELECT resource_id FROM win GROUP BY resource_id HAVING count(*) FILTER (WHERE permission = 'read') = 0`)).map(r => r.resource_id)) : null;
+    // What was read before was read through another window.
+    rowOf.clear(); tilesOf.clear(); state.byId.clear(); state.back.clear();
+    if (scopeIds) await rescope();
+  }
   async function rescope() {
     const seed = `SELECT resource_id FROM resources WHERE list_contains(layers, ${q(state.view)})`;
     const one = `SELECT target_resource AS resource_id FROM edges WHERE src_resource IN (${seed}) UNION ${seed}`;
@@ -243,7 +261,10 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
   const scoped = () => (scopeOn ? 'resource_id IN (SELECT resource_id FROM scope)' : null);
 
   return {
-    know, full, refId, compose, exactRefs,
+    know, full, refId, compose, exactRefs, setWindow,
+    // Whether the window (if there is one) shows an entry at all, and whether only by its name.
+    visible: id => !visibleIds || visibleIds.has(id),
+    nameOnly: id => !!nameOnly?.has(id),
     async applyEdits(drafts) { const problems = await applyEdits(drafts); if (scopeIds) await rescope(); return problems; },
     // Only what the campaign uses, or everything in its world.
     async setScope(on) { if (on && !scopeIds) await rescope(); scopeOn = on; },

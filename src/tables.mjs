@@ -9,6 +9,10 @@
 //     edge columns (src_resource, src_node, src_nodegroup, src_tile, target_resource), so the
 //     explorer reads them with the substrate's edges: they are made from text, not stored in a
 //     field, so the emitter cannot see them.
+//   access.parquet     a closed view's grants (src/access.mjs), resolved: principal, resource_id,
+//     nodegroup_id (null: the whole entry), permission (read, discover), from (the epoch it starts
+//     at). Ids and ordinals only, nothing of the layers, so a reader such as Rós Madair can window
+//     on it without knowing this site.
 //
 // Written with DuckDB (@duckdb/node-api), sorted, so the same data gives the same bytes.
 
@@ -19,7 +23,7 @@ import { DuckDBInstance } from '@duckdb/node-api';
 
 const lit = p => `'${p.replace(/'/g, "''")}'`;
 
-export async function writeTables(dir, { resources, mentions }) {
+export async function writeTables(dir, { resources, mentions, access = null }) {
   fs.mkdirSync(dir, { recursive: true });
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cairn-tables-'));
   const db = await DuckDBInstance.create(':memory:');
@@ -32,8 +36,11 @@ export async function writeTables(dir, { resources, mentions }) {
     await c.run(`COPY (SELECT src_resource, src_node, src_nodegroup, src_tile, target_resource
         FROM read_json(${json('mentions', mentions)}, columns = {src_resource: 'VARCHAR', src_node: 'VARCHAR', src_nodegroup: 'VARCHAR', src_tile: 'VARCHAR', target_resource: 'VARCHAR'})
         ORDER BY target_resource, src_resource) TO ${lit(path.join(dir, 'mentions.parquet'))} (FORMAT parquet, COMPRESSION zstd)`);
+    if (access) await c.run(`COPY (SELECT principal, resource_id, nodegroup_id, permission, "from"
+        FROM read_json(${json('access', access)}, columns = {principal: 'VARCHAR', resource_id: 'VARCHAR', nodegroup_id: 'VARCHAR', permission: 'VARCHAR', "from": 'INTEGER'})
+        ORDER BY principal, resource_id, nodegroup_id NULLS FIRST, permission) TO ${lit(path.join(dir, 'access.parquet'))} (FORMAT parquet, COMPRESSION zstd)`);
     // Their sizes, as Rós Madair's manifest lists its files', so a reader can choose how to fetch each.
-    const artifacts = ['mentions.parquet', 'resources.parquet'].map(f => ({ path: f, bytes: fs.statSync(path.join(dir, f)).size }));
+    const artifacts = [...(access ? ['access.parquet'] : []), 'mentions.parquet', 'resources.parquet'].map(f => ({ path: f, bytes: fs.statSync(path.join(dir, f)).size }));
     fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ artifacts }, null, 1) + '\n');
   } finally {
     c.closeSync?.();

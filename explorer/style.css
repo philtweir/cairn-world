@@ -17,6 +17,8 @@ svg.icon{display:inline-block;width:1em;height:1em;max-width:none;margin:0;borde
 .chip[aria-pressed=true]{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
 .chip small{color:var(--muted);margin-left:.25rem}
 .rules{display:block;margin:.8rem 0;font-size:14px;color:var(--muted)}
+.access{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:center}
+.access select{font:inherit;max-width:100%}
 #list{list-style:none;margin:0;padding:0}
 #list a{display:flex;justify-content:space-between;gap:.5rem;padding:.35rem .5rem;border-radius:6px;text-decoration:none;color:var(--fg);font-size:15px}
 #list a:hover{background:var(--panel)}
