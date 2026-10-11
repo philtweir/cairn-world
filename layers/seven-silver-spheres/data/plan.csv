@@ -40,6 +40,7 @@ taster-clock,The clock,"The adventure is set up for Cairn 2e's travel, as its au
 - **Every leg** (a route between two points), the old road included, is a short forest trail of **3 watches** ([[rule/procedures-travel-duration|Travel Duration]]): a day and a half.
 - **Every leg, a d6 to get lost: 1–2** ([[rule/procedures-travel|Travel]], [[rolltable/procedures-path-difficulty-table-1|Path Difficulty]]). Lost, they arrive at a different point from the one they meant: you pick one the route network joins, and it costs them a leg.
 - **No rolls on the last leg to the wall** (from the Rising Sun or the Great Oak): the porcelain soldiers keep that ground clear. Through the gatehouse, or along the well passage, takes no watches.
+- **Off the trails** (cutting between points no trail joins: the Stones, the Rising Sun and the Oak are 7 to 10 km apart): a short wilderness path, **4 watches**, lost on **1–3**, and a Wilderness Events roll as they leave the trail ([[rule/forest-seeds-exploring-the-wood|Exploring the Wood]]). It is [[creature/the-shadow|the Shadow]]'s ground: lost, they come out where you choose, or where they started. Quicker than two trails round (6 watches), and a gamble.
 
 Every route to the temple is three legs: **9 watches**, from about 13 of travel before the doors open. With nothing lost, the party is at the wall on the evening of day 5, with two days to spare (the table). **One wrong turn they can afford; two, they cannot**, unless they travel at night or skip camp. That is the pressure: let the players count it.
 
@@ -202,6 +203,7 @@ Anywhere | A stranger's mood is unclear | **2d6** Reactions | 2 hostile … 12 h
 Anywhere | A spell, in danger or _deprived_ | **WIL** save | Fatigue, a lost book, worse
 Each leg (each watch, in the campaign) | Travelling | **d6** Wilderness Events | (the table): Encounter, Travel Encounters and Reactions; Sign, Signs
 Each leg, but not the last to the wall | Travelling | **d6**: lost on 1–2 | They reach a different point: a leg (3 watches) lost
+Off the trails, between points | Cutting across | **d6**: lost on 1–3, and **d6** Wilderness Events as they leave | The Shadow lets them out where you choose, or where they began: 4 watches gone
 [[place/old-ford|Old Ford]] | Holding the boat mid-river to ask the spirit | **STR** save _(a ruling)_ | Swept downstream toward the waterfall: **DEX** or **STR** to get ashore
 [[place/sister-stones|Sister Stones]] | Walking between them | **WIL** save | **d4 WIL** damage
 [[place/sister-stones|Sister Stones]] | Going round them | **STR** save | No progress: try again, or another way
