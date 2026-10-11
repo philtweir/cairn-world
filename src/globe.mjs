@@ -15,14 +15,15 @@
 // optional box of longitude and latitude, "Russia@24:60" or "Norway@-20:40/74:85", for a realm
 // that is part of a country; or WKT in
 // Earth's longitude and latitude), map ("<map> POINT (x y)" in that map's units, x east and y
-// south), note. A place with neither keeps no geometry. Natural Earth data is public domain;
+// south), note. A place with neither keeps no geometry. `globe.dry` in layer.json lists places with
+// no rivers or lakes (a desert, say): Natural Earth's rivers stop at their edge, and their lakes go. Natural Earth data is public domain;
 // it comes from the world-atlas package (a dev dependency: the site never needs it).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity } from 'd3-geo';
+import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity, geoContains, geoCentroid } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
 import { feature, merge } from 'topojson-client';
 import polygonClipping from 'polygon-clipping';
@@ -355,17 +356,46 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // out of view; in a detailed area it draws the rivers src/terrain.mjs finds there instead.
   const lineOf = g => (g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : []);
   const rivers = naturalEarth('ne_50m_rivers_lake_centerlines.geojson').features.filter(f => f.properties.featurecla === 'River');
+  // The dry places: a river is cut where it crosses into one (the crossing found by halving the
+  // stretch), and a lake goes if its middle is in one.
+  const dry = (settings.globe.dry ?? []).map(id => {
+    if (!geometryOf.has(id)) throw new Error(`layer.json globe.dry lists "${id}", which globe.csv gives no shape`);
+    return geometryOf.get(id);
+  });
+  const isDry = p => dry.some(g => geoContains(g, p));
+  const wet = line => {
+    if (!dry.length) return [line];
+    const out = [];
+    let cur = [];
+    for (let i = 0; i < line.length; i++) {
+      const inside = isDry(line[i]);
+      if (i) {
+        const was = isDry(line[i - 1]);
+        if (was !== inside) {
+          let [a, b] = was ? [line[i], line[i - 1]] : [line[i - 1], line[i]];   // a outside, b inside
+          for (let k = 0; k < 16; k++) { const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (isDry(m)) b = m; else a = m; }
+          cur.push(a.map(v => Math.round(v * 100) / 100));
+          if (inside) { if (cur.length >= 2) out.push(cur); cur = []; }
+        }
+      }
+      if (!inside) cur.push(line[i]);
+    }
+    if (cur.length >= 2) out.push(cur);
+    return out;
+  };
   for (const w of [3, 2, 1]) {
     const lines = rivers.filter(f => (f.properties.scalerank <= 2 ? 3 : f.properties.scalerank <= 4 ? 2 : 1) === w)
       .flatMap(f => lineOf(geomOf(remap.project(f.geometry) ?? { type: 'none' })))
       .map(l => simplifyLine(l.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100]), 0.03))
+      .flatMap(wet)
       .filter(l => l.length >= 2);
     features.push({ type: 'Feature', properties: { kind: 'river', w, source: 'Natural Earth 1:50m rivers (public domain), remapped' }, geometry: { type: 'MultiLineString', coordinates: lines } });
   }
   // Lakes: water over land. Natural Earth winds them as d3 expects, but any read inside out is turned.
   const lakes = naturalEarth('ne_50m_lakes.geojson').features.flatMap(f => polysOf(geomOf(remap.project(f.geometry) ?? { type: 'none' })))
     .map(poly => poly.map(r => { const t = simplifyLine(r, 0.04); return t.length >= 4 ? t : r; }))
-    .map(poly => (geoArea({ type: 'Polygon', coordinates: poly }) > 2 * Math.PI ? poly.map(r => [...r].reverse()) : poly));
+    .map(poly => (geoArea({ type: 'Polygon', coordinates: poly }) > 2 * Math.PI ? poly.map(r => [...r].reverse()) : poly))
+    .filter(poly => !isDry(geoCentroid({ type: 'Polygon', coordinates: poly })));
   const lakeGeom = dropSpecks(round({ type: 'MultiPolygon', coordinates: lakes }, 2), 3e-6);
   if (lakeGeom) features.push({ type: 'Feature', properties: { kind: 'lake', source: 'Natural Earth 1:50m lakes (public domain), remapped' }, geometry: lakeGeom });
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));

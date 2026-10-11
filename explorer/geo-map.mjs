@@ -242,8 +242,9 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const inDetail = holes.some(({ bbox: [x0, y0, x1, y1] }) => cx - span * 1.3 > x0 && cx + span * 1.3 < x1 && cy - span > y0 && cy + span < y1);
     for (const c of coarse) c.node.setAttribute('d', inDetail ? '' : path(near ? { type: 'MultiPolygon', coordinates: c.polys.filter(near).map(p => p.c) } : c.geom) ?? '');
     for (const c of details) c.node.setAttribute('d', path(c.geom) ?? '');
-    // Detail by zoom: the whole globe shows the great rivers and lakes; more appear zoomed in.
-    const minW = span > 40 ? 3 : span > 20 ? 2 : 1, minLake = span > 40 ? 2e-5 : span > 20 ? 4e-6 : 0;
+    // Detail by zoom: the whole globe shows only the greatest lakes, no rivers; a continent its
+    // greatest rivers; a region more; and closer in, all of them.
+    const minW = span > 40 ? Infinity : span > 20 ? 3 : span > 8 ? 2 : 1, minLake = span > 40 ? 2e-5 : span > 20 ? 4e-6 : 0;
     // Turning a wide view, water waits until the drag ends: it is detail the eye does not follow.
     const still = !(moved && drag) || span <= 20;
     gWater.style.display = still ? '' : 'none';

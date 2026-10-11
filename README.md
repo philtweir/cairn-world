@@ -343,7 +343,10 @@ Earth has only the greatest rivers, `npm run terrain` finds them from the 1 km h
 drains to its steepest lower neighbour, and a river is drawn wherever more than 150 km² drains
 through (wider past 2,000 and 15,000 km²), smoothed, into `rivers.json`. The explorer draws water
 over the relief, Natural Earth's rivers masked out of a detailed area where the found ones are
-drawn; the smaller rivers and lakes appear as a map zooms in. Rivers found this way follow the
+drawn. Water comes in by zoom: the whole globe shows only its greatest lakes, a continent its
+greatest rivers, a region more, and closer in all of them. A place listed in `globe.dry` in
+`layer.json` has no rivers or lakes: Natural Earth's stop at its edge (Bith na Bró's Sandfolk
+interior, the Midwest in the projection, is desert). Rivers found this way follow the
 terrain, so a story river is drawn as a `river` edit and the finding follows it.
 
 Bith na Bró's Balkan interior is more mountainous than Earth's: its relief raised by up to 40%,

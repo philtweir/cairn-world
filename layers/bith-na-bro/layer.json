@@ -9,6 +9,7 @@
   },
   "globe": {
     "remap": { "pole": [50.27, -10], "seam": [150, -50], "south": 0.5, "eastWest": 0.55 },
+    "dry": ["lands-of-the-sandfolk"],
     "maps": {
       "dells": {
         "name": "The Dells and Surrounds",
