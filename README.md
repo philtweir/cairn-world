@@ -474,10 +474,13 @@ errors on unknown or ambiguous keys.
 **References in text.** Any text field can name another entry: `[[Caryes]]` links by name
 (ignoring case, a leading "The" and a trailing parenthetical, so `[[Prince of Miurna]]` finds
 "The Prince of Miurna (deceased)"); `[[faction/realm-ievure|the Emirate]]` names the target exactly
-and shows other words. Like links, references point down: the build warns when a reference
-matches nothing the layer can see, or several things (with the exact form to use instead); either
-way the text still reads, unlinked. Each reference also becomes a derived "Mentions" link
-(P67 refers to), so the referent lists it under "Linked from" and graphs show it.
+and shows other words. Like links, references point down: a name is resolved against what its own
+layer can see, and a reference that matches nothing, or several things, stops the build (with the
+exact form to use). The build publishes every reference exact, as `[[model/key|label]]` (the label
+as written, or the entry's name), so the explorer follows one by its address alone, with no entry
+loaded, and what a universe's text means cannot change in a campaign that adds a namesake. Each
+reference also becomes a derived "Mentions" link (P67 refers to), so the referent lists it under
+"Linked from" and graphs show it.
 
 In the explorer, a reference is styled by how the entry whose text it is
 stands to the referent: **related** (it links to the referent by a real field: a normal link),

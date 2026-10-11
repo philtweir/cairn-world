@@ -41,19 +41,21 @@ const svg = (tag, attrs = {}, ...kids) => {
 const icon = (name, cls = '') => svg('svg', { class: `icon ${cls}`.trim(), 'aria-hidden': 'true' }, svg('use', { href: `icons.svg${V}#i-${name}` }));
 
 // Markdown tree (src/md.mjs) to DOM, as text nodes only.
-// A [[reference]] links to its entry in this view; one with no entry here stays plain text. Its
-// style says how the entry whose text it is (`textOf`) stands to the referent: related,
-// related only the other way, or mentioned with no relationship (see refRelation).
+// A [[reference]] arrives exact, [[model/key|label]] (the build resolves names), so its link is
+// its address: no entry has to be loaded to follow it. In the author's view its style says how the
+// entry whose text it is (`textOf`) stands to the referent: related, related only the other way,
+// or mentioned with no relationship (see refRelation).
 let textOf = null;
 const REL_TITLE = { 'rel-in': 'Related only from the other side', mention: 'Mentioned, but no relationship recorded' };
 const md = nodes => nodes.map(n => {
   if (typeof n === 'string') return n;
   if (n.t === 'ref') {
+    const href = n.target.includes('/') ? `#/${[state.view, ...n.target.split('/')].map(encodeURIComponent).join('/')}` : null;
     const t = state.resolve?.(n.target);
-    if (!t) return md(n.c);
-    if (!state.author) return h('a', { href: route(t), class: 'ref' }, md(n.c));
+    if (!href && !t) return md(n.c);
+    if (!state.author || !t) return h('a', { href: href ?? route(t), class: 'ref' }, md(n.c));
     const rel = refRelation(textOf, t, state.back);
-    return h('a', { href: route(t), class: `ref ${rel}`, title: REL_TITLE[rel] ?? false }, md(n.c));
+    return h('a', { href: href ?? route(t), class: `ref ${rel}`, title: REL_TITLE[rel] ?? false }, md(n.c));
   }
   return h(n.t, {}, md(n.c));
 });

@@ -23,7 +23,7 @@ import { buildExplorer } from './build-explorer.mjs';
 import { buildSearch } from './search-index.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
-import { makeResolver, refsIn } from './refs.mjs';
+import { makeResolver, REF } from './refs.mjs';
 import { validateGeojson } from '@alizarin/geo';
 import { cellToFeatureCollection } from './geometry.mjs';
 
@@ -359,23 +359,30 @@ for (const key of layerKeys) {
 }
 if (problems.length) bail();
 
-// [[References]] in text must name something the layer can see (like links, they point down).
-// A miss or an ambiguous name is a warning, not an error: the text still reads, unlinked.
+// [[References]] in text must name something the layer can see (like links, they point down). A
+// name is resolved here, against the layer's own stack, and written out exact, as
+// [[model/key|label]], so readers never resolve names (and need not load every entry to follow
+// one), and a campaign's entries cannot change what a universe's text means. A name that matches
+// nothing, or several things, stops the build.
 {
   const named = {};   // layer -> [{ model, key, name }]
   for (const key of layerKeys) named[key] = Object.entries(tables[key]).flatMap(([alias, t]) =>
     [...new Map(t.rows.filter(r => r.get.name).map(r => [r.cells[0], { model: alias, key: r.cells[0], name: r.get.name }])).values()]);
   for (const key of layerKeys) {
     const resolve = makeResolver([...new Map(layers[key].stack.flatMap(l => named[l]).map(c => [`${c.model}/${c.key}`, c])).values()]);
-    for (const [alias, t] of Object.entries(tables[key])) for (const r of t.rows) for (const [j, col] of t.header.entries()) {
-      for (const ref of refsIn(r.cells[j])) {
-        const got = resolve(ref.target);
-        if (got.missing) console.warn(`warning: ${rel(r.file)}:${r.line} ${ref.raw} matches nothing layer "${key}" can see; it stays plain text`);
-        else if (got.ambiguous) console.warn(`warning: ${rel(r.file)}:${r.line} ${ref.raw} could be ${got.ambiguous.map(c => `${c.model}/${c.key}`).join(' or ')}; write [[${got.ambiguous[0].model}/${got.ambiguous[0].key}|${ref.label}]]`);
-      }
+    for (const [, t] of Object.entries(tables[key])) for (const r of t.rows) for (const [j] of t.header.entries()) {
+      if (!r.cells[j]?.includes('[[')) continue;
+      r.cells[j] = r.cells[j].replace(REF, (raw, target, label) => {
+        const got = resolve(target);
+        if (got.hit) return `[[${got.hit.model}/${got.hit.key}|${label ?? (target.includes('/') ? got.hit.name : target)}]]`;
+        if (got.ambiguous) problem(`${rel(r.file)}:${r.line} ${raw} could be ${got.ambiguous.map(c => `${c.model}/${c.key}`).join(' or ')}; write [[${got.ambiguous[0].model}/${got.ambiguous[0].key}|${label ?? target}]]`);
+        else problem(`${rel(r.file)}:${r.line} ${raw} matches nothing layer "${key}" can see`);
+        return raw;
+      });
     }
   }
 }
+if (problems.length) bail();
 
 // Field rule citations must name a General rule.
 for (const m of models) for (const n of m.nodes) {

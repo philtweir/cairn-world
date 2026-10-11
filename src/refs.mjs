@@ -1,8 +1,9 @@
 // Inline references in text: [[Caryes]] links to the entry named Caryes; [[faction/realm-ievure|the
 // Emirate]] names the target exactly (model/key) and shows "the Emirate". Names match ignoring
 // case, a leading "The" and a trailing parenthetical ("The Prince of Miurna (deceased)" is
-// [[Prince of Miurna]]). A reference that matches nothing, or several things, stays plain text;
-// the build warns about both. Shared by the build, the reader and both renderers.
+// [[Prince of Miurna]]). The build resolves names against the layer's own stack and publishes
+// every reference exact ([[model/key|label]]); one that matches nothing, or several things, stops
+// it. Shared by the build, the reader and both renderers.
 
 export const REF = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g;
 
