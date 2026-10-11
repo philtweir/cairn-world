@@ -1,5 +1,5 @@
 ResourceID,name,description,kind,created_by,created_when,refers_to
-marcos-will,The Will of Marcos,His last will. At its reading each friend receives the same letter and annotated map.,Will,marcos,,"marcos-letter,marcos-map"
+marcos-will,The Will of Marcos,"His last will. At its reading each friend receives the same letter and annotated map. Written out for him by [[pc/greg-sayers|Greg Sayers]], who brought it to Marcos's acquaintances.",Will,marcos,,"marcos-letter,marcos-map"
 marcos-letter,Marcos's Letter,"Great treasure waits at the Temple of St. Rylan, deep in the Forest of Dawn: the Seven Silver Spheres, long thought lost, whose existence he has proved. He has researched the paths too, but is too old to walk them safely.",Letter,marcos,,"temple-of-st-rylan,forest-of-dawn,red-sphere,yellow-sphere,green-sphere,blue-sphere,black-sphere,purple-sphere,pink-sphere"
 marcos-map,Marcos's Annotated Map,"The player handout. Its notes:
 
