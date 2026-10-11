@@ -1,0 +1,11 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+number,Session,number,1,E52_Time-Span,P4_has_time-span,,,,
+played_on,Played on,string,1,E52_Time-Span,P4_has_time-span,,,,
+description,Recap,string,1,E62_String,P3_has_note,,,,
+campaign,Part of,resource-instance-list,1,E7_Activity,P9i_forms_part_of,,,campaign,
+continues,Continues,resource-instance-list,1,E7_Activity,P134_continued,,,session,
+characters,Characters played,resource-instance-list,n,E21_Person,P11_had_participant,,,pc,
+events,Played out,resource-instance-list,n,E5_Event,cairn:played_out,,,event,
+left_off,Where it ended,string,1,E62_String,P3_has_note,,,,
+threads,For next time,string,1,E62_String,P3_has_note,,,,

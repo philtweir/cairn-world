@@ -132,6 +132,8 @@ End on [[document/the-prophecy|The Prophecy]]: ""When magic returns to the land,
 [[relic/pink-sphere|Pink]] | [[strand/delight|Delight]] | In the temple"
 taster-after,After the session: making it canon,"Write the outcome down the same day, in two layers, because different views see them (the table). Links point down the stack and campaigns cannot see each other, so nothing written in this layer reaches the coming campaign. Anything it must know goes into Bith na Bró: an Event after [[event/spheres-scattered|The Seven Spheres are scattered]], say, or a sphere's description. Keep the Bith na Bró version as the present remembers it, rumour and gaps included; the table's detail stays here.
 
+Give each session an entry of its own in this layer: what happened, where it ended, and the threads for next time ([[session/session-1|Session 1]] is the first).
+
 To write it, append rows to the layer's CSVs, or turn on **Author** in the right view (this one for what happened at the table, Bith na Bró's for canon), use **Edit** or **New**, then **Export**, and in the repository run `npm run merge-edits -- cairn-edits-<view>.json` and `npm run check`.
 
 Two things to know before relying on this plan:

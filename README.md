@@ -53,6 +53,7 @@ A deliberately small CIDOC-CRM subset. Models come in three kinds: *instances* (
 | Creature | E20 Biological Object | Hireling Role | E55 Type | Campaign | E7 Activity |
 | Relic | E22 Human-Made Object | Vocabularies (SKOS) | E55 Type | | |
 | Event | E5 Event | | | | |
+| Session | E7 Activity | | | | |
 
 Typed relationships:
 
@@ -85,11 +86,23 @@ Typed relationships:
 | Place | Terrain; Geometry | P2 has type (Terrain Difficulty: Easy, Tough, Perilous); P168 place is defined by (E94 Space Primitive, a GeoJSON FeatureCollection; see Maps) | |
 | Faction | Member of | P107i is current or former member of | Faction |
 | PC | Faction; Home | P107i is current or former member of; P74 has current or former residence | Faction; Place |
+| Session | Part of; Continues | P9i forms part of; P134 continued | Campaign; Session |
+| Session | Characters played; Played out | P11 had participant; `cairn:played_out` | PC; Event |
+| Session | Session, Played on | P4 has time-span (E52 Time-Span) | |
 
 **PC.** Character Creation defines a PC, so General defines the model: background, age, current
 and maximum STR/DEX/WIL and HP, Armor, gold, Fatigue, Deprived, the eight traits, bond, omen,
 inventory, scars, ties. Traits and scars are concepts from vocabularies the importer builds out of
 the rules' own d10 and Scars tables. PCs themselves live in campaign layers.
+
+**Session.** A session of play is an E7 Activity, like the campaign it forms part of (P9i, the
+whole/part relation CRM gives periods); a later session continues an earlier one (P134), the
+characters played take part in it (P11; the PCs stand for their players), and it has its number
+and the date it was played (P4, as an Event's session number does, so the Events & Times timeline
+puts a session with the events of the same number). Its recap, where it ended, and threads for next
+time are text. What CRM cannot say is how a real activity relates to the fictional events its story
+narrates: `cairn:played_out`, an extension (`ontology/extensions.csv`), links a session to them.
+Sessions live in campaign layers.
 
 **Fields cite their rules.** A model CSV may have a `rule` column naming a General Rule
 (`hp,...,character-creation-hit-protection`). The build checks it exists, writes it into the
@@ -742,7 +755,7 @@ too: build and upload `dist/`.
 | `antenexus` | Era of Bith na Bró | The Antenexus, the present age: the Six Kingdoms and Nine States and their realms, the Engineers, the churches, the Order of the White Raven, the Dells' settlements and recent history |
 | `ravens-in-the-dells` | Campaign (solo), set in the Antenexus | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Era of Bith na Bró, **test** | The First Empire: player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, password gate, **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
+| `seven-silver-spheres` | Campaign, password gate, **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
 
 **The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
 stack is General › Bith na Bró › The First Empire › the campaign, the First Empire being the era

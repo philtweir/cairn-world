@@ -19,3 +19,4 @@ era,Era,E4_Period
 campaign,Campaign,E7_Activity
 pc,PC,E21_Person
 document,Document,E31_Document
+session,Session,E7_Activity

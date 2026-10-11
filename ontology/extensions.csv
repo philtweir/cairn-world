@@ -10,3 +10,4 @@ cairn:starts_with,property,starts with,,E55_Type,E55_Type,Characters of this bac
 cairn:carries,property,carries,,E21_Person,E55_Type,A character carries an item of that type.
 cairn:played_by,property,played by,,E21_Person,http://www.w3.org/2000/01/rdf-schema#Literal,The name of the player of a character.
 cairn:suppressed_by,property,suppressed by,,E55_Type,E22_Human-Made_Object,A kind of magic and the made thing that holds it in check.
+cairn:played_out,property,played out,,E7_Activity,E5_Event,A session of play and the events of its story that the table played out in it. CRM has no property tying a real activity to the fictional events it narrates.
