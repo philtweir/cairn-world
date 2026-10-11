@@ -307,6 +307,20 @@ function checkLand(features, positioned, water, key) {
   process.exit(1);
 }
 
+// A shape small enough to keep: a geometry value may have at most 1,500 positions (@alizarin/geo's
+// limit, which the build checks), so a larger one (a continent of many realms) is simplified, a
+// little more each time, until it fits; rings that simplify away go.
+const LIMIT = 1500;
+function fitted(g) {
+  const count = x => (typeof x[0] === 'number' ? 1 : x.reduce((n, y) => n + count(y), 0));
+  if (!g || count(g.coordinates) <= LIMIT) return g;
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  for (let tol = 0.02; ; tol *= 1.5) {
+    const out = polys.map(poly => poly.map(r => simplifyLine(r, tol)).filter(r => r.length >= 4)).filter(poly => poly.length);
+    if (count(out) <= LIMIT) return { type: 'MultiPolygon', coordinates: out };
+  }
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const key = process.argv[2];
   if (!key) { console.error('usage: npm run globe -- <layer>'); process.exit(1); }
@@ -323,11 +337,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const countries = atlas('countries-110m.json'), countriesDetail = atlas('countries-50m.json');
 
   // What each place is: Earth's countries or a WKT shape, or a point on a regional map.
-  const rows = parseCsv(fs.readFileSync(path.join(dir, 'globe.csv'), 'utf8'));
-  const head = rows[0], col = n => head.indexOf(n);
+  const readRows = file => {
+    const [head, ...body] = parseCsv(fs.readFileSync(file, 'utf8'));
+    return body.filter(r => r[0]).map(r => ({ id: r[0], earth: r[head.indexOf('earth')] ?? '', map: r[head.indexOf('map')] ?? '' }));
+  };
+  const rows = readRows(path.join(dir, 'globe.csv'));
+  const isWkt = earth => /^[A-Z]+\s*\(/.test(earth);
   const geometryOf = new Map(), positioned = new Map();
-  for (const r of rows.slice(1).filter(r => r[0])) {
-    const [id, earth, onMap] = [r[0], r[col('earth')] ?? '', r[col('map')] ?? ''];
+  const shapeOf = ({ id, earth, map: onMap }) => {
     let g = null;
     if (onMap) {
       const m = /^(\S+)\s+(.*)$/.exec(onMap);
@@ -342,13 +359,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []) {
         poly.forEach((ring, i) => { if ((geoArea({ type: 'Polygon', coordinates: [ring] }) > 2 * Math.PI) !== (i > 0)) ring.reverse(); });
       }
-    } else if (/^[A-Z]+\s*\(/.test(earth)) {
+    } else if (isWkt(earth)) {
       g = round(remap.project(wktToGeometry(earth)), 3);
     } else if (earth) {
-      g = round(dropSpecks(remap.project(forD3(earthShape(countries, earth, `globe.csv ${id}`))), 2e-6), 2);
+      g = fitted(round(dropSpecks(remap.project(forD3(earthShape(countries, earth, `globe.csv ${id}`))), 2e-6), 2));
     }
-    if (g) geometryOf.set(id, g);
-    if (g && (onMap || /^[A-Z]+\s*\(/.test(earth))) positioned.set(id, g);
+    return g;
+  };
+  for (const r of rows) {
+    const g = shapeOf(r);
+    if (g) geometryOf.set(r.id, g);
+    if (g && (r.map || isWkt(r.earth))) positioned.set(r.id, g);
   }
 
   // Write the geometry column, leaving every other cell as it is.
@@ -362,19 +383,26 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const water = [...(globe.water ?? []), ...(on ? settings.globe.water ?? [] : [])];
   // Written only once the places are checked (below, for a universe, once its land is drawn).
   const writePlaces = () => fs.writeFileSync(placeFile, toCsv(place));
-  if (on) {
+  // A layer on a universe's globe whose places have no Earth shapes of their own (a campaign's
+  // points) is drawn on the universe's land. One that names lands of its own (an era's realms) gets
+  // its own basemap: the universe's places and its own together, so its named lands are drawn as
+  // named in its views, and in an era without them the same land is unnamed.
+  const ownLands = on && rows.some(r => r.earth && !isWkt(r.earth));
+  if (on && !ownLands) {
     checkLand(JSON.parse(fs.readFileSync(path.join(ROOT, 'layers', on, 'basemap.json'), 'utf8')).features, positioned, water, key);
     writePlaces();
     console.log(`layers/${key}: ${geometryOf.size} place geometries, on the globe of ${on}`);
     process.exit(0);
   }
+  const all = on ? [...readRows(path.join(ROOT, 'layers', on, 'globe.csv')), ...rows] : rows;
+  const shapes = new Map([...all.filter(r => !geometryOf.has(r.id)).map(r => [r.id, shapeOf(r)]).filter(([, g]) => g), ...geometryOf]);
 
   // The globe's land, for the explorer to draw under its maps, in two kinds: `land`, every place's
   // Earth shape together (the world's named lands), and `unnamed`, the rest of Earth's land, which
   // no place claims and which the explorer draws fainter, so nothing is lost and nothing needs a
   // name. Natural Earth 1:110m for the whole globe, and 1:50m around each regional map (3 degrees
   // beyond its places), which the explorer draws there instead.
-  const specs = rows.slice(1).filter(r => r[0] && r[col('earth')] && !/^[A-Z]+\s*\(/.test(r[col('earth')])).map(r => r[col('earth')]).join('|');
+  const specs = all.filter(r => r.earth && !isWkt(r.earth)).map(r => r.earth).join('|');
   const geomOf = x => (x.type === 'FeatureCollection' ? x.features[0]?.geometry : x.type === 'Feature' ? x.geometry : x);
   const named = topo => remap.project(forD3(earthShape(topo, specs, 'basemap')));
   const unnamed = topo => asMulti(unnamedLand(topo, specs).map(g => geomOf(remap.project(g))));
@@ -386,7 +414,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const detailed = { land: named(countriesDetail), unnamed: unnamed(countriesDetail) };
   for (const [name] of Object.entries(maps)) {
     const flat = c => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
-    const pts = rows.slice(1).filter(r => (r[col('map')] ?? '').startsWith(`${name} `)).flatMap(r => flat(geometryOf.get(r[0]).coordinates));
+    const pts = all.filter(r => r.map.startsWith(`${name} `)).flatMap(r => flat(shapes.get(r.id).coordinates));
     if (!pts.length) continue;
     const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
     for (const [kind, g] of Object.entries(detailed)) {
@@ -406,9 +434,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const rivers = naturalEarth('ne_50m_rivers_lake_centerlines.geojson').features.filter(f => f.properties.featurecla === 'River');
   // The dry places: a river is cut where it crosses into one (the crossing found by halving the
   // stretch), and a lake goes if its middle is in one.
-  const dry = (globe.dry ?? []).map(id => {
-    if (!geometryOf.has(id)) throw new Error(`layer.json globe.dry lists "${id}", which globe.csv gives no shape`);
-    return geometryOf.get(id);
+  // A dry place is one of the places here (by id) or a stretch of Earth (`{ "earth": spec }`), so a
+  // desert can be dry in every era whatever its people call it.
+  const dry = [...(globe.dry ?? []), ...(on ? settings.globe.dry ?? [] : [])].map(d => {
+    if (typeof d === 'object') return round(dropSpecks(remap.project(forD3(earthShape(countries, d.earth, 'layer.json globe.dry'))), 2e-6), 2);
+    if (!shapes.has(d)) throw new Error(`layer.json globe.dry lists "${d}", which globe.csv gives no shape`);
+    return shapes.get(d);
   });
   const isDry = p => dry.some(g => geoContains(g, p));
   const wet = line => {

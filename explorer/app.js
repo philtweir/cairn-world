@@ -219,7 +219,7 @@ function fillViews() {
   // Grouped by universe: the universe itself, then its campaigns.
   put($('view'), groupViews(state.viewsMeta).map(g => h('optgroup', { label: g.label },
     g.views.map(v => h('option', { value: v.key, selected: v.key === state.view },
-      `${v.kind === 'universe' ? `${v.name} (universe)` : v.name}${v.gate ? ' · locked' : ''}`)))));
+      `${'\u2003'.repeat(v.depth ?? 0)}${v.kind === 'universe' ? `${v.name} (universe)` : v.kind === 'era' ? `${v.name} (era)` : v.name}${v.gate ? ' · locked' : ''}`)))));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
   document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);

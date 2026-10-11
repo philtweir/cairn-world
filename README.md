@@ -134,10 +134,22 @@ override parts of lower ones, and add to their lists, without copying them.
 |---|---|---|
 | **General** | `model/`, `rules/`, optional `layers/general/` | nothing: the base of every stack |
 | **Universe** | `layers/<key>/`, holding one Universe row with ResourceID `<key>` | General |
-| **Campaign** | `layers/<key>/`, holding one Campaign row with ResourceID `<key>` | General plus the universes in its `universes` field |
+| **Era** | `layers/<key>/`, holding one Era row with ResourceID `<key>` | Its universe (the Era's `universe` field) |
+| **Campaign** | `layers/<key>/`, holding one Campaign row with ResourceID `<key>` | The universes or eras in its `universes` ("Set in") field, with whatever they stand on |
 
 Nothing is tagged with a campaign. Which layer an entry belongs to is where its row lives, and how
 layers stack is read from the root entities themselves (a Campaign's `universes` links).
+
+**Eras.** A universe holds what is true in every age: its land and seas, its map and terrain,
+peoples who outlast empires, the magic in it. An era holds one age's own: its realms, powers,
+people, places built and named in it, and its recent history. An era can restate a universe entry
+for its time (rename a place, describe it as it then was, set what it lies within, give a people
+its lands), but can remove nothing, so a universe entry must hold in every age. Links point down,
+so the universe cannot mention an era's entries, and the build says where one does. Each era is a
+view, with `when` ("The present") and an order (`sequence`); the explorer lists it under its
+universe, with its campaigns under it. Bith na Bró has two: the First Empire (`the-empire`,
+between one and two thousand years before the present) and the Antenexus (`antenexus`, the
+present), and its campaigns are set in them.
 
 **Links point down.** A row may only link to entries visible in its own layer's stack: General
 cannot point into a universe, a universe cannot point into a campaign, and two campaigns cannot see
@@ -158,7 +170,7 @@ build prints every composed entry and what each upper layer does to it ("overrid
 description", "adds to enemies"), as an audit of what each campaign changes. Each layer is built with its own tile namespace; without that, the same field
 in two layers shares a tile id and composition silently keeps only the topmost list.
 
-**Publishing.** Universe and Campaign rows have `published`. `npm run build` writes only published
+**Publishing.** Universe, Era and Campaign rows have `published`. `npm run build` writes only published
 views, and only the layers they stand on, so unpublished data never reaches `dist/`.
 `npm run build -- --all` includes everything for a local GM preview: never deploy that output.
 
@@ -349,11 +361,16 @@ and 1:50m around each regional map, which the explorer draws in place of the coa
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
 
-**A campaign on its universe's globe.** A campaign layer whose `layer.json` says
-`"globe": { "on": "<universe>" }` has a `globe.csv` of its own: `npm run globe -- <campaign>` places
+**An era or a campaign on its universe's globe.** A layer whose `layer.json` says
+`"globe": { "on": "<universe>" }` has a `globe.csv` of its own: `npm run globe -- <layer>` places
 its places with that universe's remap and regional maps (positions may lie outside a map's extent,
-in the same units) and writes only the campaign's `place.csv`. Its maps draw on the universe's land,
-relief and rivers, since the explorer takes those from the topmost layer in the stack that has them.
+in the same units) and writes the layer's `place.csv`. If its places name lands of their own (an
+era's realms, by their Earth countries), it also writes its own `basemap.json`: the universe's
+places and its own together, so in its views those lands are drawn as named, and in an age without
+them the same land is drawn unnamed. Relief and rivers stay the universe's: the explorer takes each
+from the topmost layer in the stack that has it. A shape over 1,500 positions (the geometry
+limit), such as a continent made of many realms, is simplified until it fits. `globe.dry` can name
+a place or give a stretch of Earth (`{ "earth": "<spec>" }`), so a desert stays dry in every age.
 
 **Bith na Bró** uses its world globe's remap (pole 50.27°E 10°S, seam 150°E 50°S, south 0.5,
 east-west 0.55). Realms are their countries ("In the projection: Sweden"). The High Marks are read
@@ -721,14 +738,15 @@ too: build and upload `dist/`.
 |---|---|---|
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
-| `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map; places on the world globe (see Maps) |
-| `ravens-in-the-dells` | Campaign (solo) | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
-| `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos; a Run Plan for it as a 90-minute taster. Set on Bith na Bró and the Empire (below) |
+| `bith-na-bro` | Universe | Bith na Bró in every age: the land (the Greater Lands, the Dells and its surrounds from the regional map, the globe, terrain and rivers; see Maps), peoples who outlast empires, the strands of magic and the Seven Spheres |
+| `antenexus` | Era of Bith na Bró | The Antenexus, the present age: the Six Kingdoms and Nine States and their realms, the Engineers, the churches, the Order of the White Raven, the Dells' settlements and recent history |
+| `ravens-in-the-dells` | Campaign (solo), set in the Antenexus | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
+| `the-empire` | Era of Bith na Bró, **test** | The First Empire: player-facing background for Seven Silver Spheres; remove with it |
+| `seven-silver-spheres` | Campaign, password gate, **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
 
 **The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
-stack is General › Bith na Bró › The Empire › the campaign, the Empire being Bith na Bró between
-one and two thousand years before the present. The Forest of Dawn is the valley of the Veleka
+stack is General › Bith na Bró › The First Empire › the campaign, the First Empire being the era
+between one and two thousand years before the Antenexus, the present. The Forest of Dawn is the valley of the Veleka
 (Earth's, remapped: the Strandzha uplands, old oak forest and Thracian megaliths) just north of the
 Dells map, its places laid out along the river the relief already has (`globe.csv` in the layer),
 about 60 km from the coast hills to the ridge at its head.

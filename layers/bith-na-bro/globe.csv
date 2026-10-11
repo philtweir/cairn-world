@@ -1,42 +1,12 @@
 ResourceID,earth,map,note
-miurna,Russia#Central+Northwestern+Volga-Kaliningrad,,"European Russia: the Central, Northwestern and Volga federal districts as Natural Earth groups them (so with Crimea, which Natural Earth counts as Russian), less Kaliningrad."
-leantis,Russia#Urals+Siberian-Buryat-Chita,,"Western and central Siberia: the Urals and Siberian federal districts, less Buryatia and Zabaykalsky (Chita), which border Mongolia."
-godrastan,France@-10:20|Italy|Spain|Portugal,,Metropolitan France: French Guiana (part of France in Natural Earth) is in South America.
-cofrey,Mongolia|Russia#Far Eastern+Buryat+Chita,,"Mongolia, and the Russian Far East with Buryatia and Zabaykalsky (in the Far Eastern federal district since 2018)."
-palatinate,Kazakhstan,,
-high-marks,Austria|Czechia|Slovakia|Hungary|Slovenia|Croatia|Bosnia and Herz.|Serbia|Montenegro|Kosovo|Macedonia|Albania|Bulgaria|Romania|Moldova|Ukraine|Belarus|Greece|Turkey,,"""The remaining countries of Central and Eastern Europe"", read as these, an assumption; with Greece and Turkey (Anatolia and East Thrace) added."
-ievure,Sweden,,
-astina,Denmark|Norway@-20:40/50:74,,Denmark and mainland Norway: Svalbard belongs to the Keepers of Mantra.
-kaminos,Estonia,,
-linos,Lithuania,,
-aphinos,Latvia,,
-caryes,Finland,,
-sevine,Belgium,,
-grunheim,Poland,,
-rock-of-aphemenosta,Russia#Kaliningrad,,Kaliningrad: the Russian exclave.
-zintar,Germany,,
+greater-lands,Russia#Central+Northwestern+Volga-Kaliningrad|Russia#Urals+Siberian-Buryat-Chita|France@-10:20|Italy|Spain|Portugal|Mongolia|Russia#Far Eastern+Buryat+Chita|Kazakhstan|Austria|Czechia|Slovakia|Hungary|Slovenia|Croatia|Bosnia and Herz.|Serbia|Montenegro|Kosovo|Macedonia|Albania|Bulgaria|Romania|Moldova|Ukraine|Belarus|Greece|Turkey|Sweden|Denmark|Norway@-20:40/50:74|Estonia|Lithuania|Latvia|Finland|Belgium|Poland|Russia#Kaliningrad|Germany,,"The continent: every realm's Earth shape within it in the Antenexus, together, so the land is the same in every age."
 the-dells,,dells POINT (18.2 3.8),
 the-black-dunes,,dells POINT (9.4 9.4),
-artificers-workshop,,dells POINT (13.8 6.1),
-hearth,,dells POINT (22.2 6.3),
-the-bonefort,,dells POINT (2.9 11.9),"The map's anchor: Earth 27.67°E 42.83°N, about 40 km north of Burgas, where the Dells map best fits the named lands (all its places on the right side of the coast)."
 the-glaciers,,dells POINT (25.3 19.6),
-cannerly-hall,,dells POINT (24.8 9.7),
 the-sea,,dells POINT (1.6 6.1),
 fist-of-glass,,dells POINT (3.0 8.8),
 forest-of-arrows,,dells POINT (8.8 4.2),
 great-stone-face,,dells POINT (25.5 3.3),
-engineers-trading-post,,dells POINT (16.7 9.4),
 dead-aqueduct,,dells POINT (16.9 11.1),
 ancient-channel,,dells POINT (14.1 14.1),
 the-farmlands,,dells POINT (8.2 17.4),
-lands-of-the-engineers,United Kingdom|Ireland,,
-lands-of-the-sapphire-throne,Yemen|Djibouti|Eritrea,,
-lands-of-the-eastern-emirates,Morocco|Mauritania|Senegal|Gambia|Algeria|Tunisia,,"Western Sahara is not named, so it is sea between Morocco and Mauritania."
-lands-of-the-threefold-republic,Sudan|Chad|Central African Rep.|Cameroon|Nigeria|Benin,,
-lands-of-the-elven-islands,Madagascar|Malaysia,,
-lands-of-the-dragon-seat,Indonesia,,
-lands-of-the-empire-of-the-sun,Canada|United States of America|Mexico|Guatemala|Belize|Honduras|El Salvador|Nicaragua|Costa Rica|Panama|Cuba|Haiti|Dominican Rep.|Jamaica|Bahamas|Puerto Rico|Trinidad and Tobago,,North and Central America read as the mainland states and the Caribbean islands; Greenland is left out.
-lands-of-the-sandfolk,United States of America@-104:-82/36:49,,"The US Midwest, approximated as the United States between 104°W and 82°W and 36°N and 49°N."
-lands-of-the-tribes-of-hanathy,Brazil|Argentina|Chile|Peru|Colombia|Venezuela|Bolivia|Ecuador|Paraguay|Uruguay|Guyana|Suriname|France@-56:-50,,South America: its twelve states and French Guiana (part of France in Natural Earth).
-lands-of-the-keepers-of-mantra,Norway@-20:40/74:85,,"Svalbard, taken out of Norway (and so out of Astina)."

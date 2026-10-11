@@ -1,7 +1,8 @@
 term,kind,label,parent,domain,range,comment
 cairn:allied_with,property,allied with,,E74_Group,E74_Group,Two groups that support each other.
 cairn:hostile_to,property,hostile to,,E74_Group,E74_Group,Two groups in open enmity.
-cairn:set_in,property,set in,,E7_Activity,E89_Propositional_Object,A campaign takes place in a universe (a body of shared setting).
+cairn:set_in,property,set in,,E7_Activity,E1_CRM_Entity,A campaign takes place in a universe (a body of shared setting) or in one of its eras.
+cairn:period_of,property,period of,,E4_Period,E89_Propositional_Object,An era is a period of a universe: its powers and places for that time.
 cairn:connects,property,connects,P122_borders_with,E53_Place,E53_Place,A route that joins two places; it borders each.
 cairn:wields,property,wields,,E55_Type,E55_Type,Monsters of this type carry spellbooks of that type.
 cairn:holds_spell,property,holds spell,,E55_Type,E55_Type,Items of this type contain the spell of that spellbook.

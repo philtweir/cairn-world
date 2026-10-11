@@ -7,11 +7,13 @@
 // Layers (see README.md):
 //   General   model/ + rules/ (+ layers/general/), the base of every stack
 //   Universe  layers/<key>/ containing exactly one Universe row with ResourceID <key>
+//   Era       layers/<key>/ containing exactly one Era row with ResourceID <key>
 //   Campaign  layers/<key>/ containing exactly one Campaign row with ResourceID <key>
-// A layer's stack is read from its root entity: a Universe sits on General; a Campaign sits on
-// General plus the universes its `universes` field links to. Links may only target entities
-// visible in the linking layer's stack. Each Universe/Campaign is a *view*: its stack composed
-// with Alizarin's composeResourceLayers (topmost layer wins per single-valued group).
+// A layer's stack is read from its root entity: a Universe sits on General; an Era on the
+// universe its `universe` field links to; a Campaign on the universes or eras its `universes`
+// field links to (an era bringing its universe). Links may only target entities visible in the
+// linking layer's stack. Each Universe/Era/Campaign is a *view*: its stack composed with
+// Alizarin's composeResourceLayers (topmost layer wins per single-valued group).
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,7 +46,7 @@ if (PREFIXES.cairn !== CAIRN) throw new Error('ontology/prefixes.csv must map ca
 const NODE_COLS = ['alias', 'name', 'datatype', 'cardinality', 'ontology_class',
   'parent_property', 'parent_alias', 'collection_name', 'graphs', 'description'];
 const LINK_TYPES = new Set(['resource-instance', 'resource-instance-list']);
-const ROOT_MODELS = ['universe', 'campaign'];
+const ROOT_MODELS = ['universe', 'era', 'campaign'];
 const GENERAL = 'general';
 
 const problems = [];
@@ -283,22 +285,27 @@ for (const key of layerKeys.filter(k => k !== GENERAL)) {
     if (row.cells[0] !== key) problem(`${rel(row.file)}:${row.line} layers/${key}/ may only hold its own root; found ${kind} "${row.cells[0]}"`);
   }
   const own = roots.filter(x => x.row.cells[0] === key);
-  if (own.length !== 1) { problem(`layers/${key}/ needs exactly one Universe or Campaign row with ResourceID "${key}" (found ${own.length})`); continue; }
+  if (own.length !== 1) { problem(`layers/${key}/ needs exactly one Universe, Era or Campaign row with ResourceID "${key}" (found ${own.length})`); continue; }
   const { kind, row } = own[0];
   layers[key] = {
     key, kind, name: row.get.name || key, published: row.get.published === 'true', row, ...readSettings(key),
-    parents: kind === 'universe' ? [GENERAL] : [GENERAL, ...splitKeys(row.get.universes)],
+    // A universe sits on General; an era on its universe; a campaign on the universes or eras it
+    // is set in.
+    parents: kind === 'universe' ? [GENERAL] : [GENERAL, ...splitKeys(kind === 'era' ? row.get.universe : row.get.universes)],
   };
 }
 for (const l of Object.values(layers)) {
+  if (l.kind === 'era' && (l.parents.length !== 2 || layers[l.parents[1]]?.kind !== 'universe')) problem(`${rel(l.row.file)}:${l.row.line} era "${l.key}" needs one universe, a universe layer (got "${l.parents.slice(1).join(', ')}")`);
   if (l.kind !== 'campaign') continue;
   for (const u of l.parents.slice(1)) {
-    if (layers[u]?.kind !== 'universe') problem(`${rel(l.row.file)}:${l.row.line} campaign "${l.key}" lists universe "${u}", which is not a universe layer`);
+    if (!['universe', 'era'].includes(layers[u]?.kind)) problem(`${rel(l.row.file)}:${l.row.line} campaign "${l.key}" is set in "${u}", which is not a universe or era layer`);
   }
 }
 if (problems.length) bail();
-// Stacks are bottom-to-top. Universes only sit on General, so a stack is never deeper than three tiers.
-for (const l of Object.values(layers)) l.stack ??= [...new Set([...l.parents, l.key])];
+// Stacks are bottom-to-top: each parent's stack, then the layer. A campaign set in an era stands on
+// General, the era's universe, the era, then itself.
+const stackOf = l => (l.stack ??= [...new Set([...l.parents.flatMap(p => (p === GENERAL ? [GENERAL] : stackOf(layers[p]))), l.key])]);
+for (const l of Object.values(layers)) stackOf(l);
 
 // A model a layer defines itself is only usable inside that layer's descendants.
 for (const key of layerKeys) {
@@ -521,7 +528,7 @@ for (const l of shippedLayers) for (const m of usedModels) {
 
 for (const l of shippedLayers) for (const k of ['basemap', 'rivers', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
 for (const l of shippedLayers) for (const img of layers[l].relief?.images ?? []) fs.copyFileSync(path.join(LAYERS_DIR, l, img.file), path.join(DIST, 'data', 'layers', l, img.file));
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.kind === 'era' ? { when: l.row.get.when || null, sequence: Number(l.row.get.sequence) || 0 } : {}), ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
   ...Object.fromEntries(['basemap', 'rivers', 'relief'].filter(k => l[k]).map(k => [k, `layers/${l.key}/${k}.json`])) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {

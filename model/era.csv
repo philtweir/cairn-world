@@ -1,0 +1,7 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
+description,Description,string,1,E62_String,P3_has_note,,,
+universe,Universe,resource-instance-list,1,E89_Propositional_Object,cairn:period_of,,,universe
+when,When,string,1,E62_String,P3_has_note,,,
+sequence,Order,number,1,E60_Number,P3_has_note,,,
+published,Published,boolean,1,E62_String,P3_has_note,,,
