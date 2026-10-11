@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import * as A from 'alizarin/inline-full';
 import { parseCsv, toCsv } from './csv.mjs';
 import { buildExplorer } from './build-explorer.mjs';
+import { buildSearch } from './search-index.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
 import { makeResolver, refsIn } from './refs.mjs';
@@ -548,6 +549,19 @@ for (const v of viewKeys) {
   }
   write(`views/${v}/index.json`, index);
   write(`views/${v}/manifest.json`, manifest);
+}
+
+// Search and filtering for each open view (src/search-index.mjs): a Rós Madair substrate and a
+// Pagefind index. A gated view gets neither.
+{
+  const search = await buildSearch(ROOT, DIST, open.map(v => ({
+    key: v,
+    models: usedModels.filter(m => views[v].models[m.alias]).map(m => ({ alias: m.alias, graphid: m.built.graph.graphid })),
+    resources: usedModels.flatMap(m => views[v].models[m.alias]?.resources ?? []),
+  })));
+  const meta = JSON.parse(fs.readFileSync(path.join(DIST, 'data', 'views.json'), 'utf8'));
+  for (const d of meta.views) if (search[d.key]) d.search = search[d.key];
+  write('views.json', meta);
 }
 
 // A content hash of this build's data. The explorer fetches views.json fresh and asks for every

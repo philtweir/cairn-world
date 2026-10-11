@@ -306,6 +306,21 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     projection.clipExtent([[-20, -20], [W + 20, H + 20]]);
     draw();
   }).observe(el);
+  // What the map shows, as a longitude and latitude box ([west, south, east, north]), for a filter
+  // to use: from points across the box that land on the globe. Null if the view crosses 180° or a
+  // pole, or shows too much of the globe for a box to say.
+  box.viewBounds = () => {
+    if (!W) return null;
+    const pts = [];
+    for (let i = 0; i <= 12; i++) for (let j = 0; j <= 12; j++) {
+      const p = projection.invert([W * i / 12, H * j / 12]);
+      if (p && visible(p)) pts.push(p);
+    }
+    if (pts.length < 4) return null;
+    const lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+    const b = [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)];
+    return b[2] - b[0] > 180 || b[3] > 89 || b[1] < -89 ? null : b.map(v => Math.round(v * 1000) / 1000);
+  };
   return box;
 }
 

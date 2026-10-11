@@ -23,6 +23,23 @@ svg.icon{display:inline-block;width:1em;height:1em;max-width:none;margin:0;borde
 #list a[aria-current=true]{background:var(--accent-bg);color:var(--accent)}
 #list .m{font-size:12px;color:var(--muted);white-space:nowrap}
 #list .more{padding:.5rem;color:var(--muted);font-size:14px}
+#list a .ex{flex-basis:100%;font-size:12.5px;line-height:1.35;color:var(--muted);padding-left:1.1rem}
+#list a .ex mark{background:var(--accent-bg);color:inherit;border-radius:2px}
+#list a:has(.ex){flex-wrap:wrap}
+#filters{margin:.6rem 0 0;font-size:14px}
+#filters summary{cursor:pointer;color:var(--muted)}
+#filters[open] summary{color:var(--fg)}
+.filters fieldset{border:1px solid var(--line);border-radius:6px;margin:.5rem 0;padding:.3rem .6rem .5rem}
+.filters legend{font-weight:600;font-size:13px;padding:0 .3rem;display:flex;align-items:center;gap:.25rem}
+.filters label{display:grid;grid-template-columns:6.5rem 1fr;align-items:center;gap:.4rem;margin:.3rem 0;font-size:13px}
+.filters label>span{color:var(--muted)}
+.filters select,.filters input,.filters button{font:inherit;font-size:13px;padding:.2rem .35rem;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--fg);min-width:0}
+.filters button{cursor:pointer}
+.filters .frow{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;min-width:0}
+.filters .frow input{flex:1 1 7rem}
+.filters .fbox{color:var(--muted);font-size:12px}
+.filters .fstatus{margin:.3rem 0 0;color:var(--muted);font-size:12.5px}
+.filters .fstatus:empty{display:none}
 #detail{padding:1.2rem 1.5rem 4rem;max-width:52rem}
 .kind{font:12px system-ui,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 h1{margin:.2rem 0 .6rem}

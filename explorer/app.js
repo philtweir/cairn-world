@@ -10,6 +10,7 @@ import { assignLenses } from '../src/lenses.mjs';
 import { drawLens } from './lens-views.mjs';
 import { geoMap, locate } from './geo-map.mjs';
 import { groupViews } from '../src/views.mjs';
+import { makeFinder, excerptNodes } from './finder.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
 let V = '';   // ?v=<build>, set from views.json
@@ -71,7 +72,7 @@ function rollTable(e) {
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, md(inline(c)))))))));
 }
 
-const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, author: (() => { try { return localStorage.getItem('cairn-world:author') === '1'; } catch { return false; } })(), ontology: null, lenses: [], lensOf: {}, root: null, overrides: [] };
+const state = { view: null, viewsMeta: null, models: [], entities: [], byId: new Map(), byRoute: new Map(), back: new Map(), modelOf: {}, filter: new Set(), rules: false, q: '', matches: {}, author: (() => { try { return localStorage.getItem('cairn-world:author') === '1'; } catch { return false; } })(), ontology: null, lenses: [], lensOf: {}, root: null, overrides: [], finder: { passes: () => true, canFilter: false, canSearch: false }, hits: null, filterScope: null };
 
 const title = e => e.fields.find(f => f.alias === 'name')?.value ?? e.key;
 const text = e => e.fields.map(f => (typeof f.value === 'string' ? f.value : '')).join(' ').toLowerCase();
@@ -136,6 +137,7 @@ async function load() {
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
   state.root = state.entities.find(e => e.key === state.view && e.layers[0] === state.view) ?? null;
   state.overrides = manifest.overrides ?? [];
+  state.finder = makeFinder({ data: DATA, suffix: V, view: state.viewsMeta.views.find(x => x.key === state.view), models: manifest.models, h, put, icon });
 }
 
 // ---- Password gate ----------------------------------------------------------------------------
@@ -220,9 +222,14 @@ const basemap = () => (state.basemap ??= (() => {
   } : null));
 })());
 const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
+// A search runs on the view's text index when it has one (state.hits, the matches in rank order),
+// else over the loaded text.
 const matches = e => {
   if (state.filter.size && !state.filter.has(e.model)) return false;
-  return !state.q || title(e).toLowerCase().includes(state.q) || text(e).includes(state.q);
+  if (!state.finder.passes(e)) return false;
+  if (!state.q) return true;
+  if (state.hits) return state.hits.rank.has(e.id);
+  return title(e).toLowerCase().includes(state.q) || text(e).includes(state.q);
 };
 
 // The list shows the current lens (or, on the home page, everything); a search looks everywhere.
@@ -238,21 +245,38 @@ function renderSide(currentId) {
       onclick: () => { state.filter.has(m.alias) ? state.filter.delete(m.alias) : state.filter.add(m.alias); renderSide(currentId); },
     }, m.name, h('small', {}, counts[m.alias]))));
 
+  // The filter panel: for the models in the list. Moving to another lens starts it afresh.
+  const filters = $('filters');
+  filters.hidden = !state.finder.canFilter;
+  const lens = state.scope ? lensById(state.scope) : null;
+  const panelModels = state.models.filter(m => (lens ? lens.models.includes(m.alias) : true) && state.entities.some(e => e.model === m.alias && visible(e)));
+  const scopeKey = panelModels.map(m => m.alias).join(' ');
+  if (state.finder.canFilter && scopeKey !== state.filterScope) {
+    state.filterScope = scopeKey;
+    state.finder.clear();
+    // A change of filter re-asks the search, whose best matches depend on it.
+    put($('filter-panel'), state.finder.panel(panelModels, () => (state.q && state.finder.canSearch ? $('q').dispatchEvent(new Event('input')) : renderSide(currentId))));
+  }
+
   const nRules = state.entities.filter(isGeneral).length;
   $('rules-count').textContent = `(${nRules})`;
 
+  const rank = state.q && state.hits?.rank;
   const rows = state.entities.filter(e => inScope(e) && matches(e))
-    .sort((a, b) => state.models.findIndex(m => m.alias === a.model) - state.models.findIndex(m => m.alias === b.model) || title(a).localeCompare(title(b)));
+    .sort((a, b) => state.models.findIndex(m => m.alias === a.model) - state.models.findIndex(m => m.alias === b.model) || (rank ? rank.get(a.id) - rank.get(b.id) : title(a).localeCompare(title(b))));
   const shown = rows.slice(0, LIST_LIMIT);
   // Grouped by model, each entry marked with its model's colour.
   const items = [];
   shown.forEach((e, i) => {
     if (!i || shown[i - 1].model !== e.model) items.push(h('li', { class: 'grp' }, state.modelOf[e.model].name, h('small', {}, rows.filter(r => r.model === e.model).length)));
-    items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: colourOf(e.model) }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)))));
+    const ex = rank && state.hits.excerpt.get(e.id);
+    items.push(h('li', {}, h('a', { href: route(e), 'aria-current': e.id === currentId, class: colourOf(e.model) }, h('i', { class: 'dot' }), h('span', { class: 'nm' }, title(e)),
+      ex && h('span', { class: 'ex' }, excerptNodes(h, ex)))));
   });
   put($('list'), [
     ...items,
     rows.length > shown.length && h('li', { class: 'more' }, `${rows.length - shown.length} more — narrow with search or a filter.`),
+    rank && !state.hits.complete && h('li', { class: 'more' }, `The best ${LIST_LIMIT} text matches; add words to narrow the search.`),
     !rows.length && h('li', { class: 'more' }, 'Nothing matches.'),
   ]);
 }
@@ -507,9 +531,25 @@ try {
   // anything (a result, even the one already open, or any link) shows the page; the query stays,
   // and focusing the search box brings its results back.
   const pane = v => { document.body.dataset.view = v; };
-  $('q').addEventListener('input', ev => {
+  // With a text index the search asks it (for the best matches the list can show, among the
+  // entries in view and through the filters); without one, the list matches the loaded text.
+  let asked = 0;
+  $('q').addEventListener('input', async ev => {
     state.q = ev.target.value.trim().toLowerCase();
     pane(state.q ? 'list' : 'detail');
+    if (!state.q || !state.finder.canSearch) { state.hits = null; renderSide(); return; }
+    const mine = ++asked, q = state.q;
+    await new Promise(r => setTimeout(r, 150));
+    if (mine !== asked) return;
+    try {
+      const ok = id => { const e = state.byId.get(id); return !!e && visible(e) && (!state.filter.size || state.filter.has(e.model)) && state.finder.passes(e); };
+      const { hits, complete } = await state.finder.search(q, ok, LIST_LIMIT);
+      if (mine !== asked) return;
+      state.hits = { rank: new Map(hits.map((x, i) => [x.id, i])), excerpt: new Map(hits.map(x => [x.id, x.excerpt])), complete };
+    } catch (err) {
+      console.error(err);
+      state.hits = null;   // the index could not be read: search the loaded text instead
+    }
     renderSide();
   });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });

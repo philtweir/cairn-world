@@ -228,6 +228,50 @@ The view's own root (the Universe or Campaign) is its home page: a card per lens
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
 changes. Detail pages are as before, with the lens as a breadcrumb.
 
+## Search and filters
+
+Both work from static indexes the browser reads only the parts of that it needs, so neither has
+to change as a world grows; they answer with entry ids. (The rest of the explorer still loads a
+whole view, which is the next thing to make lazy.) `src/search-index.mjs` builds both for each
+open view; a gated view gets neither.
+
+**Search** is [Pagefind](https://pagefind.app): one record per entry (its name and every text
+value in its tiles), in `views/<view>/pagefind/`. A search fetches the index shards for its words,
+then the small record of each match it shows, best first, until the list is full. Matches show an
+excerpt with the words marked. A view without an index (the gated one) searches the loaded text
+as before.
+
+**Filters** ("Filter" above the list) are [Rós Madair](https://github.com/flaxandteal/ros-madair):
+`ros-madair-emit` compiles the view's graphs and resources into Parquet in
+`views/<view>/substrate/` (a tile per row, the concept and edge tables, a manifest). The panel
+offers, for each model in the current lens:
+
+- a concept field: one of its collection's terms;
+- a link field: any, has one, has none, or a particular entry, which Pagefind suggests as you type
+  (only entries of the models the link can point to);
+- a geometry: what the map on screen is showing (its box).
+
+The panel's choices become Rós Madair's query IR, which its compiler (the `ros-madair` npm package,
+the same lowering its native reader runs) turns into DuckDB SQL; duckdb-wasm runs it over the
+Parquet by HTTP range requests. The compiler and DuckDB are a bundle of their own
+(`query-engine.js`, with `duckdb/` and the compiler's WASM) loaded on the first filter, so a visitor
+who never filters never fetches them. Filtering and search combine: a search lists only matches
+that pass the filters, and while any filter is set only the filtered models are listed.
+
+Three things this release of Rós Madair (0.1.0-alpha.21) shapes:
+
+- **Numbers have no filter.** Only dates and EDTF are indexed as ordered values, so HP, prices and
+  the like cannot be ranged yet.
+- **A query reads one model's `tiles`.** Its SQL selects from `tiles` without naming the model, so
+  with every model's files behind `tiles` an unfiltered or negated query would return every
+  model's entries; the engine points `tiles` at the queried model's file before each query.
+- **Concept filters match exactly.** Without SKOS vocabularies there is no concept catalogue, so
+  "this term or anything narrower" is not available; our vocabularies are flat anyway.
+
+The emitter is Rós Madair's release binary for the installed `ros-madair` version, fetched once into
+`.cache/ros-madair/` (CI caches it); `ROS_MADAIR_EMIT` points the build at another. DuckDB fetches
+its Parquet extension from `extensions.duckdb.org` on first use, as duckdb-wasm does by default.
+
 ## Maps
 
 **Only places have geometry.** That is CIDOC-CRM's own position: a Place is defined by an E94
@@ -470,6 +514,7 @@ label exactly.
 | Path | What |
 |---|---|
 | `index.html`, `app.js`, `style.css`, `icons.svg`, `alizarin_bg.wasm` | The explorer: loads one view's tile store with Alizarin's WASM ORM and uses it for everything it shows |
+| `query-engine.js`, `ros_madair_wasm_bg.wasm`, `duckdb/` | The filters' query engine, loaded on first use (see Search and filters) |
 | `data/` | The tile store |
 
 The explorer has a universe/campaign picker, a searchable list with model filters, a detail page
@@ -495,6 +540,7 @@ does not come back.
 | `layers/<layer>/<graphid>.json` | Each layer's own, uncomposed resources, for hosts that compose themselves |
 | `graphs.json`, `graphs/<id>.json`, `collections/<id>.json` | Shared models and vocabularies |
 | `layers/<layer>/basemap.json`, `rivers.json`, `relief.json`, `relief-*.webp` | A universe's land, rivers and lakes on its globe, and its shaded relief, for maps (see Maps) |
+| `views/<view>/substrate/`, `views/<view>/pagefind/` | An open view's Rós Madair Parquet and Pagefind index (see Search and filters) |
 
 `views.json` carries `build`, a hash of the rest of `data/`. The explorer fetches `views.json`
 fresh and requests every other file, and the page its script and stylesheet, with `?v=<build>`,
@@ -516,6 +562,8 @@ too: build and upload `dist/`.
 - **Pages sites are public.** Everything in `data/` is readable on the site, JSON included, gated
   views too. Do not put GM-only secrets in a world you publish.
 - **Size.** A visitor fetches Alizarin's 4.4 MB WASM once, plus one view's bundles (about 2 MB).
+  The first filter adds duckdb-wasm (34 MB, cached after) and the compiler (1.7 MB); a search
+  fetches a few index shards and a few KB per match shown.
 - **Licences.** See Licensing below.
 - **Tested** over plain HTTP in Chromium at desktop and phone widths, password gate included.
 
@@ -539,7 +587,9 @@ too: build and upload `dist/`.
     and information funded by the European Union) and others. Check its attribution list before
     covering other regions.
 - **Libraries:**
-  - Alizarin and `@alizarin/geo` are AGPL-3.0.
+  - Alizarin, `@alizarin/geo` and Rós Madair (the `ros-madair` compiler, and `ros-madair-emit` at
+    build time) are AGPL-3.0.
+  - DuckDB and duckdb-wasm, and Pagefind, are MIT.
   - d3-force, d3-geo and the Lucide icons are ISC.
   - Used only by the globe and terrain scripts: `polygon-clipping` (MIT), `topojson-server` and
     `topojson-simplify` (ISC), `pngjs` (MIT) and `sharp` (Apache-2.0).

@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 // Icons: Lucide (lucide-static, ISC), monochrome line icons that take the text colour. Lens icons
 // are named in ontology/labels.csv (`icon`); the interface's own are listed here. Only those used
 // go into dist/icons.svg, one <symbol id="i-<name>"> each; an unknown name fails the build.
-const UI_ICONS = ['pencil', 'lock', 'circle', 'plus', 'minus', 'locate-fixed'];
+const UI_ICONS = ['pencil', 'lock', 'circle', 'plus', 'minus', 'locate-fixed', 'filter'];
 function buildIconSprite(root, dist) {
   const ontology = JSON.parse(fs.readFileSync(path.join(dist, 'data', 'ontology.json'), 'utf8'));
   const names = [...new Set([...UI_ICONS, ...Object.values(ontology.classes).map(c => c.icon).filter(Boolean)])].sort();
@@ -37,6 +37,17 @@ export async function buildExplorer(root, dist, version) {
     external: ['fs', 'path', 'url', 'node:*'],
     logLevel: 'warning',
   });
+  // The query engine for filters (explorer/query-engine.mjs), a bundle of its own that the
+  // explorer imports only when a filter is first used, with the Rós Madair compiler's WASM and
+  // duckdb-wasm's (the exception-handling build, and its worker).
+  await build({
+    entryPoints: [path.join(root, 'explorer/query-engine.mjs')],
+    outfile: path.join(out, 'query-engine.js'),
+    bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true, logLevel: 'warning',
+  });
+  fs.copyFileSync(path.join(root, 'node_modules/ros-madair/ros_madair_wasm_bg.wasm'), path.join(out, 'ros_madair_wasm_bg.wasm'));
+  fs.mkdirSync(path.join(out, 'duckdb'), { recursive: true });
+  for (const f of ['duckdb-eh.wasm', 'duckdb-browser-eh.worker.js']) fs.copyFileSync(path.join(root, 'node_modules/@duckdb/duckdb-wasm/dist', f), path.join(out, 'duckdb', f));
   // Alizarin resolves its WASM relative to the bundle (new URL('alizarin_bg.wasm', import.meta.url)).
   fs.copyFileSync(path.join(root, 'node_modules/alizarin/dist/alizarin_bg.wasm'), path.join(out, 'alizarin_bg.wasm'));
   fs.writeFileSync(path.join(out, '.nojekyll'), '');
