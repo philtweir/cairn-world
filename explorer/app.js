@@ -163,6 +163,8 @@ async function load() {
   state.scoped = state.campaign && (() => { try { return localStorage.getItem('cairn-world:scoped') !== '0'; } catch { return true; } })();
   if (state.campaign) await state.store.setScope(state.scoped);
   state.counts = await state.store.counts(state.view);
+  // A view with nothing of its own but its root (the Cairn 2e reference) is there for General: show it.
+  if (Object.values(state.counts).reduce((n, c) => n + c.n - c.general, 0) <= 1) { state.rules = true; const box = $('rules'); if (box) box.checked = true; }
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
   [state.root = null] = await state.store.full([state.store.idOf(v.kind, state.view)]);
   state.finder = makeFinder({ data: DATA, suffix: V, view: v, models: manifest.models, engine: state.engine, h, put, icon });

@@ -1,0 +1,14 @@
+{
+  "rights": {
+    "holder": "Yochai Gal",
+    "statement": "Rules data adapted from Cairn (2nd edition) by Yochai Gal.",
+    "licence": {
+      "name": "CC BY-SA 4.0",
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    "source": {
+      "name": "cairnrpg.com",
+      "url": "https://cairnrpg.com"
+    }
+  }
+}

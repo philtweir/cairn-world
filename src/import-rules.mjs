@@ -375,6 +375,84 @@ for (const { sec, parent, source } of bestiary) {
   }
 }
 
+// The things a background's tables give a character become Item Types, listed in their table
+// (P67i), so "Regrowth Salve" or "The Cathedral and the Canopy" has a page like a Marketplace
+// item. How each table names its items is read from its layout, table by table:
+//   rows  "| 1 | **Item** | What it does |": every row is an item
+//   lead  "| 1 | **Item** (d6). What it does |": the bold that leads each row is the item
+//   none  the bold names are not things (creatures studied, ways of paying)
+//   (any other table) items are named in the prose: "Take a **Steadymade Buckler** (+1 Armor)."
+const TABLE_ITEMS = {
+  rows: ['aurifex-table-2', 'barber-surgeon-table-2', 'bonekeeper-table-2', 'cutpurse-table-2', 'fieldwarden-table-2', 'foundling-table-2',
+    'fungal-forager-table-2', 'greenwise-table-2', 'half-witch-table-2', 'jongleur-table-2', 'kettlewright-table-2', 'marchguard-table-2',
+    'mountebank-table-2', 'outrider-table-2', 'prowler-table-2', 'scrivener-table-2'],
+  lead: ['fungal-forager-table-1', 'fletchwind-table-2', 'scrivener-table-1'],
+  none: ['beast-handler-table-1', 'rill-runner-table-2'],
+};
+const TRANSPORT_TABLES = new Set(['outrider-table-2']);
+// In prose, a bold name is a thing the character gets when the sentence gives it to them.
+const GIVEN = /(?:\b(?:take|takes|took|start with|starts with|begin with|carry|carries|keep|keeps|gain|gains|receive|have|has|bring|brought back|came with|wear|wears|own|owns)\b[^.;:]{0,120}|^\s*(?:an?|the)\s+(?:[\w'’-]+\s+){0,2})$/i;
+// Bold words that read as things but are rules terms or amounts, not items.
+const NOT_ITEMS = /^(?:recharge|fatigue|roots|gate|attributes|hp|spellbook|scroll|omens|bonds|\d+\s*gp|an extra \d+gp|\+d\d+ hp|prize money.*|a single item|not of your specialty|specialty|weapon type|mortal wound|eye|foot|ears|chest|arm|living nightmare|raven familiar)$/i;
+
+function itemFields(name, text, table) {
+  const after = text.slice(text.indexOf(`**${name}**`) + name.length + 4);
+  const paren = /^\s*\(([^()]*)\)/.exec(after)?.[1] ?? '';
+  const q = qualities(topCommas(paren));
+  const x = (re, s = text) => re.exec(s)?.[1] ?? '';
+  const uses = q.uses || x(/(\d+) uses?\b/i, after.split(/(?<=\.)\s/)[0] + ' ' + text);
+  const charges = q.charges || x(/(\d+) charges?\b/i);
+  const recharge = x(/\*\*Recharge\*\*:\s*([^|]+?\.)(?:\s|$)/);
+  const props = [...new Set([...q.props, ...[...paren.matchAll(/_(bulky|petty)_/gi)].map(m => m[1].toLowerCase())])];
+  const armor = q.armor || (TRANSPORT_TABLES.has(table.key) ? x(/(\d+) Armor/i) : '');
+  const slots = q.slots || x(/\+(\d+) slots/i);
+  const kind = TRANSPORT_TABLES.has(table.key) || (slots && !q.damage) ? 'Transport' : charges || recharge ? 'Relic' : q.damage ? 'Weapon' : q.armor ? 'Armor' : 'Gear';
+  return { kind, damage: q.damage, armor, slots, uses, charges, recharge, properties: props.join(',') };
+}
+
+function tableItems(table, parsed, items, spells, source) {
+  const k = table.key;
+  if (TABLE_ITEMS.none.includes(k)) return;
+  const make = (name, description, row) => {
+    name = stripMd(name).replace(/[.,:;]+$/, '').trim();
+    if (!name || NOT_ITEMS.test(name)) return;
+    // "a **crow-shaped amulet**": named like the other items, "Crow-Shaped Amulet".
+    if (name === name.toLowerCase()) name = name.replace(/(^|[\s-])([a-z])/g, (_, a, b) => a + b.toUpperCase());
+    const known = items.get(name.toLowerCase());
+    if (known) return;   // a Marketplace item, or one an earlier table made: the text's own link reaches it
+    const it = add('itemtype', slug(name), { name, description: tidy(description), ...itemFields(name, row, table), source }, row);
+    link(it, 'listed_in', table);
+    items.set(name.toLowerCase(), it);
+  };
+  for (const [, ...cells] of parsed.rows) {
+    const row = cells.join(' | ');
+    // A spellbook a table gives, written out as "Name: effect. _Quirk._" (e.g. "Read Mind: You can hear...").
+    if (/spellbook/i.test(row)) {
+      for (const m of row.matchAll(/(?:^|[.)]\s+)([A-Z][\w'’ -]{2,30}):\s+([^_|]+?)\s*_([^_]+)_/g)) {
+        const name = m[1].trim();
+        if (!spells.has(name.toLowerCase()) && /spellbook/i.test(row.slice(0, m.index))) {
+          const sp = add('spellbook', slug(name), { name, description: m[2].trim(), quirk: m[3].trim().replace(/\.?$/, '.'), source }, row);
+          link(sp, 'listed_in', table);
+          spells.set(name.toLowerCase(), sp);
+        }
+      }
+    }
+    if (TABLE_ITEMS.rows.includes(k)) {
+      const m = /^\*\*([^*]+)\*\*$/.exec(cells[0]?.trim() ?? '');
+      if (m) make(m[1], cells.slice(1).join(' '), row);
+    } else if (TABLE_ITEMS.lead.includes(k)) {
+      const m = /^\*\*([^*]+)\*\*\s*(?:\([^()]*\))?\s*[.:]?\s*(.*)$/s.exec(cells[0]?.trim() ?? '');
+      if (m) make(m[1], m[2], row);
+    } else {
+      for (const m of row.matchAll(/\*\*([^*]+)\*\*/g)) {
+        const next = row.slice(m.index + m[0].length);
+        if (next[0] === ':' || /^\s*spellbook/i.test(next) || spells.has(stripMd(m[1]).toLowerCase()) || !GIVEN.test(row.slice(0, m.index))) continue;
+        make(m[1], row, row);
+      }
+    }
+  }
+}
+
 // ---- 5. Backgrounds -----------------------------------------------------------------------------------
 
 {
@@ -448,7 +526,7 @@ for (const { sec, parent, source } of bestiary) {
       const title = sec.title.replace(/\s*Roll \d*d\d+:?\s*$/i, '').trim();
       for (const t of sec.tables) {
         const p = parseTable(t.lines, sec.title);
-        if (p.rows.length) addRollTable(`${key}-table-${++nt}`, title, p, e, nt, source, t.lines.join('\n'));
+        if (p.rows.length) tableItems(addRollTable(`${key}-table-${++nt}`, title, p, e, nt, source, t.lines.join('\n')), p, items, spells, source);
       }
     }
   }
@@ -528,14 +606,43 @@ for (const model of Object.keys(all)) {
     }
     const plainText = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
     for (const m of plainText.matchAll(/\*\*([^*]+)\*\*|(?<![\w*])_([^_\n]+)_(?![\w])/g)) {
-      const target = resolveTerm(m[1] ?? m[2], e);
+      const raw = m[1] ?? m[2];
+      const target = resolveTerm(raw, e);
       if (target) hits.push(target);
+      // "_Charm, Hypnotize, Push/Pull, Shield_": a list emphasised as one, each name its own link.
+      else if (/,|\bor\b|\band\b/.test(raw)) for (const part of raw.split(/,\s*|\s+or\s+|\s+and\s+/)) { const t = resolveTerm(part, e); if (t) hits.push(t); }
     }
     for (const t of hits) {
-      if (t === e || e.links.part_of?.has(t) || e.links.about?.has(t) || e.links.listed_in?.has(t)) continue;
+      if (t === e || e.links.part_of?.has(t) || e.links.about?.has(t) || e.links.listed_in?.has(t) || t.links.listed_in?.has(e)) continue;
       link(e, FIELD_FOR[model]?.[t.model] ?? 'refers_to', t);
     }
   }
+}
+
+// Gear the Player's Guide procedures name in plain text ("A torch can be lit 3 times") links to
+// its Marketplace item, so Light reaches Torch, Lantern and Oil Can. Only the procedures, core
+// rules and character creation, and only items the Marketplace sells; "trap" there means a
+// dungeon's, not the hunter's Trap.
+{
+  const PLAIN_PAGES = new Set(['core-rules', 'procedures', 'character-creation']);
+  const NOT_GEAR = new Set(['trap']);
+  const market = [...all.itemtype.values()].filter(it => [...(it.links.listed_in ?? [])].some(t => t.key.startsWith('marketplace')));
+  const forms = market.map(it => [it, it.fields.name.toLowerCase().replace(/\s*\(.*\)$/, '')]).filter(([, n]) => n.length > 3 && !NOT_GEAR.has(n));
+  for (const e of all.rule.values()) {
+    if (!PLAIN_PAGES.has(e.page)) continue;
+    const text = stripMd(e.fields.description ?? '');
+    for (const [it, n] of forms) if (new RegExp(`(?<![\\w-])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:s|es)?(?![\\w-])`, 'i').test(text)) link(e, 'refers_to', it);
+  }
+}
+
+// A 1st-edition monster is the same creature as its 2nd-edition namesake: it refers to it, and
+// where the 1st edition gives no category, it takes the 2nd edition's.
+for (const e of all.monstertype.values()) {
+  if (!e.key.endsWith('-1e')) continue;
+  const twin = all.monstertype.get(e.key.slice(0, -3));
+  if (!twin) continue;
+  link(e, 'refers_to', twin);
+  if (!e.links.group?.size) for (const g of twin.links.group ?? []) link(e, 'group', g);
 }
 
 // ---- 7. Vocabularies from the rules' own tables -----------------------------------------------------

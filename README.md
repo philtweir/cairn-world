@@ -516,7 +516,7 @@ the General layer's data from it:
 |---|---|---|
 | Rule | Player's Guide (principles, character creation, core rules, procedures, marketplace) and Warden's Guide: one per page and per heading, nested with `part_of`, in reading order (`section`) | 396 |
 | Roll Table | every table in those pages and in the backgrounds (traits, bonds, omens, scars, weather, seeds, naming, NPCs...) | 125 |
-| Item Type | the whole Marketplace (armor, weapons, transport, upkeep, gear), the Reliquary (kind Relic, with uses, charges, recharge), and background starting gear not sold in the Marketplace | 166 |
+| Item Type | the whole Marketplace (armor, weapons, transport, upkeep, gear), the Reliquary (kind Relic, with uses, charges, recharge), background starting gear not sold in the Marketplace, and the things the backgrounds' own tables hand out (listed in their table) | 361 |
 | Spellbook | Warden's Guide spellbooks (effect and quirk), plus spells only found in backgrounds | 100 |
 | Monster Type | the 2e Bestiary, then 1st-edition monsters; where both have one, the 1e entry is `<key>-1e` | 229 |
 | Monster Group | the Bestiary's Monster Categories | 20 |
@@ -530,6 +530,30 @@ that defines them, then by name to a spellbook, monster, item, background or hea
 that carries the _Charm_ spellbook links to it, and a relic that leaves you _deprived_ links to
 Deprivation & Fatigue. Starting gear matches Marketplace items by name ("Iron Dagger" is a
 Dagger); anything else becomes its own Item Type.
+
+The backgrounds' tables hand out things too (a Regrowth Salve, a Steadymade Buckler, a horse of a
+given breed), and each becomes an Item Type listed in its table (P67i), with its uses, charges,
+recharge, damage, armour, slots and _bulky_/_petty_ read from the text, and its kind (Relic if it
+recharges, Transport for mounts and wagons). How a table names them is set table by table in the
+importer (`TABLE_ITEMS`): a row per item, an item leading each row, or items given in the prose
+("Take a **Death-Whistle**, 1 charge"); bold labels that are not things (vows, orders, codes,
+specialties) are left as they are. Three more kinds of link are made beyond the emphasised text:
+
+- an emphasised list is split, so "_Charm, Hypnotize, Push/Pull, Shield_" links all four spells;
+- gear the Player's Guide procedures name in plain text links to its Marketplace item (Light to
+  Torch, Lantern and Oil Can; Healing to Bandages), except "trap", which there is a dungeon's;
+- a 1st-edition monster refers to its 2nd-edition namesake and, lacking a category, takes its.
+
+Plain-text mentions are otherwise not linked: in the rules' prose "save", "armor", a spell called
+Charm or a monster group called Magical are words more often than references, and a link on every
+one would bury the useful ones. The 1st-edition monsters with no 2nd-edition namesake have no
+category in the source and are left without one.
+
+**Browsing the rules alone.** The `cairn-2e` layer is a Universe with nothing in it but its root,
+a guide to the books; its view is General by itself. The explorer shows General entries without
+being asked in any view that has nothing of its own but its root, so the Cairn 2e view opens on the
+rules, with Texts & Lore as the books' tree and Kinds as the items, spellbooks, monsters,
+backgrounds and hireling roles.
 
 Left out on purpose: Vald (the 2e default setting is world, not rules, so it belongs in a Universe
 layer), the bibliography, and the note about the example party. The source text is CC-BY-SA 4.0;
@@ -749,6 +773,7 @@ too: build and upload `dist/`.
 
 | Layer | Kind | Notes |
 |---|---|---|
+| `cairn-2e` | Universe | The rules alone: General with a guide to the books as its root |
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
 | `bith-na-bro` | Universe | Bith na Bró in every age: the land (the Greater Lands, the Dells and its surrounds from the regional map, the globe, terrain and rivers; see Maps), peoples who outlast empires, the strands of magic and the Seven Spheres |

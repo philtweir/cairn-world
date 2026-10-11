@@ -18,7 +18,7 @@ character-creation-backgrounds-table,Backgrounds,,d20,Background,"1 | Aurifex
 17 | Outrider
 18 | Prowler
 19 | Rill Runner
-20 | Scrivener",1,character-creation-backgrounds,,"aurifex,half-witch,barber-surgeon,hexenbane,beast-handler,jongleur,bonekeeper,kettlewright,cutpurse,marchguard,fieldwarden,mountebank,fletchwind,outrider,foundling,prowler,fungal-forager,rill-runner,greenwise,scrivener,npc-tables-background","Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
+20 | Scrivener",1,character-creation-backgrounds,,npc-tables-background,"Cairn 2e Player's Guide: Character Creation, CC-BY-SA 4.0"
 character-creation-physique-table,Physique,,d10,,"1 | Athletic
 2 | Brawny
 3 | Flabby
@@ -987,7 +987,7 @@ WIL | 6 | 12 | 15 | 18",1,creating-monsters-converting-monsters,,core-rules-attr
 creating-monsters-saving-throws-table,Saving Throws,,,Death or Poison | STR,"Wands | **DEX**
 Paralysis or Petrification | **WIL** or **STR**
 Breath Attacks | **DEX** or **STR**
-Spells, Rods or Staves | **WIL**",1,creating-monsters-saving-throws,,core-rules-attributes,"Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
+Spells, Rods or Staves | **WIL**",1,creating-monsters-saving-throws,,"overview-and-principles-death,core-rules-attributes","Cairn 2e Warden's Guide: Creating Monsters, CC-BY-SA 4.0"
 naming-procedures-names-formula-table,Names Formula,,d6,Formula,"1 | (The) **[Noun]** **[POI]**
 2 | (The) **[Adjective]** **[POI]**
 3 | **[POI]** of (the) **[Noun]**
@@ -1620,7 +1620,7 @@ foundling-table-1,Who took you in?,,d6,,"1 | An old hunter. You were both quite 
 3 | A druid, who taught you the language of trees. When it came time to , you took with you only a **Gnarled Staff** (d8) and left a promise that one day you would return.
 4 | A gruff blacksmith from a sleepy river town. You were always kept at arm's length. Now the forge is cold, and you've moved on. Take a **Smith's Apron** (_petty_) and a set of **Oft-mended Chain Mail** (2 Armor, _bulky_).
 5 | A troupe of traveling entertainers. For a time, they were like family to you. One day you woke up and they were gone with no explanation. Take a **Storybook**, a **Dagger** (d6), and some burning questions.
-6 | The monks of a secluded forest monastery. When their rules became too strict, and you snuck away. Take a **Monk's Habit** (warm, _petty_) and a **Spellbook** of _Control Plants_. Control Plants: Nearby plants and trees obey you and gain the ability to move at a slow pace. _Leaves grow along the spine, and it smells faintly of decay._",1,,foundling,"character-creation-inventory-slots,leather-jerkin,dagger,core-rules-spellbooks,control-plants","Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
+6 | The monks of a secluded forest monastery. When their rules became too strict, and you snuck away. Take a **Monk's Habit** (warm, _petty_) and a **Spellbook** of _Control Plants_. Control Plants: Nearby plants and trees obey you and gain the ability to move at a slow pace. _Leaves grow along the spine, and it smells faintly of decay._",1,,foundling,"character-creation-inventory-slots,dagger,core-rules-spellbooks,control-plants","Cairn 2e Backgrounds: Foundling, CC-BY-SA 4.0"
 foundling-table-2,What keeps bad tidings at bay?,,d6,,"1 | **Pipeweed** | Your good luck charm. Conversations tend to flow more easily after a smoke. 6 uses.
 2 | **Stink Jar** | Shattering this jar releases an odor so foul all nearby must make a STR save or immediately vomit. 1 use.
 3 | **Ivy Worm** | A green worm often mistaken for a weed. Swallowed whole, it absorbs any toxins or rot in the body before exiting through the usual way.
@@ -1692,7 +1692,7 @@ kettlewright-table-1,What is your trade?,,d6,,"1 | You build small contraptions 
 3 | You were a military smelter, before peace destroyed your livelihood. Take a **smelting hammer** (d10, _bulky_) and a **tin helm** (+1 Armor). Given time and adequate materials, you can repair armor.
 4 | You sell rare and quality items to monasteries and nobles alike. Take a **Spyglass**, a **Necklace** (_petty_) worth 20gp, and a **Scroll** of Mirrorwalk (_petty_).
 5 | You offer protection as a service, quietly watching for threats as money exchanges hands. You start with **+d4 HP**, and carry a **Long Sword** (d10, _bulky_) and a **Gambeson** (+1 Armor).
-6 | You scavenge raw tin and iron from battlefields, pulling teeth from still-twitching corpses. Start with a young **Donkey** (+4 slots, slow), a **Crossbow** (d8 damage, _bulky_), and a **Saw** (d6).",1,,kettlewright,"marketplace-gear,character-creation-inventory-slots,spyglass,core-rules-scrolls,long-sword,gambeson,crossbow","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
+6 | You scavenge raw tin and iron from battlefields, pulling teeth from still-twitching corpses. Start with a young **Donkey** (+4 slots, slow), a **Crossbow** (d8 damage, _bulky_), and a **Saw** (d6).",1,,kettlewright,"marketplace-gear,character-creation-inventory-slots,spyglass,core-rules-scrolls,long-sword,gambeson,donkey,crossbow","Cairn 2e Backgrounds: Kettlewright, CC-BY-SA 4.0"
 kettlewright-table-2,What never fails to get you out of trouble?,,d6,,"1 | **Fire Eggs** | Six small pellets made of sea salt, wood, and crockery-dust. They explode at low heat (d8, _blast_) but the flames dissipate quickly.
 2 | **Black Tar** | Versatile: both sticky and highly flammable. 3 uses.
 3 | **Spiked Boots** | Cracks heads (d8) as easily as it does ice and muck. Travel is also a bit slower, but easier.
@@ -1758,7 +1758,7 @@ rill-runner-table-2,What pays your way across the land?,,d6,,"1 | **Performance*
 3 | **Wares** | You buy low and sell high, always making just enough to get by. Take a **single item** worth **20gp** (or less) from the gear table.
 4 | **Transport** | You deliver ""delicate"" packages throughout the lands. You have at least one contact in any major town.
 5 | **Sailor's Friend** | Over troubled waters and dangerous winds, you always make sure a ship reaches its destination. For you, passage is always free.
-6 | **Guide** | You shepherd caravans and travelers across water-soaked lands. Start a **map** (_petty_) relevant to your next journey.",2,,rill-runner,"marketplace-gear,bodyguard,marketplace-transport,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
+6 | **Guide** | You shepherd caravans and travelers across water-soaked lands. Start a **map** (_petty_) relevant to your next journey.",2,,rill-runner,"marketplace-gear,bodyguard,rapier,marketplace-transport,character-creation-inventory-slots","Cairn 2e Backgrounds: Rill Runner, CC-BY-SA 4.0"
 scrivener-table-1,What work did you keep for yourself?,,d6,,"1 | **The Wild Tongue**. A bundle of leather-bound scrolls. A seminal work, cataloging the hidden languages of beasts and how to understand them.
 2 | **The Silent Symphony**. Bound in fluorescent wrap. Very rare, it chronicles the subtle signs used by those employing invisibility magic.
 3 | **A Treatise on the Abyss**. A nondescript black book. An in-depth, largely theoretical text describing the **Roots**, as well as information about the location of a nearby **Gate**.
