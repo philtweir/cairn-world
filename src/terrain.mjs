@@ -25,7 +25,8 @@
 //             its radius, or a POLYGON with `radius` km of ragged fade outside it)
 //           volcano: a stratovolcano rising to `value` metres over `radius` km, its flanks cut by
 //             wandering gullies
-//           plain: lowland levelled towards `value` metres, gently rolling (sea stays sea)
+//           plain: lowland levelled towards `value` metres, gently rolling
+// Every edit leaves the sea as it is, and the coast where Earth has it (see `ashore`).
 //           dunes: a plain of hummocks
 //           river: a valley carved along a LINESTRING, drawn downstream: a floor `radius` km to
 //             each side, `value` metres under the lowest ground near it and always falling (so
@@ -219,6 +220,15 @@ function ridged(noise, x, y, wave) {
 }
 const smoothstep = t => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
 // A max without a crease where two surfaces cross (k metres of blend).
+// The coast is Earth's: no edit makes land of the sea (or sea of the land), so the relief, the
+// rivers found from it and the globe's drawn coast (basemap.json, from Natural Earth) agree. An edit
+// that lifts the ground eases in over the last COAST_KM before the sea, so a range or a volcano
+// that reaches the shore comes down to it rather than standing in it as a sea cliff. The distance
+// to the sea is Earth's, unedited, on a 2 km grid over each detailed area (seaDistance, below);
+// elsewhere edits are not eased.
+const COAST_KM = 5;
+let coastKm = () => Infinity;
+const ashore = p => smoothstep(coastKm(p) / COAST_KM);
 const smoothMax = (a, b, k) => { const h = Math.max(0, k - Math.abs(a - b)) / k; return Math.max(a, b) + h * h * k / 4; };
 
 // ---- The edits ---------------------------------------------------------------------------------
@@ -310,16 +320,17 @@ function applyEdit(e, h, p) {
       const r = Math.hypot(x - e.centre[0], y - e.centre[1]) / e.radius;
       if (r >= 1) return h;
       const fade = 0.5 * (1 + Math.cos(Math.PI * r));
-      return e.kind === 'raise' ? h + e.value * fade : h > 0 ? h * (1 + (e.value - 1) * fade) : h;
+      if (h <= 0) return h;
+      return e.kind === 'raise' ? Math.max(1, h + e.value * fade * ashore(p)) : h * (1 + (e.value - 1) * fade);
     }
     case 'mountains': {
       const m = e.inside(x, y);
-      if (m <= 0) return h;
+      if (m <= 0 || h <= 0) return h;
       // Ranges about 25 km apart, with their spurs, running north and south on the globe's map as
       // the Balkan ranges around the Dells do there; the mask lifts the whole range towards its
       // middle so the foothills are lower than the crests.
       const r = ridged(e.noise, x * 1.5, y * 0.7, 28);
-      return smoothMax(h, e.value * m * (0.3 + 0.7 * r) * (0.6 + 0.4 * m), 120);
+      return h + (smoothMax(h, e.value * m * (0.3 + 0.7 * r) * (0.6 + 0.4 * m), 120) - h) * ashore(p);
     }
     case 'volcano': {
       const dx = x - e.centre[0], dy = y - e.centre[1], a = Math.atan2(dy, dx), d = Math.hypot(dx, dy);
@@ -327,7 +338,7 @@ function applyEdit(e, h, p) {
       // stratovolcano, with a crater.
       const lobes = 1 + 0.2 * fbm(e.noise, Math.cos(a) * 4, Math.sin(a) * 4, 3);
       const r = d / (e.radius * lobes);
-      if (r >= 1) return h;
+      if (r >= 1 || h <= 0) return h;
       const cone = (1 - r) ** 2 * 0.6 + (1 - r) ** 7 * 0.4;   // a broad base, a steep summit cone
       // Gullies down its flanks: noise sampled round a circle (so each runs straight downhill and
       // there is no seam), drifting slowly with distance so they wander; finer sets, more of them,
@@ -344,7 +355,7 @@ function applyEdit(e, h, p) {
       const rough = 0.12 * smoothstep(r / 0.3) * ridged(e.noise, x, y, 8) + 0.03 * smoothstep(r / 0.08) * fbm(e.noise, x + 70, y, 4);
       const scored = cone * (0.92 + rough) - flank * (0.09 * cut(4) + 0.045 * cut(2));
       const crater = 0.09 * (1 - smoothstep(r / 0.045)) - 0.015 * Math.exp(-(((r - 0.05) / 0.02) ** 2));   // and its rim
-      return smoothMax(h, e.value * (scored - crater), 200);
+      return h + (smoothMax(h, e.value * (scored - crater), 200) - h) * ashore(p);
     }
     case 'plain': case 'dunes': {
       if (h <= 0) return h;
@@ -383,6 +394,27 @@ function height(zoom, p, upTo = edits.length) {
 // half km, so the valley is the low ground there and water does not leave it, less
 // its depth, never rising downstream, and coming down to its mouth: the bed of the river it joins
 // (carved before it), or else the sea.
+// Distance to Earth's sea (km) over each detailed area: its sea cells (unedited elevation at or
+// below 0) on a 2 km grid, spread by a two-pass chamfer transform. Read by `ashore`.
+{
+  const STEP = 0.02, grids = [];
+  const boxesOf = [...new Map(basemap.features.filter(f => f.properties.kind.endsWith('-detail')).map(f => [f.bbox.join(','), f.bbox])).values()];
+  for (const [x0, y0, x1, y1] of boxesOf) {
+    const w = Math.round((x1 - x0) / STEP) + 1, h = Math.round((y1 - y0) / STEP) + 1;
+    const dx = STEP * KM * Math.cos(((y0 + y1) / 2) * Math.PI / 180), dy = STEP * KM, dd = Math.hypot(dx, dy);
+    const d = new Float64Array(w * h);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) d[j * w + i] = elevation(DETAIL.zoom, remap.toEarth([x0 + i * STEP, y0 + j * STEP])) <= 0 ? 0 : Infinity;
+    const relax = (i, j, a, b, c) => { const k = j * w + i, n = (j + b) * w + (i + a); if (i + a >= 0 && i + a < w && j + b >= 0 && j + b < h && d[n] + c < d[k]) d[k] = d[n] + c; };
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { relax(i, j, -1, 0, dx); relax(i, j, 0, -1, dy); relax(i, j, -1, -1, dd); relax(i, j, 1, -1, dd); }
+    for (let j = h - 1; j >= 0; j--) for (let i = w - 1; i >= 0; i--) { relax(i, j, 1, 0, dx); relax(i, j, 0, 1, dy); relax(i, j, 1, 1, dd); relax(i, j, -1, 1, dd); }
+    grids.push({ x0, y0, x1, y1, w, h, d });
+  }
+  coastKm = ([lon, lat]) => {
+    const g = grids.find(b => lon >= b.x0 && lon <= b.x1 && lat >= b.y0 && lat <= b.y1);
+    return g ? g.d[Math.round((lat - g.y0) / STEP) * g.w + Math.round((lon - g.x0) / STEP)] : Infinity;
+  };
+}
+
 edits.forEach((e, k) => {
   if (e.kind !== 'river') return;
   const samples = [];
