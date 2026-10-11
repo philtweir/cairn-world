@@ -12,5 +12,8 @@
   "gate": {
     "salt": "d92b7b8860aec7323dd0bab7",
     "sha256": "e6ec6c4c5a9761274cc28af8a6eb6f6ba5ac3430f1264eb13a1d3151e946a2a1"
+  },
+  "globe": {
+    "on": "bith-na-bro"
   }
 }

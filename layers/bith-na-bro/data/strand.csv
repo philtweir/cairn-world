@@ -1,0 +1,8 @@
+ResourceID,name,description,colour,emotion,suppressed_by
+wrath,The Strand of Wrath,"Magic that anger feeds: fire, force, blood and breaking. Loose, it turns a quarrel into a feud and a feud into a war.",Red,Anger,red-sphere
+dread,The Strand of Dread,"Magic that fear feeds: shadow, hiding, flight and phantoms; the step that vanishes, and the shape at the edge of the light.",Yellow,Fear,yellow-sphere
+envy,The Strand of Envy,"Magic that envy feeds: taking another's face, voice, shape or goods; the counterfeit and the swap.",Green,Envy,green-sphere
+sorrow,The Strand of Sorrow,"Magic that sorrow feeds: water, rain and tide, and memory, which it can drown or bring back.",Blue,Sorrow,blue-sphere
+despair,The Strand of Despair,"Magic that despair feeds: death, decay and the dead; what stops, and what will not.",Black,Despair,black-sphere
+pride,The Strand of Pride,"Magic that pride feeds: command, oaths and the binding of wills; the word that makes a crowd kneel.",Purple,Pride,purple-sphere
+delight,The Strand of Delight,"Magic that delight feeds: plenty, growth, healing and charm; bread from nothing, a wound closed, a stranger beloved.",Pink,Delight,pink-sphere

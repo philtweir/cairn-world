@@ -1,0 +1,12 @@
+ResourceID,earth,map,note
+forest-of-dawn,,"dells POLYGON ((6.4 -0.1, 7.3 0, 8.1 -0.4, 8.7 -1.3, 9 -2.6, 9.1 -3.9, 9 -5.2, 8.8 -6.3, 8.3 -7.3, 7.6 -7.8, 6.8 -7.5, 6.2 -6.7, 5.7 -5.6, 5.1 -4.5, 4.8 -3.3, 5 -2.5, 5.6 -1.6, 6 -0.8, 6.4 -0.1))","The valley of the Veleka (Earth's, remapped), in the Strandzha uplands just north of the Dells: old oak and beech forest, Thracian megaliths, a river to the sea."
+the-fork,,dells POINT (7.05 -0.5),"South of the river, where the old road enters the forest from the Dells side."
+bridge-of-saints,,dells POINT (7.62 -1.42),"Where the old road crosses, at the river's bend west towards the sea."
+old-ford,,dells POINT (6.25 -1.86),Downstream of the bridge.
+sister-stones,,dells POINT (5.6 -3.55),
+rising-sun-tavern,,dells POINT (7.45 -3.3),"On the old road, west of the river."
+great-oak,,dells POINT (8.0 -4.35),"In the riverside swamp where the river loops, off the old road."
+secret-well,,dells POINT (6.6 -5.55),"The ruined village outside the wall, where it has no gate."
+porcelain-wall,,"dells LINESTRING (6.3 -6.25, 6.8 -6.05, 7.3 -5.95, 7.8 -5.9, 8.3 -5.95, 8.8 -6.1)",Across the head of the valley.
+porcelain-gatehouse,,dells POINT (7.3 -5.95),Where the old road meets the wall.
+temple-of-st-rylan,,dells POINT (7.3 -6.85),"In the cliff at the valley's head, near the river's source."

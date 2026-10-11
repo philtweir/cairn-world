@@ -8,3 +8,4 @@ cairn:holds_spell,property,holds spell,,E55_Type,E55_Type,Items of this type con
 cairn:starts_with,property,starts with,,E55_Type,E55_Type,Characters of this background start with items of that type.
 cairn:carries,property,carries,,E21_Person,E55_Type,A character carries an item of that type.
 cairn:played_by,property,played by,,E21_Person,http://www.w3.org/2000/01/rdf-schema#Literal,The name of the player of a character.
+cairn:suppressed_by,property,suppressed by,,E55_Type,E22_Human-Made_Object,A kind of magic and the made thing that holds it in check.

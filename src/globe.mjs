@@ -15,9 +15,14 @@
 // optional box of longitude and latitude, "Russia@24:60" or "Norway@-20:40/74:85", for a realm
 // that is part of a country; or WKT in
 // Earth's longitude and latitude), map ("<map> POINT (x y)" in that map's units, x east and y
-// south), note. A place with neither keeps no geometry. `globe.dry` in layer.json lists places with
-// no rivers or lakes (a desert, say): Natural Earth's rivers stop at their edge, and their lakes go. Natural Earth data is public domain;
-// it comes from the world-atlas package (a dev dependency: the site never needs it).
+// south; or a LINESTRING or POLYGON in those units, for a road or a region), note. A place with
+// neither keeps no geometry. `globe.dry` in layer.json lists places with no rivers or lakes (a
+// desert, say): Natural Earth's rivers stop at their edge, and their lakes go. Natural Earth data
+// is public domain; it comes from the world-atlas package (a dev dependency: the site never needs
+// it).
+//
+// A campaign layer's layer.json can say `globe.on: <universe>`: its places go on that universe's
+// globe and regional maps (plus any `globe.maps` of its own), and only its place.csv is written.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -284,9 +289,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (!key) { console.error('usage: npm run globe -- <layer>'); process.exit(1); }
   const dir = path.join(ROOT, 'layers', key);
   const settings = JSON.parse(fs.readFileSync(path.join(dir, 'layer.json'), 'utf8'));
-  if (!settings.globe?.remap) { console.error(`layers/${key}/layer.json has no globe.remap`); process.exit(1); }
-  const remap = makeRemap(settings.globe.remap);
-  const maps = settings.globe.maps ?? {};
+  // A campaign set in a universe is placed on that universe's globe (`globe.on`), with its maps
+  // (and any of its own): only its places' geometry is written, since the land is the universe's.
+  const on = settings.globe?.on ?? null;
+  const globe = on ? JSON.parse(fs.readFileSync(path.join(ROOT, 'layers', on, 'layer.json'), 'utf8')).globe : settings.globe;
+  if (!globe?.remap) { console.error(on ? `layers/${on}/layer.json has no globe.remap` : `layers/${key}/layer.json has no globe.remap (or globe.on, the universe whose globe it is on)`); process.exit(1); }
+  const remap = makeRemap(globe.remap);
+  const maps = { ...(globe.maps ?? {}), ...(on ? settings.globe.maps ?? {} : {}) };
 
   const countries = atlas('countries-110m.json'), countriesDetail = atlas('countries-50m.json');
 
@@ -301,9 +310,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const m = /^(\S+)\s+(.*)$/.exec(onMap);
       const map = m && maps[m[1]];
       if (!map) throw new Error(`globe.csv ${id}: no map "${m?.[1]}" in globe.maps`);
-      const pt = wktToGeometry(m[2]);
-      if (pt.type !== 'Point') throw new Error(`globe.csv ${id}: a map position is a POINT`);
-      g = round({ type: 'Point', coordinates: mapToGlobe(map, remap, pt.coordinates) }, 3);
+      // A point on the map, or a shape (a forest, a road) drawn in the map's units.
+      const shape = wktToGeometry(m[2]);
+      const onGlobe = c => (typeof c[0] === 'number' ? mapToGlobe(map, remap, c) : c.map(onGlobe));
+      g = round({ type: shape.type, coordinates: onGlobe(shape.coordinates) }, 3);
+      // Wound as d3 (and the Earth shapes here) have it: an outline clockwise, a hole the other
+      // way. However the map's ring was written, so its y running south does not matter.
+      for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []) {
+        poly.forEach((ring, i) => { if ((geoArea({ type: 'Polygon', coordinates: [ring] }) > 2 * Math.PI) !== (i > 0)) ring.reverse(); });
+      }
     } else if (/^[A-Z]+\s*\(/.test(earth)) {
       g = round(remap.project(wktToGeometry(earth)), 3);
     } else if (earth) {
@@ -321,6 +336,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const id of geometryOf.keys()) if (!known.has(id)) throw new Error(`globe.csv lists "${id}", which is not in ${path.relative(ROOT, placeFile)}`);
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
   fs.writeFileSync(placeFile, toCsv(place));
+  if (on) { console.log(`layers/${key}: ${geometryOf.size} place geometries, on the globe of ${on}`); process.exit(0); }
 
   // The globe's land, for the explorer to draw under its maps, in two kinds: `land`, every place's
   // Earth shape together (the world's named lands), and `unnamed`, the rest of Earth's land, which
@@ -338,7 +354,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   ];
   const detailed = { land: named(countriesDetail), unnamed: unnamed(countriesDetail) };
   for (const [name] of Object.entries(maps)) {
-    const pts = rows.slice(1).filter(r => (r[col('map')] ?? '').startsWith(`${name} `)).map(r => geometryOf.get(r[0]).coordinates);
+    const flat = c => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
+    const pts = rows.slice(1).filter(r => (r[col('map')] ?? '').startsWith(`${name} `)).flatMap(r => flat(geometryOf.get(r[0]).coordinates));
     if (!pts.length) continue;
     const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
     for (const [kind, g] of Object.entries(detailed)) {
@@ -358,7 +375,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const rivers = naturalEarth('ne_50m_rivers_lake_centerlines.geojson').features.filter(f => f.properties.featurecla === 'River');
   // The dry places: a river is cut where it crosses into one (the crossing found by halving the
   // stretch), and a lake goes if its middle is in one.
-  const dry = (settings.globe.dry ?? []).map(id => {
+  const dry = (globe.dry ?? []).map(id => {
     if (!geometryOf.has(id)) throw new Error(`layer.json globe.dry lists "${id}", which globe.csv gives no shape`);
     return geometryOf.get(id);
   });

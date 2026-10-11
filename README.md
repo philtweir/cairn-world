@@ -184,7 +184,7 @@ Warden's notes; it is not security. The layer's CSVs are in this public reposito
 files are on the site like any other view's. `--remove` takes the gate off.
 
 Not done yet: model overlays (a campaign adding *fields* to a General model). A layer can define new
-models in `layers/<key>/model/`, and Alizarin's `LayeredGraph` supports overlays, but the build does
+models in `layers/<key>/model/` (Bith na Bró's Strand of Magic is one), and Alizarin's `LayeredGraph` supports overlays, but the build does
 not create overlay graphs yet.
 
 ## The interface: lenses from the ontology
@@ -325,7 +325,8 @@ each optionally cut to a band of longitude, `Russia@24:60`, or a box, `Norway@-2
 `Russia#Central+Northwestern+Volga-Kaliningrad`, by Natural Earth's admin-1 district or region name,
 less those after `-`;
 or WKT in Earth's longitude and latitude) or where it is on a regional map (`dells POINT (x y)`, in
-that map's units, x east and y south). `npm run globe -- <layer>` repeats the remap and writes the
+that map's units, x east and y south; a `LINESTRING` or `POLYGON` there draws a wall or a region,
+wound for d3 whichever way it was written). `npm run globe -- <layer>` repeats the remap and writes the
 `geometry` column of the layer's `place.csv` (each realm's countries unioned into one outline, with
 `polygon-clipping`), and `basemap.json`, the globe's land, in two kinds: the named lands (every
 place's Earth shape together), and the unnamed land, the rest of Earth's land, which no place
@@ -336,6 +337,12 @@ script and it moves from one kind to the other. Both are Natural Earth 1:110m fo
 and 1:50m around each regional map, which the explorer draws in place of the coarse coast there. The script needs the
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
+
+**A campaign on its universe's globe.** A campaign layer whose `layer.json` says
+`"globe": { "on": "<universe>" }` has a `globe.csv` of its own: `npm run globe -- <campaign>` places
+its places with that universe's remap and regional maps (positions may lie outside a map's extent,
+in the same units) and writes only the campaign's `place.csv`. Its maps draw on the universe's land,
+relief and rivers, since the explorer takes those from the topmost layer in the stack that has them.
 
 **Bith na Bró** uses its world globe's remap (pole 50.27°E 10°S, seam 150°E 50°S, south 0.5,
 east-west 0.55). Realms are their countries ("In the projection: Sweden"). The High Marks are read
@@ -678,7 +685,24 @@ too: build and upload `dist/`.
 | `bith-na-bro` | Universe | Bith na Bró: the Six Kingdoms and Nine States, the Engineers, the churches, the Order of the White Raven; the Dells and surrounds from the regional map; places on the world globe (see Maps) |
 | `ravens-in-the-dells` | Campaign (solo) | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Universe, **test** | Player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos |
+| `seven-silver-spheres` | Campaign, password gate, **test** | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; three placeholder PCs tied to Marcos. Set on Bith na Bró and the Empire (below) |
+
+**The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
+stack is General › Bith na Bró › The Empire › the campaign, the Empire being Bith na Bró between
+one and two thousand years before the present. The Forest of Dawn is the valley of the Veleka
+(Earth's, remapped: the Strandzha uplands, old oak forest and Thracian megaliths) just north of the
+Dells map, its places laid out along the river the relief already has (`globe.csv` in the layer).
+The spheres themselves are Bith na Bró's, so any of its campaigns can find them later:
+
+- Bith na Bró defines a model of its own, **Strand of Magic** (`layers/bith-na-bro/model/`: a
+  colour, an emotion, the sphere that holds it in check, and its spells), and seven strands by the
+  usual colour idioms: red anger (Wrath), yellow fear (Dread), green envy, blue sorrow, black
+  despair, purple pride, pink delight. Each is suppressed by its sphere (`cairn:suppressed_by`).
+  The seven spheres are relics there, and an event has them scattered between 1,000 and 2,000
+  years ago.
+- The campaign layers its era on top: the spheres' item type and where they are (five in the
+  temple, the Red and the Yellow with Archmage Hann), and its own spellbooks added to the strands'
+  spells. The Ravens in the Dells see the spheres and strands, but not the temple or Hann.
 
 *Seven Silver Spheres* and The Empire are test layers, to be removed when done. *Seven Silver
 Spheres* is © Martin Orchard and is not openly licensed; both layers' `rights` say so. The layer condenses and

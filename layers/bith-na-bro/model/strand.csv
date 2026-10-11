@@ -1,0 +1,7 @@
+alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,collection_name,target_model,rule
+name,Name,string,1,E41_Appellation,P1_is_identified_by,,,,
+description,Description,string,1,E62_String,P3_has_note,,,,
+colour,Colour,concept,1,E55_Type,P2_has_type,,Colour,,
+emotion,Emotion,concept,1,E55_Type,P2_has_type,,Emotion,,
+suppressed_by,Suppressed by,resource-instance-list,1,E22_Human-Made_Object,cairn:suppressed_by,,,relic,
+spells,Spells,resource-instance-list,n,E55_Type,P127i_has_narrower_term,,,spellbook,

@@ -198,8 +198,10 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
         // horizon cuts a shape, the cut is not stroked as if it were a border.
         const fill = svg('path', { class: 'fill' }), edge = svg('path', { class: 'edge' });
         const node = svg('a', { href: route(x.e), class: `shape ${roleCls}` }, fill, edge, t);
-        const rings = f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates.flat() : [];
-        shapes.push({ fill, edge, g: f.geometry, lines: { type: 'MultiLineString', coordinates: rings } }); gShapes.append(node);
+        // A line (a wall, a road) is only its outline.
+        const t2 = f.geometry.type, line = t2 === 'LineString' || t2 === 'MultiLineString';
+        const rings = t2 === 'Polygon' ? f.geometry.coordinates : t2 === 'MultiPolygon' ? f.geometry.coordinates.flat() : t2 === 'LineString' ? [f.geometry.coordinates] : t2 === 'MultiLineString' ? f.geometry.coordinates : [];
+        shapes.push({ fill, edge, g: line ? null : f.geometry, lines: { type: 'MultiLineString', coordinates: rings } }); gShapes.append(node);
       }
     }
     const node = svg('text', { class: `lbl ${x.role}` }, title(x.e));
@@ -254,7 +256,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     }
     relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
-    for (const s of shapes) { s.fill.setAttribute('d', path(s.g) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }
+    for (const s of shapes) { s.fill.setAttribute('d', (s.g && path(s.g)) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }
     for (const r of routes) r.node.firstChild.setAttribute('d', path(r.g) ?? '');
     for (const p of points) {
       const on = visible(p.c), xy = projection(p.c);

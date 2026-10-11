@@ -63,6 +63,8 @@ const md = nodes => nodes.map(n => {
   }
   return h(n.t, {}, md(n.c));
 });
+// A model's name in the plural: "Factions", "Strands of Magic".
+const plural = name => name.replace(/^(.+?)( of .+)?$/, (_, head, tail = '') => `${head}s${tail}`);
 const field = (e, alias) => e.fields.find(f => f.alias === alias)?.value;
 const section = e => field(e, 'section') ?? Infinity;
 const inOrder = (a, b) => section(a) - section(b) || title(a).localeCompare(title(b));
@@ -390,7 +392,7 @@ function renderDetail(e) {
   }
   for (const c of order.filter(c => !c.out.length && c.in.length)) {
     const [via, detail] = c.in[0].split(': ');
-    put1(`${state.modelOf[c.e.model].name}s · ${via}`, chip(c.e, detail));
+    put1(`${plural(state.modelOf[c.e.model].name)} · ${via}`, chip(c.e, detail));
   }
   const mentionsOnly = order.filter(c => !c.out.length && !c.in.length && c.mention);
   const nConn = conns.size;
