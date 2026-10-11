@@ -91,6 +91,8 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
         await know(want);
         const byGraph = new Map();
         for (const id of want) { const r = rowOf.get(id); if (r && !edited.has(id)) (byGraph.get(r.graph_id) ?? byGraph.set(r.graph_id, []).get(r.graph_id)).push(id); }
+        // Every model's tiles fetched at once, rather than one model after another.
+        await engine.prefetch?.([...byGraph.keys()]);
         for (const [gid, list] of byGraph) for (const part of chunks(list, 200)) {
           const ts = await engine.tiles(gid, part);
           for (const id of part) tilesOf.set(id, ts.filter(t => t.resource_id === id));

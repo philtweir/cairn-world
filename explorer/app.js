@@ -720,7 +720,7 @@ function renderLens(lens, entries) {
 
 // Each draw reads what it needs first; a later navigation supersedes one still reading.
 let shows = 0;
-async function show() {
+async function show(again = false) {
   const mine = ++shows;
   const [view, a, b, c] = hashParts();
   // The ORM's caches belong to one view, so moving to another view reloads the page.
@@ -747,7 +747,19 @@ async function show() {
     }
   } catch (err) {
     console.error(err);
-    if (mine === shows) put($('detail'), h('p', { class: 'empty' }, `Could not read this: ${err?.message ?? err}`));
+    if (mine !== shows) return;
+    // A page left open across a deploy reads files that have since been replaced: say so, and
+    // offer the new version. Otherwise a dropped connection is worth one more try.
+    const latest = await fetch(`${DATA}/views.json`, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+    if (mine !== shows) return;
+    if (latest?.build && latest.build !== state.viewsMeta.build) {
+      put($('detail'), h('p', { class: 'empty' }, 'The world has been updated since this page was opened.'),
+        h('button', { type: 'button', class: 'retry', onclick: () => location.reload() }, 'Reload'));
+      return;
+    }
+    if (!again) { show(true); return; }
+    put($('detail'), h('p', { class: 'empty' }, `Could not read this: ${err?.message ?? err}`),
+      h('button', { type: 'button', class: 'retry', onclick: () => show() }, 'Try again'));
   } finally { clearTimeout(reading); }
 }
 

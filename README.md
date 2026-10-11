@@ -280,6 +280,17 @@ across deploys. DuckDB's Parquet reader is an extension: the build fetches it (o
 extensions.duckdb.org; the engine uses it when its DuckDB is the version it was fetched for, and
 falls back to extensions.duckdb.org otherwise.
 
+**How files are fetched.** DuckDB in the browser reads a file over HTTP a piece at a time, one
+request after another (its size, its footer, the row groups it needs), and a query over a view
+opens every file behind it, so a page of a small world could cost dozens of round trips. So the
+engine fetches a small file (512 KB or less, by the sizes the substrate's `manifest.json` and the
+tables' own `tables/manifest.json` list, up to 8 MB in all) whole, side by side with the others,
+and reads it from memory: the views' files when it opens, a model's tiles the first time a page
+needs them (all of a page's models at once). A larger file, or one past the budget, is range-read
+as before, so a world of any size still opens. Parquet footers, once read, are cached. A read that
+fails is tried once more; if the site has been redeployed since the page opened, it says so and
+offers to reload.
+
 What this release of Rós Madair (0.1.0-alpha.22) leaves to us, until it does them itself:
 
 - **No slug or layers in its Parquet.** Hence `resources.parquet`, the resource table it lacks.

@@ -32,6 +32,9 @@ export async function writeTables(dir, { resources, mentions }) {
     await c.run(`COPY (SELECT src_resource, src_node, src_nodegroup, src_tile, target_resource
         FROM read_json(${json('mentions', mentions)}, columns = {src_resource: 'VARCHAR', src_node: 'VARCHAR', src_nodegroup: 'VARCHAR', src_tile: 'VARCHAR', target_resource: 'VARCHAR'})
         ORDER BY target_resource, src_resource) TO ${lit(path.join(dir, 'mentions.parquet'))} (FORMAT parquet, COMPRESSION zstd)`);
+    // Their sizes, as Rós Madair's manifest lists its files', so a reader can choose how to fetch each.
+    const artifacts = ['mentions.parquet', 'resources.parquet'].map(f => ({ path: f, bytes: fs.statSync(path.join(dir, f)).size }));
+    fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ artifacts }, null, 1) + '\n');
   } finally {
     c.closeSync?.();
     fs.rmSync(tmp, { recursive: true, force: true });

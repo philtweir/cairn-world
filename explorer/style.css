@@ -272,3 +272,4 @@ fieldset.efield label{display:grid;gap:.2rem;margin-bottom:.4rem}
 .eproblems{color:#b3261e;font:14px system-ui,sans-serif;margin:0;padding-left:1.1rem}
 .eactions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0}
 .eactions button[type=submit]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.retry{font:14px system-ui,sans-serif;padding:.35rem .9rem;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg);cursor:pointer}

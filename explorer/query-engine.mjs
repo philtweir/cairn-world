@@ -24,8 +24,10 @@ import { sqlString, draftTablesSql, viewsSql, tilesViewSql, overlaySql } from '.
 // the build's ?v= cache key, for the data only.
 // extensions: { version, repository } where the site serves DuckDB's extensions, if it does.
 export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, extensions = null, substrate, tables, graphs, suffix = '' }) {
-  const [manifest] = await Promise.all([
+  const [manifest, tableManifest] = await Promise.all([
     fetch(`${substrate}manifest.json${suffix}`).then(r => { if (!r.ok) throw new Error(`substrate manifest: HTTP ${r.status}`); return r.json(); }),
+    // The view's own tables list their sizes as the substrate's manifest does (an older build has none).
+    fetch(`${tables}manifest.json${suffix}`).then(r => (r.ok ? r.json() : { artifacts: [] })).catch(() => ({ artifacts: [] })),
     initCompiler({ module_or_path: compilerWasm }),
   ]);
   const compiler = new Compiler(`[${graphs.join(',')}]`);
@@ -37,8 +39,34 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
   const conn = await db.connect();
   const url = (dir, f) => new URL(`${f}${suffix}`, new URL(dir, location.href)).href;
   const files = manifest.artifacts.map(a => a.path).filter(p => p.endsWith('.parquet'));
-  for (const f of files) await db.registerFileURL(f, url(substrate, f), duckdb.DuckDBDataProtocol.HTTP, false);
-  for (const f of ['resources.parquet', 'mentions.parquet']) await db.registerFileURL(f, url(tables, f), duckdb.DuckDBDataProtocol.HTTP, false);
+  const own = ['resources.parquet', 'mentions.parquet'];
+  const where = f => (own.includes(f) ? tables : substrate);
+  // How each file is read. DuckDB in the browser reads a file over HTTP a piece at a time, one
+  // request after another (its size, its footer, then the row groups a query needs), and a query
+  // over a view opens every file behind it: for a small world, dozens of round trips a page. So a
+  // small file is fetched whole, side by side with the others, and read from memory: the views'
+  // files when the engine opens, a model's tiles the first time they are asked for. A large one,
+  // or any past the budget, is range-read as before, so a world of any size still opens.
+  const size = new Map([...manifest.artifacts, ...tableManifest.artifacts].map(a => [a.path, a.bytes]));
+  const SMALL = 512 * 1024;
+  let budget = 8 * 1024 * 1024;
+  const whole = new Map();   // file -> promise of it in memory
+  const ranged = new Set();
+  const byRange = async f => { ranged.add(f); await db.registerFileURL(f, url(where(f), f), duckdb.DuckDBDataProtocol.HTTP, false); };
+  const inMemory = f => whole.get(f) ?? whole.set(f, fetch(url(where(f), f))
+    .then(r => { if (!r.ok) throw new Error(`${f}: HTTP ${r.status}`); return r.arrayBuffer(); })
+    .then(b => db.registerFileBuffer(f, new Uint8Array(b)))
+    .catch(() => byRange(f))).get(f);   // a whole fetch that fails falls back to reading by range
+  const small = f => size.has(f) && size.get(f) <= SMALL && (budget -= size.get(f)) >= 0;
+  const viewsFiles = [...files.filter(f => !f.startsWith('tiles_')), ...own];
+  const lazy = new Set();
+  for (const f of [...viewsFiles, ...files.filter(f => f.startsWith('tiles_'))]) {
+    if (!small(f)) await byRange(f);
+    else if (f.startsWith('tiles_')) lazy.add(f);
+  }
+  await Promise.all(viewsFiles.filter(f => !ranged.has(f)).map(inMemory));
+  // A model's tiles, ready to read (fetched whole the first time, if it is a small file).
+  const ready = gids => Promise.all(gids.map(g => `tiles_${g}.parquet`).filter(f => lazy.has(f)).map(inMemory));
   const all = prefix => `[${files.filter(f => f.startsWith(`${prefix}_`)).map(f => `'${f}'`).join(', ')}]`;
   // The first read_parquet loads DuckDB's Parquet reader, an extension: from the site when it
   // serves one for this DuckDB, else (or if that fails) from extensions.duckdb.org.
@@ -59,6 +87,8 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
       throw new Error(`DuckDB could not load its Parquet reader (${err2?.message ?? err2})`);
     }
   }
+  // Parquet footers, once read, kept (the setting comes with the Parquet reader, now loaded).
+  await conn.query('SET parquet_metadata_cache = true').catch(() => {});
   for (const sql of draftTablesSql()) await conn.query(sql);
   let edited = false;   // whether the edit layer has anything in it
   const file = f => `'${f}'`;
@@ -76,11 +106,16 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
   return {
     rows,
     // The ids of a model's entries that match `where` (Rós Madair's query IR), or all of them.
-    select: (graphid, where) => serial(async () => {
-      const sql = compiler.compile(JSON.stringify({ model: graphid, measures: ['select_ids'], ...(where ? { where } : {}) }), ...caps);
-      await conn.query(tilesViewSql({ file, graphid, edited }));
-      return (await conn.query(sql)).toArray().map(r => r.resource_id);
-    }),
+    async select(graphid, where) {
+      await ready([graphid]);
+      return serial(async () => {
+        const sql = compiler.compile(JSON.stringify({ model: graphid, measures: ['select_ids'], ...(where ? { where } : {}) }), ...caps);
+        await conn.query(tilesViewSql({ file, graphid, edited }));
+        return (await conn.query(sql)).toArray().map(r => r.resource_id);
+      });
+    },
+    // Models' tiles fetched ahead, side by side, for a page about to read several.
+    prefetch: ready,
     // The edited entries, as rows of each draft table ({ resources: [...], tiles: [...], ... },
     // columns as in DRAFT_TABLES), replacing those there were.
     overlay: drafts => serial(async () => {
@@ -89,8 +124,11 @@ export async function openEngine({ duckdb: duckdbDir, compiler: compilerWasm, ex
       await views();
     }),
     // A model's tiles for some of its entries, as published, for Alizarin.
-    tiles: (graphid, ids) => rows(`SELECT resource_id, tileid, nodegroup_id, parenttile_id, sortorder, data FROM read_parquet('tiles_${graphid}.parquet')
-      WHERE resource_id IN (${ids.map(sqlString).join(', ')}) ORDER BY resource_id, nodegroup_id, sortorder`),
+    async tiles(graphid, ids) {
+      await ready([graphid]);
+      return rows(`SELECT resource_id, tileid, nodegroup_id, parenttile_id, sortorder, data FROM read_parquet('tiles_${graphid}.parquet')
+        WHERE resource_id IN (${ids.map(sqlString).join(', ')}) ORDER BY resource_id, nodegroup_id, sortorder`);
+    },
   };
 }
 
