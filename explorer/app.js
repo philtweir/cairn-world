@@ -158,6 +158,10 @@ async function load() {
   // Edits made in this browser: a layer over the view, in place before anything is read.
   state.drafts = await openDrafts(state.view, state.viewsMeta.build);
   if (state.drafts.list().length) state.editProblems = await state.store.applyEdits(state.drafts);
+  // A campaign shows what it uses (explorer/store.mjs, scope) unless asked for its whole world.
+  state.campaign = v.kind === 'campaign';
+  state.scoped = state.campaign && (() => { try { return localStorage.getItem('cairn-world:scoped') !== '0'; } catch { return true; } })();
+  if (state.campaign) await state.store.setScope(state.scoped);
   state.counts = await state.store.counts(state.view);
   // The view's root is the entry its own layer is keyed by (the Universe or Campaign itself).
   [state.root = null] = await state.store.full([state.store.idOf(v.kind, state.view)]);
@@ -277,6 +281,9 @@ async function renderSide(currentId) {
     put($('filter-panel'), state.finder.panel(panelModels, () => (state.q ? $('q').dispatchEvent(new Event('input')) : renderSide(currentId))));
   }
   $('rules-count').textContent = `(${Object.values(state.counts).reduce((n, c) => n + c.general, 0)})`;
+  $('scope-wrap').hidden = !state.campaign;
+  const used = Object.values(state.counts).reduce((n, c) => n + c.n - c.general, 0), world = Object.values(state.counts).reduce((n, c) => n + c.world, 0);
+  $('scope-count').textContent = state.scoped ? `(${used} of ${world})` : `(${world})`;
 
   const chosen = scopeModels.filter(m => !state.filter.size || state.filter.has(m.alias)).map(m => m.alias);
   let rows, total = null;
@@ -286,7 +293,7 @@ async function renderSide(currentId) {
   else if (state.finder.active()) {
     const ids = state.finder.ids(chosen);
     rows = await state.store.page({ models: chosen.filter(a => state.finder.filtered(a)), general: state.rules, ids, limit: LIST_LIMIT });
-    total = ids.length;
+    total = ids.filter(state.store.inScope).length;
   } else {
     rows = await state.store.page({ models: chosen, general: state.rules, limit: LIST_LIMIT });
     total = chosen.reduce((n, a) => n + shownCount(a), 0);
@@ -713,6 +720,7 @@ function renderLens(lens, entries) {
     lens.comment && h('p', { class: 'scope' }, `CIDOC-CRM, ${lens.crmLabel}: ${lens.comment}`),
     anchor && h('p', { class: 'note' }, `Laid out by ${lens.anchor.replace(/^.*\//, '').replace(/_/g, ' ')}.`),
     total > entries.length && h('p', { class: 'note' }, `Showing the first ${entries.length} of ${total} entries; the list finds the rest.`),
+    state.scoped && lens.models.some(m => (state.counts[m]?.world ?? 0) > (state.counts[m]?.n ?? 0) - (state.counts[m]?.general ?? 0)) && h('p', { class: 'note' }, 'Showing what this campaign uses; untick "Only what this campaign uses" for everything its world holds.'),
     drawLens(ctx(), lens, entries),
     !state.rules && lens.models.some(m => state.counts[m]?.general) && h('p', { class: 'note' }, 'General entries are hidden; tick "Include General" to add them.'));
   document.title = `${lens.label} · Cairn World`;
@@ -784,7 +792,7 @@ try {
     try {
       // A match's record says what the list needs (id, model, slug, name, whether only General has
       // it), so no entry is read to list it.
-      const ok = m => (state.rules || !m.general) && m.id !== state.root?.id && (!state.filter.size || state.filter.has(m.model)) && state.finder.passes(m);
+      const ok = m => (state.rules || !m.general) && m.id !== state.root?.id && state.store.inScope(m.id) && (!state.filter.size || state.filter.has(m.model)) && state.finder.passes(m);
       const { hits, complete } = await state.finder.search(q, ok, LIST_LIMIT);
       if (mine !== asked) return;
       // The index is the published text: an edited entry is listed under its name now, and the
@@ -803,6 +811,15 @@ try {
     renderSide();
   });
   $('rules').addEventListener('change', ev => { state.rules = ev.target.checked; show(); });
+  $('scoped').checked = state.scoped;
+  $('scoped').addEventListener('change', async ev => {
+    state.scoped = ev.target.checked;
+    try { localStorage.setItem('cairn-world:scoped', state.scoped ? '1' : '0'); } catch { /* not remembered */ }
+    await state.store.setScope(state.scoped);
+    state.counts = await state.store.counts(state.view);
+    if (state.q) $('q').dispatchEvent(new Event('input'));
+    show();
+  });
   const author = $('author');
   author.setAttribute('aria-pressed', state.author);
   author.addEventListener('click', () => {

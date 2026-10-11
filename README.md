@@ -633,6 +633,17 @@ the same entity differs between views. General-only entries (about 1,070 rules e
 until asked for. Rule text renders its markdown (lists, bold, italics), and Roll Tables render as
 tables, as does any entry with a table in an `entries` field (`columns` heads it).
 
+**What a campaign uses.** A campaign's view holds its whole world: every place, faction and person
+its universes know, most of which the campaign never touches. So a campaign opens on what it uses
+("Only what this campaign uses", above the list, remembered in the browser): its own entries
+(its layer, and edits made here), what they link to or mention, and what those in turn link to.
+Links run outward only, two steps; the second follows link fields, not `[[mentions]]` (a remark
+about a remark is too far out), and never goes on through a universe's own entry, which mentions
+the whole world. The list, its counts, the lenses and their maps, search and filters all keep to
+it; an entry's own page still shows everything it connects to. Ravens in the Dells uses 51 of the
+146 entries its world holds, Seven Silver Spheres 130 of 227. Untick it for the whole world. A
+universe's view has no such switch.
+
 There are no plain HTML pages: the site needs JavaScript, since the world is only read through
 Alizarin. As a check, the build reads each view back through the ORM with its own `GraphManager`
 and `StaticStore` (`src/world-read.mjs`), and fails if any entry does not come back; that read

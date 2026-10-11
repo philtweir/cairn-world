@@ -225,8 +225,29 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
     return { text: out, problems };
   }
 
+  // ---- What a campaign uses --------------------------------------------------------------
+  // A campaign's view holds its whole world: every place, faction and person its universe knows.
+  // Its scope is narrower: the campaign's own entries (its layer, edits included), what they link
+  // to or mention, and what those in turn link to: outgoing only, two steps. The second step
+  // follows link fields, not [[mentions]] (a remark about a remark is too far out), and never goes
+  // on through a universe's own entry (which mentions the whole world). A table in the engine, so
+  // lists, counts and lenses filter on it; remade when the edits change.
+  let scopeOn = false, scopeIds = null;
+  async function rescope() {
+    const seed = `SELECT resource_id FROM resources WHERE list_contains(layers, ${q(state.view)})`;
+    const one = `SELECT target_resource AS resource_id FROM edges WHERE src_resource IN (${seed}) UNION ${seed}`;
+    const two = `SELECT target_resource AS resource_id FROM edges WHERE src_node <> 'mentions' AND src_resource IN (SELECT resource_id FROM (${one}) WHERE resource_id NOT IN (SELECT resource_id FROM resources WHERE model = 'universe')) UNION ${one}`;
+    await engine.rows(`CREATE OR REPLACE TABLE scope AS SELECT DISTINCT resource_id FROM (${two})`);
+    scopeIds = new Set((await engine.rows('SELECT resource_id FROM scope')).map(r => r.resource_id));
+  }
+  const scoped = () => (scopeOn ? 'resource_id IN (SELECT resource_id FROM scope)' : null);
+
   return {
-    know, full, refId, compose, applyEdits, exactRefs,
+    know, full, refId, compose, exactRefs,
+    async applyEdits(drafts) { const problems = await applyEdits(drafts); if (scopeIds) await rescope(); return problems; },
+    // Only what the campaign uses, or everything in its world.
+    async setScope(on) { if (on && !scopeIds) await rescope(); scopeOn = on; },
+    inScope: id => !scopeOn || !!scopeIds?.has(id),
     edited: id => edited.get(id)?.entry ?? null,
     // Edited entries whose name the edit changes: model/key -> the name as published.
     renamed: () => Object.fromEntries([...edited.values()].filter(c => c.was && c.entry.cells.name && c.entry.cells.name !== c.was.name).map(c => [`${c.entry.model}/${c.entry.key}`, c.was.name])),
@@ -246,20 +267,23 @@ export function makeStore({ engine, A, client, manifest, state, graphs = {}, col
     // `general`, optionally among `ids`, ordered by model then name.
     async page({ models, general, ids = null, limit = 200, offset = 0 }) {
       if (!models.length || (ids && !ids.length)) return [];
-      const where = [`model IN (${inList(models)})`, general ? null : 'NOT general', ids ? `resource_id IN (${inList(ids)})` : null].filter(Boolean).join(' AND ');
+      const where = [`model IN (${inList(models)})`, general ? null : 'NOT general', ids ? `resource_id IN (${inList(ids)})` : null, scoped()].filter(Boolean).join(' AND ');
       const rs = remember(await engine.rows(`SELECT * FROM resources WHERE ${where} ORDER BY list_position([${inList(models)}], model), lower(name), key LIMIT ${limit} OFFSET ${offset}`));
       return rs.map(r => state.byId.get(r.resource_id));
     },
 
-    // How many entries each model has: all, General-only, and this view's own (its layer has it).
+    // How many entries each model has (in scope, if it is on): all, General-only, and this view's
+    // own (its layer has it); and `world`, how many not General-only it has in scope or not.
     async counts(view) {
-      const rs = await engine.rows(`SELECT model, count(*) AS n, count(*) FILTER (WHERE general) AS general, count(*) FILTER (WHERE list_contains(layers, ${q(view)})) AS own FROM resources GROUP BY model`);
+      const used = scoped() ?? 'true';
+      const rs = await engine.rows(`SELECT model, count(*) FILTER (WHERE ${used}) AS n, count(*) FILTER (WHERE general AND ${used}) AS general,
+        count(*) FILTER (WHERE list_contains(layers, ${q(view)}) AND ${used}) AS own, count(*) FILTER (WHERE NOT general) AS world FROM resources GROUP BY model`);
       return Object.fromEntries(rs.map(r => [r.model, r]));
     },
 
     // Names containing some text (for a view without a text index).
     async named(text, { models, general, limit = 200 }) {
-      const where = [`lower(name) LIKE ${q(`%${text.toLowerCase().replace(/[%_]/g, '')}%`)}`, models ? `model IN (${inList(models)})` : null, general ? null : 'NOT general'].filter(Boolean).join(' AND ');
+      const where = [`lower(name) LIKE ${q(`%${text.toLowerCase().replace(/[%_]/g, '')}%`)}`, models ? `model IN (${inList(models)})` : null, general ? null : 'NOT general', scoped()].filter(Boolean).join(' AND ');
       return remember(await engine.rows(`SELECT * FROM resources WHERE ${where} ORDER BY lower(name) LIMIT ${limit}`)).map(r => state.byId.get(r.resource_id));
     },
   };
