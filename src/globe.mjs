@@ -334,7 +334,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const remap = makeRemap(globe.remap);
   const maps = { ...(globe.maps ?? {}), ...(on ? settings.globe.maps ?? {} : {}) };
 
-  const countries = atlas('countries-110m.json'), countriesDetail = atlas('countries-50m.json');
+  const countries = atlas('countries-110m.json');
 
   // What each place is: Earth's countries or a WKT shape, or a point on a regional map.
   const readRows = file => {
@@ -411,19 +411,52 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     { type: 'Feature', properties: { kind: 'land', source: source('110m', 'the named lands') }, geometry: dropSpecks(round(geomOf(named(countries)), 2), 2e-6) },
     { type: 'Feature', properties: { kind: 'unnamed', source: source('110m', 'land no place claims') }, geometry: dropSpecks(round(unnamed(countries), 2), 2e-6) },
   ];
-  const detailed = { land: named(countriesDetail), unnamed: unnamed(countriesDetail) };
-  for (const [name] of Object.entries(maps)) {
+  // A map's detailed coast is 1:50m unless it asks for 1:10m (`coast`: a city on its lough, say),
+  // `margin` degrees beyond its places (3 unless it says). The 1:10m land is worked out only from
+  // the countries near the map (the whole world at 1:10m is more than polygon-clipping can union),
+  // so it suits a map of a small area.
+  const COASTS = { '50m': 'countries-50m.json', '10m': 'countries-10m.json' };
+  const topos = new Map(), detailedAt = new Map();
+  const detailed = (coast, near) => {
+    const key = `${coast} ${near ?? ''}`;
+    if (detailedAt.has(key)) return detailedAt.get(key);
+    if (!topos.has(coast)) topos.set(coast, atlas(COASTS[coast]));
+    let topo = topos.get(coast), spec = specs;
+    if (near) {
+      const [x0, y0, x1, y1] = near;
+      const meets = g => polysOf(feature(topo, g).geometry).some(poly => {
+        const r = unwrapRing(poly[0]), xs = r.map(p => p[0]), ys = r.map(p => p[1]);
+        return Math.min(...xs) <= x1 && Math.max(...xs) >= x0 && Math.min(...ys) <= y1 && Math.max(...ys) >= y0;
+      });
+      const kept = topo.objects.countries.geometries.filter(meets);
+      const names = new Set(kept.map(g => g.properties.name));
+      topo = { ...topo, objects: { ...topo.objects, countries: { ...topo.objects.countries, geometries: kept } } };
+      spec = specs.split('|').filter(part => names.has(/^([^@#]+?)(?:[@#].*)?$/.exec(part.trim())[1])).join('|');
+    }
+    const out = { land: spec ? remap.project(forD3(earthShape(topo, spec, 'basemap'))) : null, unnamed: asMulti((spec ? unnamedLand(topo, spec) : [merge(topo, topo.objects.countries.geometries)]).map(g => geomOf(remap.project(g)))) };
+    detailedAt.set(key, out);
+    return out;
+  };
+  // The stretch of Earth (a longitude and latitude box, a degree wider) that a box on the globe covers.
+  const earthBox = ([x0, y0, x1, y1]) => {
+    const edge = Array.from({ length: 21 }, (_, i) => i / 20).flatMap(t => [[x0 + (x1 - x0) * t, y0], [x0 + (x1 - x0) * t, y1], [x0, y0 + (y1 - y0) * t], [x1, y0 + (y1 - y0) * t]]).map(p => remap.toEarth(p));
+    return [Math.min(...edge.map(p => p[0])) - 1, Math.min(...edge.map(p => p[1])) - 1, Math.max(...edge.map(p => p[0])) + 1, Math.max(...edge.map(p => p[1])) + 1];
+  };
+  for (const [name, map] of Object.entries(maps)) {
+    const { coast = '50m', margin = 3 } = map;
+    if (!COASTS[coast]) throw new Error(`globe.maps.${name}.coast: "${coast}" is not one of ${Object.keys(COASTS).join(', ')}`);
     const flat = c => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
     const pts = all.filter(r => r.map.startsWith(`${name} `)).flatMap(r => flat(shapes.get(r.id).coordinates));
     if (!pts.length) continue;
-    const bbox = [Math.min(...pts.map(p => p[0])) - 3, Math.min(...pts.map(p => p[1])) - 3, Math.max(...pts.map(p => p[0])) + 3, Math.max(...pts.map(p => p[1])) + 3].map(v => Math.round(v * 100) / 100);
-    for (const [kind, g] of Object.entries(detailed)) {
+    const bbox = [Math.min(...pts.map(p => p[0])) - margin, Math.min(...pts.map(p => p[1])) - margin, Math.max(...pts.map(p => p[0])) + margin, Math.max(...pts.map(p => p[1])) + margin].map(v => Math.round(v * 100) / 100);
+    for (const [kind, g] of Object.entries(detailed(coast, coast === '10m' ? earthBox(bbox) : null))) {
+      if (!g) continue;
       // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
       // (Nothing of a kind inside the box comes back as null.)
       const cut = geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]));
       const clipped = cut && geomOf(flipY(cut));
-      const geometry = clipped && dropSpecks(round(clipped, 3), 0);
-      if (geometry) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source('50m', kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry });
+      const geometry = clipped && dropSpecks(round(clipped, coast === '10m' ? 4 : 3), 0);
+      if (geometry) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source(coast, kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry });
     }
   }
   // Rivers and lakes: Natural Earth 1:50m, remapped, on every land (named or not). Rivers come in

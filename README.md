@@ -420,7 +420,11 @@ claims. The explorer draws unnamed land fainter: it keeps the continents' shapes
 having to become a named territory, and it is not data in the world (no entries, no links), only
 the drawing under the maps. Naming a piece later is a row in `globe.csv` and `place.csv`; rerun the
 script and it moves from one kind to the other. Both are Natural Earth 1:110m for the whole globe
-and 1:50m around each regional map, which the explorer draws in place of the coarse coast there. The script needs the
+and 1:50m around each regional map (3 degrees beyond its places), which the explorer draws in place
+of the coarse coast there. A map of a small area can ask for more in `globe.maps`: `"coast": "10m"`
+draws Natural Earth 1:10m there instead (worked out only from the countries near it, as the whole
+world at 1:10m is more than `polygon-clipping` can union), and `"margin"` sets the degrees beyond its
+places. The script needs the
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
 
@@ -469,6 +473,14 @@ the right side, and still do if the scale or anchor shifts a little. (At Burgas 
 northern places fell in Turkey, which no realm names.) That makes the Dells about 130 by 100 km, and
 Hearth to the Trading Post about one 30 km watch.
 
+The Lough map is a city's: 100 m to a map unit, anchored at Earth 5.944°W 54.596°N in Belfast, with
+the 1:10m coast half a degree around it. On it the Antenexus draws Ephemeristorum: the Orbital, a
+ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km), broken where the
+real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
+an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
+lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
+Ephe is the universe's Mound, a `raise` of the relief about 90 m above the city's centre.
+
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
 edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
@@ -500,7 +512,9 @@ The shapes are seeded noise, so a bake is repeatable, at scales down to twice th
 
 **One coast.** The coast is Earth's in every drawing: no edit makes land of the sea or sea of the
 land, so the relief, the rivers found from it, and the coast the maps draw (Natural Earth, in
-`basemap.json`) agree to within Natural Earth's 1:50m generalisation (a kilometre or two). An edit
+`basemap.json`) agree to within Natural Earth's 1:50m generalisation (a kilometre or two). On a
+map with the 1:10m coast, the relief takes its sea from that drawn coast instead, as Earth's heights
+at that scale blur a lough or a harbour into land just above the sea. An edit
 that lifts the ground eases in over the last 5 km before the sea (Earth's distance to it, on a
 2 km grid over each detailed area), so a range that reaches the shore comes down to it instead of
 standing in it as a cliff. And `npm run globe` stops if a place it positions (a point or shape on a

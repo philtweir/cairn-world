@@ -44,7 +44,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import sharp from 'sharp';
-import { geoCentroid } from 'd3-geo';
+import { geoCentroid, geoContains } from 'd3-geo';
 import { parseCsv } from './csv.mjs';
 import { wktToGeometry, cellToFeatureCollection } from './geometry.mjs';
 import { makeRemap, mapToGlobe } from './globe.mjs';
@@ -182,6 +182,14 @@ const dir = path.join(ROOT, 'layers', key);
 const settings = JSON.parse(fs.readFileSync(path.join(dir, 'layer.json'), 'utf8'));
 const remap = makeRemap(settings.globe.remap);
 const basemap = JSON.parse(fs.readFileSync(path.join(dir, 'basemap.json'), 'utf8'));
+// A regional map with the fine coast (`coast` "10m" in globe.maps) takes its sea from that drawn
+// coast, not from where Earth's heights reach 0: at that scale the heights blur a lough or a
+// harbour into land, and the relief would shade it under the drawn water.
+const seaOf = name => {
+  if (settings.globe.maps?.[name]?.coast !== '10m') return null;
+  const land = basemap.features.filter(f => f.properties.map === name && /^(land|unnamed)-detail$/.test(f.properties.kind));
+  return p => !land.some(f => geoContains(f, p));
+};
 
 // ---- Noise: Perlin's gradient noise, seeded, and sums of it ------------------------------------
 function gradientNoise(seed) {
@@ -395,15 +403,16 @@ function height(zoom, p, upTo = edits.length) {
 // its depth, never rising downstream, and coming down to its mouth: the bed of the river it joins
 // (carved before it), or else the sea.
 // Distance to Earth's sea (km) over each detailed area: its sea cells (unedited elevation at or
-// below 0) on a 2 km grid, spread by a two-pass chamfer transform. Read by `ashore`.
+// below 0, or off a fine-coast map's drawn land) on a 2 km grid, spread by a two-pass chamfer
+// transform. Read by `ashore`.
 {
   const STEP = 0.02, grids = [];
-  const boxesOf = [...new Map(basemap.features.filter(f => f.properties.kind.endsWith('-detail')).map(f => [f.bbox.join(','), f.bbox])).values()];
-  for (const [x0, y0, x1, y1] of boxesOf) {
+  const boxesOf = [...new Map(basemap.features.filter(f => f.properties.kind.endsWith('-detail')).map(f => [f.bbox.join(','), { bbox: f.bbox, sea: seaOf(f.properties.map) }])).values()];
+  for (const { bbox: [x0, y0, x1, y1], sea } of boxesOf) {
     const w = Math.round((x1 - x0) / STEP) + 1, h = Math.round((y1 - y0) / STEP) + 1;
     const dx = STEP * KM * Math.cos(((y0 + y1) / 2) * Math.PI / 180), dy = STEP * KM, dd = Math.hypot(dx, dy);
     const d = new Float64Array(w * h);
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) d[j * w + i] = elevation(DETAIL.zoom, remap.toEarth([x0 + i * STEP, y0 + j * STEP])) <= 0 ? 0 : Infinity;
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) d[j * w + i] = elevation(DETAIL.zoom, remap.toEarth([x0 + i * STEP, y0 + j * STEP])) <= 0 || sea?.([x0 + i * STEP, y0 + j * STEP]) ? 0 : Infinity;
     const relax = (i, j, a, b, c) => { const k = j * w + i, n = (j + b) * w + (i + a); if (i + a >= 0 && i + a < w && j + b >= 0 && j + b < h && d[n] + c < d[k]) d[k] = d[n] + c; };
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { relax(i, j, -1, 0, dx); relax(i, j, 0, -1, dy); relax(i, j, -1, -1, dd); relax(i, j, 1, -1, dd); }
     for (let j = h - 1; j >= 0; j--) for (let i = w - 1; i >= 0; i--) { relax(i, j, 1, 0, dx); relax(i, j, 0, 1, dy); relax(i, j, 1, 1, dd); relax(i, j, -1, 1, dd); }
@@ -443,11 +452,12 @@ edits.forEach((e, k) => {
 });
 
 // One image: heights on a grid in the globe's longitude and latitude, hillshaded.
-async function bake({ name, step, zoom, exaggerate }, [x0, y0, x1, y1]) {
+async function bake({ name, step, zoom, exaggerate }, [x0, y0, x1, y1], sea = null) {
   finest = 2 * step * KM;
   const w = Math.round((x1 - x0) / step) + 1, hgt = Math.round((y1 - y0) / step) + 1;
   const hs = new Float64Array(w * hgt);
   for (let j = 0; j < hgt; j++) for (let i = 0; i < w; i++) hs[j * w + i] = height(zoom, [x0 + i * step, y1 - j * step]);
+  if (sea) for (let j = 0; j < hgt; j++) for (let i = 0; i < w; i++) if (sea([x0 + i * step, y1 - j * step])) hs[j * w + i] = Math.min(hs[j * w + i], 0);
   const png = { data: Buffer.alloc(w * hgt * 4) };
   // Light from azimuth 315 (the north-west of the globe's map), 45 degrees up; cells are metres
   // apart by the globe's own degrees (the world it describes, not Earth).
@@ -478,7 +488,7 @@ const images = [{ ...(await bake(WORLD, [-Math.ceil(ew), Math.floor(south), Math
 const riverFeatures = [];
 const boxes = [...new Map(basemap.features.filter(f => f.properties.kind.endsWith('-detail')).map(f => [f.bbox.join(','), { bbox: f.bbox, map: f.properties.map }])).values()];
 for (const { bbox, map } of boxes) {
-  const { image, heights } = await bake({ ...DETAIL, name: map }, bbox);
+  const { image, heights } = await bake({ ...DETAIL, name: map }, bbox, seaOf(map));
   images.push({ ...image, name: map });
   const found = rivers(heights, image.width, image.height, bbox, DETAIL.step);
   for (const [w, lines] of found) riverFeatures.push({ type: 'Feature', bbox, properties: { kind: 'river-detail', map, w, source: `Found from ${SOURCE}` }, geometry: { type: 'MultiLineString', coordinates: lines } });
@@ -489,7 +499,7 @@ for (const [name, map] of Object.entries(maps).filter(([, m]) => m.extent)) {
   const corners = [[a - mx, b - my], [c + mx, b - my], [a - mx, d + my], [c + mx, d + my]].map(p => mapToGlobe(map, remap, p));
   const snap = (v, up) => (up ? Math.ceil(v / FINE.step) : Math.floor(v / FINE.step)) * FINE.step;
   const bbox = [snap(Math.min(...corners.map(p => p[0]))), snap(Math.min(...corners.map(p => p[1]))), snap(Math.max(...corners.map(p => p[0])), true), snap(Math.max(...corners.map(p => p[1])), true)].map(v => Math.round(v * 1e4) / 1e4);
-  const { image } = await bake({ ...FINE, name: `${name}-fine` }, bbox);
+  const { image } = await bake({ ...FINE, name: `${name}-fine` }, bbox, seaOf(name));
   images.push({ ...image, name: `${name}-fine` });
 }
 fs.writeFileSync(path.join(dir, 'rivers.json'), JSON.stringify({ type: 'FeatureCollection', features: riverFeatures }));
