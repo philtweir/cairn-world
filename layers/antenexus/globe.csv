@@ -20,7 +20,8 @@ hearth,,dells POINT (22.2 6.3),
 the-bonefort,,dells POINT (2.9 11.9),"The map's anchor: Earth 27.67°E 42.83°N, about 40 km north of Burgas, where the Dells map best fits the named lands (all its places on the right side of the coast)."
 cannerly-hall,,dells POINT (24.8 9.7),
 engineers-trading-post,,dells POINT (16.7 9.4),
-lands-of-the-engineers,United Kingdom|Ireland,,
+lands-of-the-engineers,United Kingdom|Ireland,,Both islands: Great Britain (Inis Tíre) and Ireland (Inis Mara).
+inis-tire,United Kingdom#Greater London+North West+South East+South West+Yorkshire and the Humber+East Wales+West Midlands+Eastern+North East+South Western+East+East Midlands+West Wales and the Valleys+Highlands and Islands+North Eastern,,"Great Britain: the United Kingdom less Northern Ireland, which is in Ulster."
 lands-of-the-sapphire-throne,Yemen|Djibouti|Eritrea,,
 lands-of-the-eastern-emirates,Morocco|Mauritania|Senegal|Gambia|Algeria|Tunisia,,"Western Sahara is not named, so it is sea between Morocco and Mauritania."
 lands-of-the-threefold-republic,Sudan|Chad|Central African Rep.|Cameroon|Nigeria|Benin,,
@@ -30,3 +31,10 @@ lands-of-the-empire-of-the-sun,Canada|United States of America|Mexico|Guatemala|
 lands-of-the-sandfolk,United States of America@-104:-82/36:49,,"The US Midwest, approximated as the United States between 104°W and 82°W and 36°N and 49°N."
 lands-of-the-tribes-of-hanathy,Brazil|Argentina|Chile|Peru|Colombia|Venezuela|Bolivia|Ecuador|Paraguay|Uruguay|Guyana|Suriname|France@-56:-50,,South America: its twelve states and French Guiana (part of France in Natural Earth).
 lands-of-the-keepers-of-mantra,Norway@-20:40/74:85,,"Svalbard, taken out of Norway (and so out of Astina)."
+prime-reach,"LINESTRING (9.14 53.89, 9.25 54.0, 9.37 54.13, 9.53 54.21, 9.67 54.3, 9.82 54.36, 10.02 54.36, 10.15 54.37)",,"The Kiel Canal, Brunsbüttel to Kiel-Holtenau."
+inis-mara,United Kingdom#Northern Ireland|Ireland,,"Ireland, the whole island."
+leinster,Ireland#Carlow+Dublin+Dún Laoghaire–Rathdown+Fingal+South Dublin+Kildare+Kilkenny+Laoighis+Longford+Louth+Meath+Offaly+Westmeath+Wexford+Wicklow,,"Leinster, by its counties."
+munster,Ireland#Clare+Cork+Kerry+Limerick+North Tipperary+South Tipperary+Waterford,,"Munster, by its counties."
+connacht,Ireland#Galway+Leitrim+Mayo+Roscommon+Sligo,,"Connacht, by its counties."
+ulster,United Kingdom#Northern Ireland|Ireland#Cavan+Donegal+Monaghan,,"Ulster: Northern Ireland with Cavan, Donegal and Monaghan."
+ephemeristorum,POINT (-5.93 54.6),,Belfast.
