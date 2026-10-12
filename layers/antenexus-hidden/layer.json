@@ -6,5 +6,9 @@
       "name": "CC BY-SA 4.0",
       "url": "https://creativecommons.org/licenses/by-sa/4.0/"
     }
+  },
+  "gate": {
+    "salt": "9fc6499e8830e9cfa61b9908",
+    "sha256": "26f70a6105c68bb9b863961f45ab1988280f0758e784e988f3b89494a1b0fb5e"
   }
 }
