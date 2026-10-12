@@ -1,2 +1,4 @@
 ResourceID,name,description,member_of,home,tie_with,tie_kind
 general-anailis,,,committee-inferior,,,
+general-anailis,,,,,gurt,Employee
+gurt,Gurt,"Assistant to [[General Anailís]], travelling with her wherever she goes. A mess of frizzy dark hair; seemingly blind, and wearing sunglasses at all times.",,,general-anailis,Employer

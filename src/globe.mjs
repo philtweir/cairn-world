@@ -29,7 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity, geoContains, geoCentroid } from 'd3-geo';
+import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity, geoContains, geoCentroid, geoBounds } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
 import { feature, merge } from 'topojson-client';
 import polygonClipping from 'polygon-clipping';
@@ -353,14 +353,19 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       // A point on the map, or a shape (a forest, a road) drawn in the map's units.
       const shape = wktToGeometry(m[2]);
       const onGlobe = c => (typeof c[0] === 'number' ? mapToGlobe(map, remap, c) : c.map(onGlobe));
-      g = round({ type: shape.type, coordinates: onGlobe(shape.coordinates) }, 3);
+      // Rounded to about a tenth of the map's unit (a degree is about 111 km), and never coarser than 0.001 degrees: a city's
+      // map (100 m a unit) keeps its canals' curves, where 0.001 degrees (about 100 m) would step them.
+      g = round({ type: shape.type, coordinates: onGlobe(shape.coordinates) }, Math.max(3, Math.ceil(Math.log10(1113.2 / map.kmPerUnit))));
       // Wound as d3 (and the Earth shapes here) have it: an outline clockwise, a hole the other
       // way. However the map's ring was written, so its y running south does not matter.
       for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []) {
         poly.forEach((ring, i) => { if ((geoArea({ type: 'Polygon', coordinates: [ring] }) > 2 * Math.PI) !== (i > 0)) ring.reverse(); });
       }
     } else if (isWkt(earth)) {
-      g = round(remap.project(wktToGeometry(earth)), 3);
+      // Rounded to about a hundredth of its size, between 0.001 and 0.00001 degrees.
+      const w = remap.project(wktToGeometry(earth));
+      const [[x0, y0], [x1, y1]] = geoBounds(w), size = Math.max(x1 - x0, y1 - y0);
+      g = round(w, size > 0 ? Math.min(5, Math.max(3, Math.ceil(Math.log10(100 / size)))) : 3);
     } else if (earth) {
       g = fitted(round(dropSpecks(remap.project(forD3(earthShape(countries, earth, `globe.csv ${id}`))), 2e-6), 2));
     }
@@ -454,7 +459,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       // A plain rectangle in longitude and latitude: small enough here to clip as if flat.
       // (Nothing of a kind inside the box comes back as null.)
       const cut = geoProject(flipY(g), geoIdentity().reflectY(false).clipExtent([[bbox[0], -bbox[3]], [bbox[2], -bbox[1]]]));
-      const clipped = cut && geomOf(flipY(cut));
+      let clipped = cut && geomOf(flipY(cut));
+      // On a fine-coast map, the water places with a shape (`globe.water`: a harbour channel, say)
+      // are cut out of the land, so a ship's way in is drawn: the relief takes its sea from this too.
+      const cuts = coast === '10m' ? water.map(w => shapes.get(w)).filter(w => w && /Polygon$/.test(w.type)).map(polysOf) : [];
+      if (clipped && cuts.length) { const rest = polygonClipping.difference(polysOf(clipped), ...cuts); clipped = rest.length ? forD3(rest) : null; }
       const geometry = clipped && dropSpecks(round(clipped, coast === '10m' ? 4 : 3), 0);
       if (geometry) features.push({ type: 'Feature', bbox, properties: { kind: `${kind}-detail`, map: name, source: source(coast, kind === 'land' ? 'the named lands' : 'land no place claims') }, geometry });
     }
