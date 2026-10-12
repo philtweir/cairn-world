@@ -1,2 +1,2 @@
 ResourceID,name,description,universes,published
-antenexus-hidden,The Hidden Antenexus,"The Warden's hidden notes on the present age: entries, and parts of entries, that the published Antenexus must not show. Never published; preview it with `npm run build -- --all`.",antenexus,false
+antenexus-hidden,The Hidden Antenexus,"The Warden's hidden notes on the present age: entries, and parts of entries, that the published Antenexus must not show. Published behind a password gate, which keeps casual visitors out; it is not security.",antenexus,true

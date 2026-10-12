@@ -36,7 +36,8 @@
     ],
     "water": [
       "the-sea",
-      "fist-of-glass"
+      "fist-of-glass",
+      "the-lagan-estuary"
     ],
     "maps": {
       "dells": {
@@ -80,7 +81,12 @@
           30
         ],
         "coast": "10m",
-        "margin": 0.5
+        "margin": 0.5,
+        "fine": {
+          "step": 0.0004,
+          "zoom": 12,
+          "exaggerate": 2
+        }
       }
     }
   }

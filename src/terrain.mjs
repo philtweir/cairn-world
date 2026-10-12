@@ -494,12 +494,15 @@ for (const { bbox, map } of boxes) {
   for (const [w, lines] of found) riverFeatures.push({ type: 'Feature', bbox, properties: { kind: 'river-detail', map, w, source: `Found from ${SOURCE}` }, geometry: { type: 'MultiLineString', coordinates: lines } });
   console.log(`${map}: ${[...found.values()].reduce((n, l) => n + l.length, 0)} river stretches`);
 }
+// A map can ask for a finer image of its extent (`fine` in globe.maps: { step, zoom, exaggerate }),
+// as a city's map does, whose knolls and harbours are smaller than FINE's cells.
 for (const [name, map] of Object.entries(maps).filter(([, m]) => m.extent)) {
-  const [a, b, c, d] = map.extent, mx = (c - a) * FINE.margin, my = (d - b) * FINE.margin;
+  const fine = { ...FINE, ...(map.fine ?? {}) };
+  const [a, b, c, d] = map.extent, mx = (c - a) * fine.margin, my = (d - b) * fine.margin;
   const corners = [[a - mx, b - my], [c + mx, b - my], [a - mx, d + my], [c + mx, d + my]].map(p => mapToGlobe(map, remap, p));
-  const snap = (v, up) => (up ? Math.ceil(v / FINE.step) : Math.floor(v / FINE.step)) * FINE.step;
+  const snap = (v, up) => (up ? Math.ceil(v / fine.step) : Math.floor(v / fine.step)) * fine.step;
   const bbox = [snap(Math.min(...corners.map(p => p[0]))), snap(Math.min(...corners.map(p => p[1]))), snap(Math.max(...corners.map(p => p[0])), true), snap(Math.max(...corners.map(p => p[1])), true)].map(v => Math.round(v * 1e4) / 1e4);
-  const { image } = await bake({ ...FINE, name: `${name}-fine` }, bbox, seaOf(name));
+  const { image } = await bake({ ...fine, name: `${name}-fine` }, bbox, seaOf(name));
   images.push({ ...image, name: `${name}-fine` });
 }
 fs.writeFileSync(path.join(dir, 'rivers.json'), JSON.stringify({ type: 'FeatureCollection', features: riverFeatures }));

@@ -17,4 +17,5 @@ the-freti,The Freti,"The channels between the [[Inner Sea]] and the [[Bay of Bra
 gulf-of-ages,The Gulf of Ages,"The ocean beyond the [[Bay of Brael]]: harsh and inhospitable, and second to the [[Inner Sea]] for maritime trade. In the projection: the Arctic Ocean.",Region,,,,
 bay-of-brael,The Bay of Brael,The bay between the [[Freti]] and the [[Gulf of Ages]]. In the projection: the North Sea.,Region,,,,
 the-inner-sea,The Inner Sea,"The sheltered sea within the [[Freti]], and the first sea for maritime trade. In the projection: the Baltic.",Region,,,,
-the-mound,The Mound,"A steep, rocky mound near the head of a sea lough. In the projection: in Belfast.",Landmark,,,,POINT (-5.532 8.119)
+the-mound,The Mound,"A steep, rocky mound near the head of a sea lough. In the projection: in Belfast.",Landmark,,,,POINT (-5.53227 8.11854)
+the-lagan-estuary,The Lagan Estuary,"The tidal channel of the Lagan, deep enough for ships, from the head of the lough up to the weir by [[the Mound]]. In the projection: the Lagan below its weir and the Victoria Channel.",Landmark,,,,"POLYGON ((-5.5356 8.1267, -5.5365 8.1266, -5.5388 8.1266, -5.5421 8.1263, -5.5459 8.126, -5.546 8.1276, -5.5421 8.1279, -5.5389 8.1282, -5.5365 8.1282, -5.5339 8.1285, -5.5339 8.1284, -5.5342 8.1281, -5.5345 8.1279, -5.5348 8.1276, -5.5351 8.1273, -5.5354 8.127, -5.5356 8.1267))"

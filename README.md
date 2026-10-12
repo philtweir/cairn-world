@@ -421,7 +421,10 @@ whose other end is an E53 Place (in either direction); and the places of the eve
 in. A linked place with no geometry is drawn as the nearest place it falls within that has one,
 marked as rough ("The Raven of Carrowmore, somewhere in Linos"); one with none at all is named in
 the caption as having no location yet. A place's map also shows, dashed, what it lies within and
-what lies within it, and a route is drawn as the line between its two places. The Places lens
+what lies within it, and a route is drawn as the line between its two places. It is framed on the
+entry's own places: a shape shows itself, however small (a city a few km across, not its province);
+points alone show at least 1.2 degrees around them, unless they lie within a smaller shape, whose
+span is shown instead (a palace in its quarter of a city). The Places lens
 shows every place with a geometry on one globe. The globe turns by dragging; the buttons zoom.
 
 **Writing geometry.** In a CSV cell, as WKT in longitude and latitude (`POINT (-9.84 27.765)`;
@@ -453,7 +456,11 @@ and 1:50m around each regional map (3 degrees beyond its places), which the expl
 of the coarse coast there. A map of a small area can ask for more in `globe.maps`: `"coast": "10m"`
 draws Natural Earth 1:10m there instead (worked out only from the countries near it, as the whole
 world at 1:10m is more than `polygon-clipping` can union), and `"margin"` sets the degrees beyond its
-places. The script needs the
+places. On such a map the places in `globe.water` that have a shape are cut out of the land, so a
+harbour channel too narrow for Natural Earth is drawn as water (and the relief takes it as sea). A
+place drawn on a map is rounded to about a tenth of the map's unit (never coarser than 0.001
+degrees), and an Earth shape to about a hundredth of its size, so a city's canals keep their curves.
+The script needs the
 Natural Earth data only as a dev dependency (`world-atlas`); its output is committed, and the build
 publishes the basemap with the views that stand on the layer.
 
@@ -508,14 +515,19 @@ ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km)
 real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
 an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
 lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
-Ephe is the universe's Mound, a `raise` of the relief about 90 m above the city's centre.
+Ephe is the universe's Mound, a steep `raise` of the relief well over 100 m above the city's centre.
+The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is
+in `globe.water`, so it is cut out of the land from the lough up to the Orbital's break: a ship's
+way in. The map's own relief is finer than other maps' (`fine` below).
 
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
 edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
 globe (0.15°, about 15 km a pixel), one of each regional map's detailed area (0.01°, about 1 km),
 and one of each regional map with an `extent` (its drawn area, in map units, in `layer.json`) and a
-quarter of its size around it (0.0025°, about 280 m).
+quarter of its size around it (0.0025°, about 280 m). A map can ask for a finer one of these with
+`"fine": { "step", "zoom", "exaggerate" }` (the Lough's: 0.0004°, about 45 m, from Terrain Tiles
+level 12, its slopes doubled).
 Each is a WebP (with `sharp`): grey is hillshade, alpha is height (0 at sea). `relief.json` says
 where they lie. The explorer draws them with a small WebGL shader that, for each pixel, undoes
 d3's orthographic projection and rotation and reads the image there, tinting by height and shading
