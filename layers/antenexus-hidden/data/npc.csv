@@ -1,4 +1,4 @@
 ResourceID,name,description,member_of,home,tie_with,tie_kind
 general-anailis,,,committee-inferior,,,
-general-anailis,,,,,gurt,Employee
-gurt,Gurt,"Assistant to [[General Anailís]], travelling with her wherever she goes. A mess of frizzy dark hair; seemingly blind, and wearing sunglasses at all times.",,,general-anailis,Employer
+general-anailis,,,,,the-lost-heir,Employee
+the-lost-heir,Gurt,"The Lost Heir, alive: the daughter of the [[Prince of Miurna|Prince]] and the [[Sultana of Caryes|Sultana]], travelling as Gurt, assistant to [[General Anailís]], wherever she goes. A mess of frizzy dark hair, dyed from the silver of the Miurnan high court; seemingly blind, and never without sunglasses, which hide the purple eyes of Aphemenosta's matrilineal line. Together the two would prove her parentage beyond reasonable doubt.",,,general-anailis,Employer
