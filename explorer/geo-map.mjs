@@ -105,14 +105,21 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const projection = geoOrthographic().clipAngle(90).precision(0);
   const path = geoPath(projection);
   let W = 0, H = 0, base = 1, home = null;
-  // Fit: turn the globe to face the items' middle, then scale to show them all (at least minSpan
+  // The least span to show, in degrees: `minSpan` for points alone, so one shows its surroundings,
+  // unless they lie within a smaller shape (a palace in its quarter), whose own span then serves;
+  // and none to speak of for a shape, which shows itself (a city a few km across, not its province).
+  const spanOf = g => { const [[x0, y0], [x1, y1]] = geoBounds(g); return Math.max(x1 - x0, y1 - y0); };
+  const pointsOnly = fitTo.features.every(f => f.geometry.type === 'Point');
+  const around = items.filter(x => x.role === 'context' && x.geom.features.some(f => f.geometry.type !== 'Point')).map(x => spanOf(x.geom)).filter(v => v > 0);
+  const least = pointsOnly ? Math.min(minSpan, ...around) : Math.min(minSpan, 0.01);
+  // Fit: turn the globe to face the items' middle, then scale to show them all (at least `least`
   // degrees across, at most the whole hemisphere).
   const fit = () => {
     const [[x0, y0], [x1, y1]] = geoBounds(fitTo);
     const mid = !fitTo.features.length ? [0, 20] : x0 <= x1 && x1 - x0 < 180 ? [(x0 + x1) / 2, (y0 + y1) / 2] : geoCentroid(fitTo);
     projection.rotate([-mid[0], -mid[1]]).translate([W / 2, H / 2]);
     const pad = 28;
-    const reach = Math.max(minSpan / 2 * Math.PI / 180, ...fitTo.features.flatMap(f => coords(f.geometry)).map(c => geoDistance(mid, c)));
+    const reach = Math.max(least / 2 * Math.PI / 180, ...fitTo.features.flatMap(f => coords(f.geometry)).map(c => geoDistance(mid, c)));
     const k = Math.min((W / 2 - pad) / Math.sin(Math.min(reach, Math.PI / 2)), (H / 2 - pad) / Math.sin(Math.min(reach, Math.PI / 2)));
     base = Math.max(10, k);
     projection.scale(base);
