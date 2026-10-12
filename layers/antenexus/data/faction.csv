@@ -1,13 +1,13 @@
 ResourceID,name,description,base,allies,enemies,member_of
 six-kingdoms,The Six Kingdoms,The kingdoms of the Greater Lands.,,,,
 nine-states,The Nine States,"The emirates, sultanates, cities and states of the Greater Lands.",,,,
-union-of-the-kingdoms,The Union of the Kingdoms,"A former union, broken back into Miurna, Leantis and Godrastan when the court fragmented after [[event/the-assassination|the assassination]] of the [[Prince of Miurna]].",,,,
-realm-miurna,Kingdom of Miurna,Claims the Lost Prince as its true heir; controlled by a younger son.,miurna,,,"six-kingdoms,union-of-the-kingdoms"
-realm-leantis,Kingdom of Leantis,Claims the Lost Prince as its true heir; controlled by a younger son.,leantis,,,"six-kingdoms,union-of-the-kingdoms"
-realm-godrastan,Godrastan,Claims the Lost Prince as its true heir; controlled by the court elders. Strict naturalist laws.,godrastan,,,"six-kingdoms,union-of-the-kingdoms"
+union-of-the-kingdoms,The Union of the Kingdoms,"A former union under [[Cargal IV]], broken back into Miurna, Leantis and Godrastan when the court fragmented after his death and the [[Madness of Cargal IV|madness]] that followed [[event/the-assassination|the assassination]] of the [[Prince of Miurna]]. The [[Treaty of Sinte]] settled the split.",,,,
+realm-miurna,Kingdom of Miurna,"The historical and commercial heart of the old [[Union of the Kingdoms|Union]], held by [[Alba Miurna]] under the [[Treaty of Sinte]]. Better resourced than Leantis, which it invaded to begin the [[Brotherly War]]; at the centre of the [[Golden Axis]].",miurna,,realm-leantis,"six-kingdoms,union-of-the-kingdoms,golden-axis"
+realm-leantis,Kingdom of Leantis,"The Western kingdoms of the old [[Union of the Kingdoms|Union]], united under [[Ceoin Miurna]] and recognised as a kingdom by the [[Treaty of Sinte]]. Leantis is a historical name, from an ancient realm that took in much of the interior. Poorer and more sparsely settled than Miurna, which invaded it to begin the [[Brotherly War]]. No sincere allies, only sympathetic words.",leantis,,realm-miurna,"six-kingdoms,union-of-the-kingdoms"
+realm-godrastan,Godrastan,"The expansive third kingdom of the old [[Union of the Kingdoms|Union]], an exclave to the East. Ruled by the elders of the old court, [[Alba Miurna|Alba]]'s chief advocates in the succession, and neutral, under the [[Treaty of Sinte]]. Strict naturalist laws.",godrastan,,,"six-kingdoms,union-of-the-kingdoms,golden-axis"
 realm-cofrey,Kingdom of Cofrey,,cofrey,,,six-kingdoms
 realm-palatinate,The Palatinate,The [[True Church]] is most active here and in the High Marks.,palatinate,,,six-kingdoms
-realm-high-marks,The High Marks,"A collection of Electors and Principalities. Politically astute enough not to challenge the Engineers, though they covet Engineer equipment and techniques.",high-marks,,,six-kingdoms
+realm-high-marks,The High Marks,"A collection of Electors and Principalities. Politically astute enough not to challenge the Engineers, though they covet Engineer equipment and techniques.",high-marks,,,"six-kingdoms,golden-axis"
 realm-ievure,Emirate of Ievure,Held by [[Emir of Ievure|the younger brother]] of the [[Sultana of Caryes]].,ievure,,,nine-states
 realm-astina,Sultanate of Astina,Known as the Harem.,astina,,,nine-states
 realm-kaminos,City of Kaminos,,kaminos,,,nine-states
@@ -17,6 +17,7 @@ realm-sevine-caryes,Sevine & Caryes,"The [[Sultana of Caryes|Sultana]] was heir 
 realm-grunheim,Grunheim,,grunheim,,,nine-states
 realm-aphemenosta,The Rock of Aphemenosta,The Sultana was its heir through her mother.,rock-of-aphemenosta,,,nine-states
 realm-zintar,Zintar,,zintar,,,nine-states
+golden-axis,The Golden Axis,"A geopolitical faction, not a formal alliance, of Miurna, [[faction/realm-godrastan|Godrastan]], [[faction/realm-high-marks|the High Marks]] and certain of [[the Nine States]]: formally neutral in the [[Brotherly War]], but warmer to [[Alba Miurna|Alba]]'s Miurna than to Leantis.",,,,
 the-engineers,The Engineers,"The unnamed empire (in the projection: the UK and Ireland). Publicly neutral on religion and state; in fact they trade technology for inviolable patents and control of rivers and ports, and suppress learning and magic as threats to their monopoly. Their materially interesting technology destructs if tampered with.",lands-of-the-engineers,,,
 empire-of-the-sun,The Empire of the Sun,"Has jurisdiction over its continent, as foreign powers see it (in the projection: North and Central America). In practice the barely habitable interior is held by indigenous tribes, the [[Sandfolk]], whose control the Empire does not recognise: a little like Finland and the Sámi in the past, without the contest.",lands-of-the-empire-of-the-sun,,,
 the-sandfolk,The Sandfolk,Indigenous tribes with de facto but unrecognised control of the barely habitable interior of the continent the [[Empire of the Sun]] claims (in the projection: the US Midwest).,lands-of-the-sandfolk,,,
