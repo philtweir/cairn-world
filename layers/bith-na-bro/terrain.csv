@@ -16,3 +16,4 @@ river,"dells LINESTRING (10.4 -3, 10.5 0, 11.3 1.6, 12.3 3.2, 12.5 4.6, 12.9 6.3
 river,"dells LINESTRING (20.6 -3, 20.8 0, 21.2 2, 21.4 4, 21.2 6, 21.4 6.8)",0.5,80,"Down from the north to Hearth, under the crags."
 river,"dells LINESTRING (25.1 17.4, 25.6 16.4, 25.6 15.5, 26.2 14.6, 26.1 13.6, 25.5 12.6, 24.6 11.9, 24.1 11, 23.4 10.3, 23.3 9.4, 22.8 8.4, 22.2 7.4, 21.4 6.8)",0.5,120,"The River of Sulphur, off the volcano, through the hills to Hearth."
 river,"dells LINESTRING (19.6 22.8, 19.1 21.9, 19.2 21, 18.6 20.3, 18.2 19.6, 17.4 18.9, 17 18, 16.2 17.4, 15.6 16.5, 14.8 15.6, 13.5 14.6)",0.5,100,Off the massif's western glaciers into the Ancient Channel.
+raise,lough POINT (-4.57 2.67),0.8,260,"The Mound: a steep rocky knoll by the head of the lough (Ephe's, in the Antenexus)."

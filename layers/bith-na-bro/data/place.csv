@@ -15,5 +15,6 @@ the-farmlands,The Farmlands,Small fields on the coastal plain south of the dunes
 river-of-sulphur,River of Sulphur,Runs from the volcano.,Landmark,,the-glaciers,,
 the-freti,The Freti,"The channels between the [[Inner Sea]] and the [[Bay of Brael]], the way from the Inner Sea to the [[Gulf of Ages]]. In the projection: the Kattegat and the Skagerrak.",Region,,,,
 gulf-of-ages,The Gulf of Ages,"The ocean beyond the [[Bay of Brael]]: harsh and inhospitable, and second to the [[Inner Sea]] for maritime trade. In the projection: the Arctic Ocean.",Region,,,,
-bay-of-brael,The Bay of Brael,"The bay between the [[Freti]] and the [[Gulf of Ages]]. In the projection: the North Sea.",Region,,,,
+bay-of-brael,The Bay of Brael,The bay between the [[Freti]] and the [[Gulf of Ages]]. In the projection: the North Sea.,Region,,,,
 the-inner-sea,The Inner Sea,"The sheltered sea within the [[Freti]], and the first sea for maritime trade. In the projection: the Baltic.",Region,,,,
+the-mound,The Mound,"A steep, rocky mound near the head of a sea lough. In the projection: in Belfast.",Landmark,,,,POINT (-5.532 8.119)
