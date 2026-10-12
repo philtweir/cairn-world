@@ -6,7 +6,7 @@ str,STR,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
 dex,DEX,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
 wil,WIL,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-attributes
 armor,Armor,number,1,E54_Dimension,P43_has_dimension,,,,core-rules-armor
-faction,Faction,resource-instance-list,1,E74_Group,P107i_is_current_or_former_member_of,,,faction,
+member_of,Member of,resource-instance-list,n,E74_Group,P107i_is_current_or_former_member_of,,,group,
 home,Home,resource-instance-list,1,E53_Place,P74_has_current_or_former_residence,,,place,
 background,Background,resource-instance-list,1,E55_Type,P2_has_type,,,background,character-creation-backgrounds
 statblock,Stat block,resource-instance-list,1,E55_Type,P2_has_type,,,monstertype,

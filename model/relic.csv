@@ -3,5 +3,5 @@ name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
 description,Description,string,1,E62_String,P3_has_note,,,
 itemtype,Item type,resource-instance-list,1,E55_Type,P2_has_type,,,itemtype
 location,Location,resource-instance-list,1,E53_Place,P55_has_current_location,,,place
-holder,Holder,resource-instance-list,1,E39_Actor,P52_has_current_owner,,,npc|faction|pc
+holder,Holder,resource-instance-list,1,E39_Actor,P52_has_current_owner,,,npc|group|pc
 carries,Carries,resource-instance-list,n,E31_Document,P128_carries,,,document

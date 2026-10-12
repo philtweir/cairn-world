@@ -1,4 +1,64 @@
 collection_name,concept_label
+Group Type,Artisans
+Group Type,Commoners
+Group Type,Criminals
+Group Type,Cultists
+Group Type,Exiles
+Group Type,Explorers
+Group Type,Industrialists
+Group Type,Merchants
+Group Type,Military
+Group Type,Nobles
+Group Type,Nomads
+Group Type,Pilgrims
+Group Type,Protectors
+Group Type,Religious
+Group Type,Revolutionaries
+Group Type,Rulers
+Group Type,Scholars
+Group Type,Settlers
+Group Type,Spies
+Group Type,Tribe
+Group Form,Alliance
+Group Form,Barony
+Group Form,Commonwealth
+Group Form,Confederation
+Group Form,Dominion
+Group Form,Ecclesiarchy
+Group Form,Empire
+Group Form,Federacy
+Group Form,Fiefdom
+Group Form,Grand Duchy
+Group Form,Hegemony
+Group Form,Kingdom
+Group Form,Monarchy
+Group Form,Principality
+Group Form,Protectorate
+Group Form,Realm
+Group Form,Regency
+Group Form,Republic
+Group Form,State
+Group Form,Union
+Group Form,Assembly
+Group Form,Brotherhood
+Group Form,Circle
+Group Form,Clan
+Group Form,Coalition
+Group Form,Collective
+Group Form,Covenant
+Group Form,Enclave
+Group Form,Fellowship
+Group Form,Guild
+Group Form,Horde
+Group Form,League
+Group Form,Legion
+Group Form,Market
+Group Form,Ministry
+Group Form,Movement
+Group Form,Network
+Group Form,Order
+Group Form,Pact
+Group Form,Syndicate
 Physique,Athletic
 Physique,Brawny
 Physique,Flabby

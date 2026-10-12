@@ -3,6 +3,6 @@ name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
 description,Content,string,1,E62_String,P3_has_note,,,
 kind,Kind,concept,1,E55_Type,P2_has_type,,Document Kind,
 created,Creation,semantic,1,E65_Creation,P94i_was_created_by,,,
-created_by,Created by,resource-instance-list,1,E39_Actor,P14_carried_out_by,created,,npc|pc|faction
+created_by,Created by,resource-instance-list,1,E39_Actor,P14_carried_out_by,created,,npc|pc|group
 created_when,When,string,1,E52_Time-Span,P4_has_time-span,created,,
-refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,place|route|relic|itemtype|npc|pc|faction|creature|event|document|monstertype|spellbook
+refers_to,Refers to,resource-instance-list,n,E1_CRM_Entity,P67_refers_to,,,place|route|relic|itemtype|npc|pc|group|creature|event|document|monstertype|spellbook

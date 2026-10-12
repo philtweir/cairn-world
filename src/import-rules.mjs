@@ -655,6 +655,21 @@ const VOCAB_TABLES = {
   Face: 'character-creation-face-table', Speech: 'character-creation-speech-table', Clothing: 'character-creation-clothing-table',
   Virtue: 'character-creation-virtue-table', Vice: 'character-creation-vice-table', Scar: 'core-rules-scars-table-table',
 };
+// Kinds of group, from the Warden's Guide: a group's Type from Setting Seeds' Faction Types (its
+// first column; the second is an Agent), its Form from the naming procedures' Ruler and Group Types.
+// model/vocab.csv adds the forms these lists lack (Emirate, City, Church...).
+const GROUP_VOCAB = { 'Group Type': ['setting-seeds-faction-types-table'], 'Group Form': ['naming-procedures-ruler-types-table', 'naming-procedures-group-types-table'] };
+for (const [collection, keys] of Object.entries(GROUP_VOCAB)) {
+  const seen = new Set();
+  for (const key of keys) {
+    const t = all.rolltable.get(key);
+    if (!t) { warnings.push(`vocabulary ${collection}: no table "${key}"`); continue; }
+    for (const line of t.fields.entries.split('\n').filter(Boolean)) {
+      const label = stripMd(line.split(' | ')[1] ?? '').trim();
+      if (label && !seen.has(label)) { seen.add(label); vocab.push([collection, label]); }
+    }
+  }
+}
 for (const [collection, key] of Object.entries(VOCAB_TABLES)) {
   const t = all.rolltable.get(key);
   if (!t) { warnings.push(`vocabulary ${collection}: no table "${key}"`); continue; }
@@ -677,5 +692,5 @@ for (const [model, cols] of Object.entries(MODELS)) {
   console.log(`rules/${model}.csv: ${rows.length} rows, ${nLinks} links`);
 }
 fs.writeFileSync(path.join(OUT, 'vocab.csv'), toCsv([['collection_name', 'concept_label'], ...vocab]));
-console.log(`rules/vocab.csv: ${vocab.length} concepts in ${Object.keys(VOCAB_TABLES).length} vocabularies`);
+console.log(`rules/vocab.csv: ${vocab.length} concepts in ${new Set(vocab.map(([c]) => c)).size} vocabularies`);
 if (warnings.length) console.warn(`\n${warnings.length} warning(s):\n  ${warnings.join('\n  ')}`);

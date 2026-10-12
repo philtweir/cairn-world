@@ -1,4 +1,0 @@
-ResourceID,name,description,disposition,base,allies,enemies
-ferrymen,The Ferrymen,"Pole-boat folk who hold the fords and charge a toll.",Wary,hollowmere,chapter-of-ash,brackenfolk
-brackenfolk,The Brackenfolk,"Antlered hunters who despise the toll.",Hostile,gallow-hill,,ferrymen
-chapter-of-ash,The Chapter of Ash,"Penitent monks who tend the chapel bell.",Neutral,sunken-chapel,ferrymen,

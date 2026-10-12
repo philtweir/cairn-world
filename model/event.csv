@@ -6,5 +6,5 @@ session,Session,number,1,E52_Time-Span,P4_has_time-span,,,
 when,When,string,1,E52_Time-Span,P4_has_time-span,,,
 after,After,resource-instance-list,1,E2_Temporal_Entity,P183i_starts_after_the_end_of,,,event
 place,Place,resource-instance-list,1,E53_Place,P7_took_place_at,,,place
-participants,Participants,resource-instance-list,n,E39_Actor,P11_had_participant,,,npc|faction|pc
+participants,Participants,resource-instance-list,n,E39_Actor,P11_had_participant,,,npc|group|pc
 involved,Involved,resource-instance-list,n,E77_Persistent_Item,P12_occurred_in_the_presence_of,,,relic|document|creature

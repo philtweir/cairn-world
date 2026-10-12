@@ -1,0 +1,4 @@
+ResourceID,name,description,disposition,base,allies,enemies,type,form,role
+forest-goblins,The Forest Goblins,"Goblins camped at the Bridge of Saints, followers of Goblob, The Best Goblin. Superstitious; they hunt spiders in the forest.",Hostile,bridge-of-saints,,,Tribe,,Faction
+faithful-of-statera,The Faithful of Statera,"Worshippers of Statera, goddess of balance, potters and vigilance against evil. Her worship has long declined, and she is no longer in the Imperial Pantheon. Her symbol is the potter's wheel.",Neutral,,,,Religious,,
+priests-of-st-rylan,The Priests of St. Rylan,The order that kept the temple and its ritual. Its last priest left a plea carved above the altar.,Friendly,temple-of-st-rylan,faithful-of-statera,,Religious,Order,

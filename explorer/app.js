@@ -96,7 +96,13 @@ const provenance = e => {
   return first ? `Defined in ${layerName(first)}` + (rest.length ? ` · changed in ${rest.map(layerName).join(', ')}` : '') : '';
 };
 // The hash is #/<view>/ (home), #/<view>/@<lens>, or #/<view>/<model>/<key>.
-const hashParts = () => location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+// Models renamed since links to them were made: such links still open (#/<view>/faction/x is a Group).
+const RENAMED_MODELS = { faction: 'group' };
+const hashParts = () => {
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  for (const i of [0, 1]) if (RENAMED_MODELS[parts[i]]) parts[i] = RENAMED_MODELS[parts[i]];
+  return parts;
+};
 const status = (msg, error = false) => { const s = $('status'); s.textContent = msg; s.className = error ? 'error' : ''; s.hidden = !msg; };
 
 // ---- Load -----------------------------------------------------------------------------------
@@ -110,7 +116,7 @@ async function load() {
   const [first, ...rest] = hashParts();
   if (keys.includes(first)) state.view = first;
   else {
-    // An old link without a view (#/faction/ferrymen) opens in the default view.
+    // An old link without a view (#/group/ferrymen) opens in the default view.
     state.view = state.viewsMeta.default ?? keys[0];
     history.replaceState(null, '', `#/${[state.view, ...(first ? [first, ...rest] : [])].map(encodeURIComponent).join('/')}`);
   }

@@ -1,4 +1,4 @@
-ResourceID,name,description,faction,home,tie_with,tie_kind
+ResourceID,name,description,member_of,home,tie_with,tie_kind
 marcos,Marcos (deceased),"Left each PC the letter and the annotated map. Each player decides what he was to them: friend, mentor, colleague, relative. He was too old to walk the paths he had researched.",,,bryn,Apprentice
 archmage-hann,Archmage Hann,"Of the Imperial Court. Visited the temple 33 years ago for his own purposes, took two spheres for his ""very important work"", and sealed the Thing in the tavern cellar.",imperial-court,the-capital,,
 last-priest,The Last Priest of St. Rylan,"Carved the plea by the altar, begging travellers not to disturb the ritual or the spheres.",priests-of-st-rylan,temple-of-st-rylan,,

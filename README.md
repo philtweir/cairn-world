@@ -48,7 +48,7 @@ A deliberately small CIDOC-CRM subset. Models come in three kinds: *instances* (
 | Instances | CRM class | Types | CRM class | Rules text | CRM class |
 |---|---|---|---|---|---|
 | Place, Route | E53 Place | Background | E55 Type | Rule | E89 Propositional Object |
-| Faction | E74 Group | Monster Type, Monster Group | E55 Type | Roll Table | E89 Propositional Object |
+| Group | E74 Group | Monster Type, Monster Group | E55 Type | Roll Table | E89 Propositional Object |
 | NPC, PC | E21 Person | Item Type, Spellbook | E55 Type | Universe | E89 Propositional Object |
 | Document | E31 Document | | | | |
 | Creature | E20 Biological Object | Hireling Role | E55 Type | Campaign | E7 Activity |
@@ -71,12 +71,13 @@ Typed relationships:
 | Route | Hazards | P67 refers to | Creature, Monster Type, Place |
 | NPC | Background, Stat block | P2 has type | Background, Monster Type |
 | Creature / Relic | Type / Item type | P2 has type | Monster Type / Item Type |
-| Faction | Allies, Enemies | `cairn:allied_with`, `cairn:hostile_to` | Faction |
+| Group | Allies, Enemies | `cairn:allied_with`, `cairn:hostile_to` | Group |
+| Group | Type, Form, Role | P2 has type (Group Type, Group Form, Group Role) | |
 | Campaign | Set in | `cairn:set_in` | Universe |
 | NPC, PC | Ties (group) | P140i was attributed by → E13 Attribute Assignment: P141 assigned (NPC, PC), P177 assigned property of type (Tie Kind) | |
 | PC | Scars (group) | P44 has condition → E3 Condition State: P2 has type (Scar) | |
 | PC | Inventory | `cairn:carries` | Item Type, Spellbook |
-| Document | Creation (group) | P94i was created by → E65 Creation: P14 carried out by, P4 has time-span | NPC, PC, Faction |
+| Document | Creation (group) | P94i was created by → E65 Creation: P14 carried out by, P4 has time-span | NPC, PC, Group |
 | Document | Refers to | P67 refers to | most instance and type models |
 | Relic | Carries | P128 carries | Document (a physical copy of it) |
 | Event | Kind; Involved | P2 has type (Event Kind); P12 occurred in the presence of | Relic, Document, Creature |
@@ -85,8 +86,8 @@ Typed relationships:
 | Roll Table | About | P129 is about | Background, Campaign |
 | Route | Hazards | P53i is former or current location of | Creature |
 | Place | Terrain; Geometry | P2 has type (Terrain Difficulty: Easy, Tough, Perilous); P168 place is defined by (E94 Space Primitive, a GeoJSON FeatureCollection; see Maps) | |
-| Faction | Member of | P107i is current or former member of | Faction |
-| PC | Faction; Home | P107i is current or former member of; P74 has current or former residence | Faction; Place |
+| Group | Member of | P107i is current or former member of | Group |
+| NPC, PC | Member of; Home | P107i is current or former member of; P74 has current or former residence | Group; Place |
 | Session | Part of; Continues | P9i forms part of; P134 continued | Campaign; Session |
 | Session | Characters played; Played out | P11 had participant; `cairn:played_out` | PC; Event |
 | Session | Session, Played on | P4 has time-span (E52 Time-Span) | |
@@ -95,6 +96,21 @@ Typed relationships:
 and maximum STR/DEX/WIL and HP, Armor, gold, Fatigue, Deprived, the eight traits, bond, omen,
 inventory, scars, ties. Traits and scars are concepts from vocabularies the importer builds out of
 the rules' own d10 and Scars tables. PCs themselves live in campaign layers.
+
+**Group.** Any organised body of people (a kingdom, a church, an order, a guild, a tribe) is a
+Group, an E74 Group: CIDOC-CRM does not split groups into classes by what they are for, it types
+them (P2 has type), and a realm and a church have the same fields here. What kind of group it is,
+and what shape, come from the Warden's Guide: its **Type** (one or more) from Setting Seeds'
+Faction Types (Rulers, Religious, Military, Merchants...), its **Form** from the naming procedures'
+Ruler and Group Types (Kingdom, Republic, Order, Guild...), with the forms those lists lack
+(Emirate, Sultanate, City, Church, Court, Cell) in `model/vocab.csv`. Being a **faction** is not a
+kind of group but a part it plays: in Cairn a faction is a group with an agenda, advantages and
+agents, which the party will deal with. So it is a **Role** (Group Role: Faction), repeatable, so
+that a campaign can make a universe's group a faction without changing the universe. A group's
+Disposition is towards the party. Links to and from groups say `group` (`#/<view>/faction/...`
+links from before the rename still open). If realms come to need fields a church does not (a
+ruler, a capital, vassals), that is the point to give them a model of their own: those typed
+Rulers would move to it.
 
 **Session.** A session of play is an E7 Activity, like the campaign it forms part of (P9i, the
 whole/part relation CRM gives periods); a later session continues an earlier one (P134), the
@@ -177,7 +193,7 @@ a campaign with the key of a universe entry *is* that entry. Each Universe and C
 |---|---|---|
 | Single-valued | Replaces it; fields it leaves blank are inherited | `place.csv`: `hollowmere,Burned,...` keeps Hollowmere's name, kind and hex |
 | Single-valued link | Replaces the link | `npc.csv`: Old Marta's `home` becomes the Sunken Chapel |
-| Multi-valued | Adds to it; can never remove an entry | `faction.csv`: the Ferrymen gain an enemy |
+| Multi-valued | Adds to it; can never remove an entry | `group.csv`: the Ferrymen gain an enemy |
 
 To end something (an alliance, a life), use a single-valued status or an Event, not deletion. The
 build prints every composed entry and what each upper layer does to it ("overrides status,
@@ -435,7 +451,7 @@ in Miurna.) The regions come from Natural Earth 1:10m admin-1, fetched once into
 to a few km), and used only to divide Russia's own outline: the coast stays the country's, and a
 sliver where the two datasets disagree along a coast goes to the nearest region.
 
-The other powers each have a territory place, "Lands of …", as their faction's Base: the Engineers
+The other powers each have a territory place, "Lands of …", as their group's Base: the Engineers
 (the United Kingdom and Ireland), the Sapphire Throne (Yemen, Djibouti, Eritrea), the Eastern
 Emirates, the Threefold Republic, the Elven Islands (Madagascar, close to the globe's north pole and
 much stretched, and Malaysia), the Dragon Seat (Indonesia), the Tribes of Hanathy (South America,
@@ -612,7 +628,7 @@ and everything reads it as if it were published:
   build builds a layer; a label that is not in its vocabulary is refused there and then) and
   composes them over the published entry with `composeResourceLayers`. So the layer semantics are
   Alizarin's own: a single-valued field in the edit replaces the one below; a repeatable field or
-  group (cardinality `n`: a faction's enemies, an NPC's ties) adds to what the layers below give it,
+  group (cardinality `n`: a group's enemies, an NPC's ties) adds to what the layers below give it,
   and the form offers only adding to one. Nothing below is removed.
 - **Seen by every query.** The composed entry goes into Alizarin's resource registry (its page,
   its links) and into the query engine's overlay (`explorer/engine-sql.mjs`): tables of the
@@ -658,7 +674,7 @@ errors on unknown or ambiguous keys.
 
 **References in text.** Any text field can name another entry: `[[Caryes]]` links by name
 (ignoring case, a leading "The" and a trailing parenthetical, so `[[Prince of Miurna]]` finds
-"The Prince of Miurna (deceased)"); `[[faction/realm-ievure|the Emirate]]` names the target exactly
+"The Prince of Miurna (deceased)"); `[[group/realm-ievure|the Emirate]]` names the target exactly
 and shows other words. Like links, references point down: a name is resolved against what its own
 layer can see, and a reference that matches nothing, or several things, stops the build (with the
 exact form to use). The build publishes every reference exact, as `[[model/key|label]]` (the label
@@ -689,7 +705,7 @@ a universe NPC.
 | `ontology_class`, `parent_property` | CRM names (`E41_Appellation`), full URIs, or prefixed terms (`cairn:`, `rel:`) |
 | `parent_alias` | For a field inside a group: the group's alias |
 | `collection_name` | For concept fields: which vocabulary in `vocab.csv` |
-| `target_model` | For links: model alias, or `npc\|faction` for several |
+| `target_model` | For links: model alias, or `npc\|group` for several |
 | `rule` | Optional: the General Rule that defines this field |
 
 The build passes `target_model` to Alizarin as model names in its `graphs` column, and checks that
@@ -721,7 +737,7 @@ the same entity differs between views. General-only entries (about 1,070 rules e
 until asked for. Rule text renders its markdown (lists, bold, italics), and Roll Tables render as
 tables, as does any entry with a table in an `entries` field (`columns` heads it).
 
-**What a campaign uses.** A campaign's view holds its whole world: every place, faction and person
+**What a campaign uses.** A campaign's view holds its whole world: every place, group and person
 its universes know, most of which the campaign never touches. So a campaign opens on what it uses
 ("Only what this campaign uses", above the list, remembered in the browser): its own entries
 (its layer, and edits made here), what they link to or mention, and what those in turn link to.
