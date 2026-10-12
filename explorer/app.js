@@ -876,7 +876,9 @@ try {
   $('back').addEventListener('click', () => { if ((history.state?.depth ?? 0) > 0) history.back(); else location.hash = `#/${state.view}/`; });
   renderEditsBar();
   pane('detail');
-  addEventListener('keydown', ev => { if (ev.key === '/' && document.activeElement !== $('q')) { ev.preventDefault(); $('q').focus(); } });
+  // "/" goes to search, unless it is being typed somewhere (an edit form's fields, the password).
+  const typing = el => el?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el?.tagName);
+  addEventListener('keydown', ev => { if (ev.key === '/' && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !typing(document.activeElement)) { ev.preventDefault(); $('q').focus(); } });
   show();
 } catch (err) {
   console.error(err);
