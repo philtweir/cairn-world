@@ -7,6 +7,14 @@
       "url": "https://creativecommons.org/licenses/by-sa/4.0/"
     }
   },
+  "calendar": {
+    "name": "bliain ón Teacht",
+    "gloss": "years since the Coming",
+    "epoch": "The Coming (an Teacht): the arrival on Inis Mara of the people who became the Engineers, year 0",
+    "after": "óT",
+    "before": "rT",
+    "beforeGloss": "roimh an Teacht, before the Coming"
+  },
   "globe": {
     "remap": {
       "pole": [

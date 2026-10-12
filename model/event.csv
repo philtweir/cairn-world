@@ -4,6 +4,7 @@ kind,Kind,concept,1,E55_Type,P2_has_type,,Event Kind,
 description,Description,string,1,E62_String,P3_has_note,,,
 session,Session,number,1,E52_Time-Span,P4_has_time-span,,,
 when,When,string,1,E52_Time-Span,P4_has_time-span,,,
+date,Date,edtf,1,E52_Time-Span,P4_has_time-span,,,
 after,After,resource-instance-list,1,E2_Temporal_Entity,P183i_starts_after_the_end_of,,,event
 place,Place,resource-instance-list,1,E53_Place,P7_took_place_at,,,place
 participants,Participants,resource-instance-list,n,E39_Actor,P11_had_participant,,,npc|group|pc

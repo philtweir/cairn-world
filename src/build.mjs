@@ -25,6 +25,7 @@ import { buildExplorer } from './build-explorer.mjs';
 import { buildSearch } from './search-index.mjs';
 import { writeTables } from './tables.mjs';
 import { readAccess, resolveAccess } from './access.mjs';
+import { readEdtf } from './edtf.mjs';
 import { readEntities } from './world-read.mjs';
 import { loadOntology, checkField } from './ontology.mjs';
 import { makeResolver, REF } from './refs.mjs';
@@ -50,6 +51,7 @@ const LINK_TYPES = new Set(['resource-instance', 'resource-instance-list']);
 const ROOT_MODELS = ['universe', 'era', 'campaign'];
 const GENERAL = 'general';
 
+const EDTF_WIDGET = '10000000-0000-0000-0000-000000000010';   // Arches' edtf-widget
 const problems = [];
 const problem = msg => problems.push(msg);
 const rel = f => path.relative(ROOT, f);
@@ -175,11 +177,21 @@ for (const m of models) {
     // A field can cite the rule that defines it (model CSV column `rule`); it travels in the
     // graph as the node's description, so the model itself says where its fields come from.
     : c === 'description' ? (n.description || (n.rule ? `Defined by Cairn rule "${n.rule}"` : ''))
+    // Alizarin's model CSVs have no EDTF datatype, though its graphs and values do: such a field
+    // is built as a plain string and made EDTF below.
+    : c === 'datatype' && n.datatype === 'edtf' ? 'non-localized-string'
     : n[c];
   const nodesCsv = toCsv([NODE_COLS, ...m.nodes.map(n => NODE_COLS.map(c => cell(n, c)))]);
   report(rel(m.file), A.validateModelCsvs(graphCsv, nodesCsv, vocabCsv));
   try {
     m.built = A.buildGraphFromModelCsvs(graphCsv, nodesCsv, RDM_NAMESPACE, vocabCsv);
+    // EDTF fields (Extended Date/Time Format: `-0400~`, `0812-21`, `-1188/-0188`), as Arches
+    // builds them: the edtf datatype and its widget.
+    for (const n of m.nodes.filter(x => x.datatype === 'edtf')) {
+      const node = m.built.graph.nodes.find(x => x.alias === n.alias);
+      Object.assign(node, { datatype: 'edtf', config: {} });
+      for (const w of m.built.graph.cards_x_nodes_x_widgets ?? []) if (w.node_id === node.nodeid) Object.assign(w, { widget_id: EDTF_WIDGET, config: { placeholder: 'Enter EDTF date' } });
+    }
   } catch (e) {
     problem(`${rel(m.file)} build failed: ${e?.message ?? JSON.stringify(e)}`);
   }
@@ -253,6 +265,9 @@ function readSettings(key) {
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
   // Who may see what of this layer's view (src/access.mjs): closed, and whom to view it as by default.
   if (settings.access && (typeof settings.access !== 'object' || Object.keys(settings.access).some(k => !['closed', 'default'].includes(k)))) problem(`${rel(file)} access takes "closed" and "default"`);
+  // How the world numbers its years (src/edtf.mjs): the marks after a year from its epoch on, and
+  // before it, and what they stand for.
+  if (settings.calendar && !(settings.calendar.after && settings.calendar.name)) problem(`${rel(file)} calendar needs a "name" and an "after" mark (and optionally "before", "gloss", "epoch")`);
   if (settings.gate?.principal && !settings.access?.closed) problem(`${rel(file)} gate.principal only applies to a closed view ("access": { "closed": true })`);
   // A basemap (src/globe.mjs writes one) is the land, rivers and lakes the explorer draws under this
   // layer's maps; rivers.json (src/terrain.mjs) the rivers found in its detailed areas.
@@ -276,7 +291,7 @@ function readSettings(key) {
       if (!(Array.isArray(img.bbox) && img.bbox.length === 4)) problem(`${rel(reliefFile)}: ${img.file} needs a bbox`);
     }
   }
-  return { rights: r ?? null, gate: settings.gate ?? null, access: settings.access ?? null, grants: readAccess(LAYERS_DIR, key, problem), test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), relief };
+  return { rights: r ?? null, gate: settings.gate ?? null, access: settings.access ?? null, calendar: settings.calendar ?? null, grants: readAccess(LAYERS_DIR, key, problem), test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), relief };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -410,6 +425,8 @@ for (const key of layerKeys) {
   for (const [alias, t] of Object.entries(tables[key])) {
     const m = modelByAlias[alias];
     const csv = toCsv([t.header, ...t.rows.map(r => t.header.map((col, j) => {
+      // Alizarin stores an EDTF value as written; this is the check that it is one (src/edtf.mjs).
+      if (j > 0 && r.cells[j] && m.nodes.find(n => n.alias === col)?.datatype === 'edtf' && !readEdtf(r.cells[j])) problem(`${rel(r.file)}:${r.line} "${col}": "${r.cells[j]}" is not an EDTF date (e.g. 0812, -0400~, 0812-21, -1188/-0188)`);
       if (j === 0 || !isLinkCol(m, col)) return r.cells[j];
       const node = m.nodes.find(n => n.alias === col);
       const keys = splitKeys(r.cells[j]);
@@ -551,7 +568,7 @@ for (const l of shippedLayers) for (const m of usedModels) {
 
 for (const l of shippedLayers) for (const k of ['basemap', 'rivers', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
 for (const l of shippedLayers) for (const img of layers[l].relief?.images ?? []) fs.copyFileSync(path.join(LAYERS_DIR, l, img.file), path.join(DIST, 'data', 'layers', l, img.file));
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.kind === 'era' ? { when: l.row.get.when || null, sequence: Number(l.row.get.sequence) || 0 } : {}), ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}),
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.kind === 'era' ? { when: l.row.get.when || null, sequence: Number(l.row.get.sequence) || 0, dates: l.row.get.dates || null } : {}), ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}), ...(l.calendar ? { calendar: l.calendar } : {}),
   ...Object.fromEntries(['basemap', 'rivers', 'relief'].filter(k => l[k]).map(k => [k, `layers/${l.key}/${k}.json`])) });
 const open = viewKeys.filter(v => !layers[v].gate);
 write('views.json', {

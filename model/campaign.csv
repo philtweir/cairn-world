@@ -2,4 +2,5 @@ alias,name,datatype,cardinality,ontology_class,parent_property,parent_alias,coll
 name,Name,string,1,E41_Appellation,P1_is_identified_by,,,
 description,Description,string,1,E62_String,P3_has_note,,,
 universes,Set in,resource-instance-list,n,E1_CRM_Entity,cairn:set_in,,,universe|era
+dates,Dates,edtf,1,E52_Time-Span,P4_has_time-span,,,
 published,Published,boolean,1,E62_String,P3_has_note,,,

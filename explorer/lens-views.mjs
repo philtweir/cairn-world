@@ -156,12 +156,22 @@ function timeline(ctx, lens, entries) {
     groups.get(key).list.push(e);
   }
   const sorted = [...groups].sort((a, b) => a[1].n - b[1].n);
-  return h('ol', { class: 'timeline' }, sorted.map(([label, g]) => h('li', {},
+  const list = h('ol', { class: 'timeline' }, sorted.map(([label, g]) => h('li', {},
     h('div', { class: 'when' }, label === 'Undated' ? 'Outside play sessions' : label),
-    h('ul', {}, beforeOrder(ctx, lens, g.list).map(e => h('li', { class: colour(lens, e) },
+    h('ul', {}, beforeOrder(ctx, lens, g.list).map(e => h('li', { class: colour(lens, e), 'data-id': e.id },
       h('a', { href: route(e) }, title(e)),
-      spans(e).filter(f => typeof f.value === 'string').map(f => h('span', { class: 'm' }, f.value)),
+      spans(e).filter(f => typeof f.value === 'string').map(f => h('span', { class: 'm', title: f.datatype === 'edtf' ? f.value : false }, f.datatype === 'edtf' ? ctx.when(f.value) : f.value)),
       firstSentence(e) && h('div', { class: 'gist' }, firstSentence(e))))))));
+  // The strip above the list (explorer/time-strip.mjs); pointing at either lights up the other.
+  const strip = ctx.strip?.({ entries, label: lens.label });
+  if (strip) {
+    const light = (id, on) => { for (const el of [...strip.querySelectorAll(`[data-id="${id}"]`), ...list.querySelectorAll(`li[data-id="${id}"]`)]) el.classList.toggle('hot', on); };
+    for (const [root, sel] of [[strip, '[data-id]'], [list, 'li[data-id]']]) {
+      root.addEventListener('mouseover', ev => { const t = ev.target.closest(sel); if (t) light(t.dataset.id ?? t.getAttribute('data-id'), true); });
+      root.addEventListener('mouseout', ev => { const t = ev.target.closest(sel); if (t) light(t.dataset.id ?? t.getAttribute('data-id'), false); });
+    }
+  }
+  return [strip, list];
 }
 // Order entries so that anything another entry says it comes before (P183 and kin, or their
 // inverses) is listed first; ties and unrelated entries go alphabetically.

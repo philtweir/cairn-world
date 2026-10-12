@@ -275,3 +275,23 @@ fieldset.efield label{display:grid;gap:.2rem;margin-bottom:.4rem}
 .eactions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0}
 .eactions button[type=submit]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .retry{font:14px system-ui,sans-serif;padding:.35rem .9rem;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg);cursor:pointer}
+/* The time strip (explorer/time-strip.mjs): a hairline, a dot an entry, eras faint behind. */
+.timestrip{margin:.1rem 0 1rem;font:11px system-ui,sans-serif}
+.timestrip svg{display:block;width:100%;height:auto;overflow:visible}
+.timestrip .axis{stroke:var(--line);stroke-width:1.5}
+.timestrip .band rect{fill:var(--panel)}
+.timestrip .band:nth-of-type(even) rect{fill:var(--accent-bg);opacity:.45}
+.timestrip .band text{fill:var(--muted);font-style:italic;font-size:10px}
+.timestrip .mark circle{fill:var(--mc,var(--accent));stroke:var(--bg);stroke-width:1.5;transition:r .12s}
+.timestrip .mark.fuzzy circle{fill-opacity:.45}
+.timestrip .mark.undated circle{fill:var(--bg);stroke:var(--mc,var(--accent));stroke-width:1.6}
+.timestrip .mark.here circle{stroke:var(--fg)}
+.timestrip .mark:hover circle,.timestrip .mark:focus circle,.timestrip .mark.hot circle{r:6.5px}
+.timestrip .span{stroke:var(--mc,var(--accent));stroke-width:6;stroke-linecap:round;opacity:.3}
+.timestrip .span.fuzzy{opacity:.16}
+.timestrip .span.open{stroke-dasharray:2 4;stroke-linecap:butt;opacity:.35}
+.timestrip .year{fill:var(--muted)}
+.timestrip .name{fill:var(--fg);font-weight:600}
+.timestrip .break{fill:var(--muted);font-size:13px;paint-order:stroke;stroke:var(--bg);stroke-width:4}
+.timestrip figcaption{color:var(--muted);font-size:12px;margin-top:.1rem}
+.timeline li.hot>a{text-decoration:underline}

@@ -14,6 +14,8 @@ import { groupViews } from '../src/views.mjs';
 import { makeFinder, excerptNodes } from './finder.mjs';
 import { openDrafts } from './drafts.mjs';
 import { editForm } from './editor.mjs';
+import { timeStrip } from './time-strip.mjs';
+import { readEdtf, formatEdtf } from '../src/edtf.mjs';
 
 const DATA = new URL('./data', import.meta.url).href;
 let V = '';   // ?v=<build>, set from views.json
@@ -271,7 +273,57 @@ const basemap = () => (state.basemap ??= (() => {
     relief: r ? { ...r, images: r.images.map(i => ({ ...i, url: `${reliefDir()}${i.file}${V}` })) } : null,
   } : null));
 })());
-const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap });
+const ctx = () => ({ state, ontology: state.ontology, h, svg, put, route, title, links, md, inOrder, isGeneral, icon, basemap,
+  when: v => formatEdtf(v, calendar()), strip: opts => strip(opts) });
+
+// ---- Time ----------------------------------------------------------------------------------
+// How this world numbers its years: the topmost layer in the view's stack that says
+// (layer.json "calendar"); and its eras, as bands behind the time strip.
+const viewMeta = () => state.viewsMeta.views.find(v => v.key === state.view);
+const calendar = () => [...(viewMeta()?.stack ?? [])].reverse().map(k => state.viewsMeta.layers[k]?.calendar).find(Boolean) ?? null;
+// The bands are the eras of this view's universe, and the campaign in hand if it is dated; the
+// layers' own entries (a universe, an era, a campaign) are bands rather than marks.
+const eraBands = () => {
+  const stack = viewMeta()?.stack ?? [];
+  const eras = Object.values(state.viewsMeta.layers)
+    .filter(l => l.kind === 'era' && l.dates && l.stack.some(k => k !== 'general' && stack.includes(k) && state.viewsMeta.layers[k]?.kind === 'universe'));
+  const own = viewMeta()?.kind === 'campaign' && state.root ? [{ name: title(state.root), dates: state.root.fields.find(f => f.datatype === 'edtf')?.value }] : [];
+  // An era whose start (or end) is open begins where the one before it ends (or ends where the
+  // next begins), by their order.
+  const bands = eras.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0)).map(l => ({ name: l.name, t: readEdtf(l.dates) })).filter(b => b.t);
+  bands.forEach((b, i) => {
+    if (b.t.lo == null && bands[i - 1]?.t.hi != null) b.t = { ...b.t, lo: bands[i - 1].t.hi };
+    if (b.t.hi == null && bands[i + 1]?.t.lo != null) b.t = { ...b.t, hi: bands[i + 1].t.lo };
+  });
+  return [...bands, ...own.map(l => ({ name: l.name, t: readEdtf(l.dates) })).filter(b => b.t)];
+};
+const isLayerRoot = e => state.viewsMeta.layers[e.key]?.kind === e.model;
+const timeLens = () => state.lenses.find(l => l.layout === 'timeline');
+const strip = opts => timeLens() && timeStrip(ctx(), { lens: timeLens(), bands: eraBands(), calendar: calendar(), colour: e => colourOf(e.model), ...opts,
+  entries: opts.entries.filter(e => e === opts.focus || !isLayerRoot(e)) });
+// Every entry in the time lens, in full, for an event's strip: read once (and again when the
+// edits, the scope or the window change what there is).
+const timeline = () => (state.timeline ??= (async () => {
+  const T = timeLens();
+  if (!T) return [];
+  const page = await state.store.page({ models: T.models, general: false, limit: 400 });
+  return state.store.full(page.map(e => e.id));
+})());
+// The entries an event's strip shows: those joined to it by order (before or after, any number
+// of steps), and those that share something with it (a participant, a place), but not the world
+// itself.
+function timeNeighbours(e, all) {
+  const T = timeLens(), props = state.ontology.properties;
+  const order = new Set([...(T.before ?? []), ...(T.before ?? []).map(p => props[p]?.inverse)].filter(Boolean));
+  const byId = new Map(all.map(x => [x.id, x]));
+  const joined = new Map(all.map(x => [x.id, new Set()]));
+  for (const x of all) for (const l of links(x)) if (order.has(l.property) && byId.has(l.id)) { joined.get(x.id).add(l.id); joined.get(l.id).add(x.id); }
+  const seen = new Set([e.id]), todo = [e.id];
+  while (todo.length) for (const n of joined.get(todo.pop()) ?? []) if (!seen.has(n)) { seen.add(n); todo.push(n); }
+  const shared = new Set(links(e).map(l => l.id).filter(id => !byId.has(id) && id !== state.root?.id));
+  for (const x of all) if (links(x).some(l => shared.has(l.id))) seen.add(x.id);
+  return [e, ...all.filter(x => seen.has(x.id) && x.id !== e.id)];
+}
 // How many entries a model shows (General-only ones only when asked for; never the root).
 const shownCount = alias => { const c = state.counts[alias]; if (!c) return 0; return c.n - (state.rules ? 0 : c.general) - (state.root?.model === alias ? 1 : 0); };
 
@@ -369,6 +421,8 @@ async function neighbourhood(id) {
   const back = await store.backOf(id);
   const near = await store.full([...links(e).map(l => l.id), ...back.map(b => b.from.id)]);
   await store.full(near.filter(n => state.lensOf[n.model] === 'time').flatMap(n => links(n).map(l => l.id)));
+  // An event's strip places it among the events around it in time (renderDetail).
+  if (state.lensOf[e.model] === 'time') state.timelineNow = await timeline();
   const P = state.lenses.find(l => l.layout === 'places')?.anchor;
   let up = [...state.byId.values()].filter(x => x.full);
   for (let depth = 0; depth < 6 && up.length; depth++) up = await store.full(up.flatMap(x => links(x).filter(l => l.property === P).map(l => l.id)).filter(t => !state.byId.get(t)?.full));
@@ -388,6 +442,7 @@ function renderDetail(e) {
   const plainValue = f => {
     if (Array.isArray(f.value)) return f.value.flatMap((v, i) => [i ? ', ' : '', term(f)(v)]);
     if (f.datatype === 'concept') return term(f)(f.value);
+    if (f.datatype === 'edtf') return h('span', { title: f.value }, formatEdtf(f.value, calendar()));
     if (typeof f.value === 'boolean') return f.value ? 'Yes' : 'No';
     return typeof f.value === 'string' ? md(inline(f.value)) : String(f.value);
   };
@@ -404,7 +459,7 @@ function renderDetail(e) {
   const maxOf = f => numbers.find(g => g.label === `Max ${f.label}`);
   const isMax = f => numbers.some(g => f.label === `Max ${g.label}`);
   const stats = numbers.filter(f => !isMax(f));
-  const short = f => ['concept', 'concept-list', 'boolean'].includes(f.datatype) || (f.datatype === 'string' && !/\n/.test(f.value) && f.value.length <= 48 && f.alias !== 'source');
+  const short = f => ['concept', 'concept-list', 'boolean', 'edtf'].includes(f.datatype) || (f.datatype === 'string' && !/\n/.test(f.value) && f.value.length <= 48 && f.alias !== 'source');
   const tags = present.filter(f => !isLink(f) && f.datatype !== 'number' && f.datatype !== 'semantic' && short(f));
   const notes = present.filter(f => !isLink(f) && f.datatype !== 'number' && !tags.includes(f) && f.alias !== 'source');
   const source = field(e, 'source');
@@ -452,10 +507,18 @@ function renderDetail(e) {
     geoMap(ctx(), { items: where.items, lines: where.lines, basemap: basemap(), cls: 'geomap banner', label: `Where ${title(e)} is` }),
     said.size ? h('figcaption', {}, [...said].map(([k, v], i) => [i ? ' · ' : '', `${k}: `, v.map((x, j) => [j ? ', ' : '', x])])) : null) : null;
 
+  // When it is, under its title: an event among the events around it, or an entry's events.
+  const isTime = state.lensOf[e.model] === 'time';
+  const timed = isTime ? timeNeighbours(e, state.timelineNow ?? [])
+    : [...new Map([...links(e).map(l => state.byId.get(l.id)), ...(state.back.get(e.id) ?? []).map(b => b.from)]
+      .filter(x => x?.full && x.id !== e.id && state.lensOf[x.model] === 'time').map(x => [x.id, x])).values()];
+  const when = strip({ entries: timed, focus: isTime ? e : null, label: `When ${title(e)} ${isTime ? 'happened' : 'took part'}` });
+
   put($('detail'),
     h('a', { class: 'back', href: lens ? `#/${state.view}/@${lens.id}` : `#/${state.view}/` }, `← ${lens?.label ?? 'All entries'}`),
     map,
     head,
+    when,
     editedBanner(e),
     e.nameOnly && h('p', { class: 'note' }, 'Known only by name, so far.'),
     description && h('div', { class: 'text lead' }, md(blocks(description))),
@@ -533,6 +596,7 @@ const editsTitle = () => `${state.drafts.list().length} edit${state.drafts.list(
 // After any change to the edits: compose them again, recount, redraw.
 async function editsChanged() {
   state.editProblems = await state.store.applyEdits(state.drafts);
+  state.timeline = null;
   state.counts = await state.store.counts(state.view);
   renderEditsBar();
 }
@@ -855,6 +919,7 @@ try {
     state.scoped = ev.target.checked;
     try { localStorage.setItem('cairn-world:scoped', state.scoped ? '1' : '0'); } catch { /* not remembered */ }
     await state.store.setScope(state.scoped);
+    state.timeline = null;
     state.counts = await state.store.counts(state.view);
     if (state.q) $('q').dispatchEvent(new Event('input'));
     show();

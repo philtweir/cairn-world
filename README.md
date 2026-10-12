@@ -275,7 +275,7 @@ beside it:
 |---|---|---|---|
 | People & Groups | range: E39 Actor | network of links between actors | P107 has current or former member |
 | Places | domain: E53 Place | "within" tree, plus a graph of connections | P89 falls within |
-| Events & Times | domain: E2 Temporal Entity | timeline: by session, then by CRM "before" relations (P176, P182, P183) | P4 has time-span |
+| Events & Times | domain: E2 Temporal Entity | time strip (dates and order) over a timeline list: by session, then by CRM "before" relations (P176, P182, P183) | P4 has time-span |
 | Things | domain: E18 Physical Thing | cards grouped by the place or actor each links to | P52 has current owner |
 | Texts & Lore | domain: E89 Propositional Object | whole/part tree | P148 has component |
 | Kinds | domain: E55 Type | broader/narrower tree, with how much of the view uses each type | P127 has broader term |
@@ -299,6 +299,35 @@ home page. Lens icons, like lens names, come from `ontology/labels.csv`: the `ic
 [Lucide](https://lucide.dev) icon (ISC licence). The build checks each name against
 `lucide-static` and bundles only the icons in use into `dist/icons.svg`, a sprite of monochrome
 line icons drawn in the text colour.
+
+**When.** An Event has a **Date** (and an Era and a Campaign their **Dates**), an EDTF value
+(Extended Date/Time Format, ISO 8601-2) beside the free-text **When**, which stays as the phrase
+people read: `0812` a year, `0812-21` spring (21-24 the seasons), `0812-03-14` a day, `08XX` some
+year of the 800s, `-0400~` about 400 years before year 0, `0812?` uncertain, `-0688%` both,
+`-1188/-0188` an interval, `../0812` open before. The build checks every value (`src/edtf.mjs`).
+Years are numbered as the world numbers them: a universe's `layer.json` can declare a `calendar`,
+and Bith na Bró's is *bliain ón Teacht*, years since the Coming:
+
+```json
+"calendar": { "name": "bliain ón Teacht", "gloss": "years since the Coming", "after": "óT", "before": "rT" }
+```
+
+so `0812` reads "812 óT" (the present day of the Antenexus) and `-0688` "688 rT" (*roimh an
+Teacht*, before it). Dates are written out that way wherever they are shown.
+
+**The time strip** (`explorer/time-strip.mjs`) is the time twin of the map banner: one hairline
+under an event's title, placing it among the events around it (those it comes before or after,
+any number of steps, and those that share a participant or place with it); on any other entry's
+page, the events it takes part in; and above the Events & Times list, every entry in it, with the
+row and the mark lighting up together. A dated entry is a dot (a bar if it spans years; faint if
+approximate or uncertain), an undated one a hollow dot where the CRM "before" relations put it
+(an Event's *After* among them). The axis gives each gap between dates room by the log of its
+length, so centuries of history and the days of a campaign share one strip, with a break (≈) at a
+long gap; years are labelled below where they fit. The world's eras lie behind as faint bands (an
+era open at one end begins or ends at its neighbour, by their order), and a campaign's own Dates
+make a band too. With no dates among them, entries joined by order are shown in order, and say
+so; entries that can be placed neither way are left to the list. Hover says each one's name and
+date; click opens it.
 
 The view's own root (the Universe or Campaign) is its home page: a card per lens with how many
 entries are this layer's own, inherited, or General, and the layer audit of what this layer
@@ -840,8 +869,8 @@ too: build and upload `dist/`.
 | `cairn-2e` | Universe | The rules alone: General with a guide to the books as its root |
 | `weeping-wood` | Universe | Small test world |
 | `the-drowned-bell`, `ashes-of-hollowmere` | Campaign | Two campaigns on the Weeping Wood, showing overrides and additions |
-| `bith-na-bro` | Universe | Bith na Bró in every age: the land (the Greater Lands, the Dells and its surrounds from the regional map, the globe, terrain and rivers; see Maps), peoples who outlast empires, the strands of magic and the Seven Spheres |
-| `antenexus` | Era of Bith na Bró | The Antenexus, the present age: the Six Kingdoms and Nine States and their realms, the Engineers, the churches, the Order of the White Raven, the Dells' settlements and recent history |
+| `bith-na-bro` | Universe | Bith na Bró in every age: the land (the Greater Lands, the Dells and its surrounds from the regional map, the globe, terrain and rivers; see Maps), peoples who outlast empires, the strands of magic and the Seven Spheres, and the calendar (*bliain ón Teacht*, óT) |
+| `antenexus` | Era of Bith na Bró | The Antenexus, the present age (812 óT): the Six Kingdoms and Nine States and their realms, the Engineers and their history since the Coming, the churches, the Order of the White Raven, the Dells' settlements and recent history |
 | `ravens-in-the-dells` | Campaign (solo), set in the Antenexus | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Era of Bith na Bró, **test** | The First Empire: player-facing background for Seven Silver Spheres; remove with it |
 | `seven-silver-spheres` | Campaign, closed (the party by default; the Warden behind the password), **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
@@ -892,6 +921,11 @@ repository private, or keep that layer out of it, if that matters.
 - Every layer needs its own tile `uuidNamespace` for multi-valued fields to accumulate; Alizarin
   warns if it sees the same tile id with different data in two layers.
 - Warnings about non-CRM properties are suppressed for the `cairn:` namespace only.
+- The model CSVs have no `edtf` datatype (alpha.139 lists string, number, date, boolean,
+  concept, resource-instance and the like), though Alizarin's graphs, values and coercion have
+  one. A model CSV may say `edtf`; the build hands Alizarin a plain string there and then makes
+  the built node `edtf`, with Arches' EDTF widget. Alizarin stores the value as written without
+  checking it, so the build checks it (`src/edtf.mjs`).
 - Earlier workarounds (concept-id translation, patching link targets, pinning publication ids,
   flattening nested lists by hand, one process per view, exact-name model lookups) were removed as
   alpha.137 and alpha.139 fixed them.
