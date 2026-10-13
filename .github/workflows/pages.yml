@@ -35,8 +35,10 @@ jobs:
             .cache/ros-madair
             .cache/duckdb-extensions
           key: fetched-${{ hashFiles('node_modules/ros-madair/package.json', 'node_modules/@duckdb/duckdb-wasm/package.json') }}
-      - run: npm run check
-      - run: npm run build
+      # Node's V8 now and then crashes in these steps (a fatal "unreachable code" in its deoptimizer,
+      # exit 133), not reproducibly: then the step runs once more. Any other failure fails it.
+      - run: npm run check || { code=$?; [ "$code" -eq 133 ] || exit "$code"; echo "::warning::V8 crashed (exit 133); checking again"; npm run check; }
+      - run: npm run build || { code=$?; [ "$code" -eq 133 ] || exit "$code"; echo "::warning::V8 crashed (exit 133); building again"; npm run build; }
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
