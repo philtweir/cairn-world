@@ -944,6 +944,9 @@ repository private, or keep that layer out of it, if that matters.
 
 ## Using the data elsewhere
 
+[`test/scale/`](test/scale/README.md) measures how what each page of the explorer reads grows with
+the size of a world, against synthetic worlds of thousands of entries; nothing should grow with it.
+
 [`docs/ros-madair.md`](docs/ros-madair.md) proposes the contracts this site's own tables
 (`resources.parquet`, the in-text reference edges, `access.parquet`) would keep for Rós Madair to
 read them, and what its date index gets from this site's EDTF values today.
