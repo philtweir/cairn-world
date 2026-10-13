@@ -24,7 +24,7 @@
     "alizarin": "2.0.0-alpha.139",
     "d3-force": "3.0.0",
     "d3-geo": "3.1.1",
-    "ros-madair": "0.1.0-alpha.22"
+    "ros-madair": "0.1.0-alpha.24"
   },
   "devDependencies": {
     "@duckdb/node-api": "1.5.6-r.1",

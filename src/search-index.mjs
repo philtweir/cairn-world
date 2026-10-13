@@ -68,7 +68,9 @@ export async function buildSearch(root, dist, views) {
       fs.symlinkSync(path.join(out, 'resources'), path.join(work, 'resources'));
       const sub = path.join(out, 'substrate');
       fs.rmSync(sub, { recursive: true, force: true });
-      execFileSync(bin, [work, sub], { stdio: ['ignore', 'ignore', 'inherit'] });
+      // Without the render cache (each tile's linked titles, alpha.23 on): the explorer names links
+      // from resources.parquet, and the cache added about half again to every tile file.
+      execFileSync(bin, [work, sub, '--no-render-cache'], { stdio: ['ignore', 'ignore', 'inherit'] });
     } finally {
       fs.rmSync(work, { recursive: true, force: true });
     }

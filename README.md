@@ -944,5 +944,9 @@ repository private, or keep that layer out of it, if that matters.
 
 ## Using the data elsewhere
 
+[`docs/ros-madair.md`](docs/ros-madair.md) proposes the contracts this site's own tables
+(`resources.parquet`, the in-text reference edges, `access.parquet`) would keep for Rós Madair to
+read them, and what its date index gets from this site's EDTF values today.
+
 The tile store is readable by Alizarin's `ArchesClientLocal` (Node) and `ArchesClientRemoteStatic`
 (browser); `src/build.mjs` and `explorer/app.js` show the wiring for each.
