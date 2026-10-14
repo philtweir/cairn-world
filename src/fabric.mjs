@@ -18,8 +18,10 @@
 //             on over bridges: a canal ring (Amsterdam's).
 //   frontage  nothing new: plots along the edges of what is there.
 //   passages  tunnels only (an undercity), drawn under everything, with no plots.
-// Every pattern but passages then cuts its blocks (the district's ground less the streets) into
-// plots along their edges, of uneven width and depth, and puts a building at the front of each.
+// A `fill` grows an organic network in what a pattern leaves open. Every pattern but passages then
+// cuts its blocks (the district's ground less the streets) into plots along their edges, of uneven
+// width and depth, and puts a building at the front of each; or, with `uses`, gives each block one
+// of a list (plots, a field, a market garden, a rope-walk), weighted by its distance from a centre.
 import ClipperLib from 'clipper-lib';
 import { Delaunay } from 'd3-delaunay';
 import { createNoise2D } from 'simplex-noise';
@@ -244,19 +246,24 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
     const pattern = PATTERNS[spec.pattern];
     if (!pattern) throw new Error(`${where}: district ${spec.place}: no pattern "${spec.pattern}" (${Object.keys(PATTERNS).join(', ')})`);
     const { streets = [], bridges = [] } = pattern(k);
+    // `fill`: an organic network grown in what the pattern leaves open (beyond a spine's ends).
+    if (spec.fill) streets.push(...PATTERNS.organic({ ...k, spec: { ...spec, organic: spec.fill, along: null }, avoid: streets }).streets);
     const n = { streets: 0, buildings: 0, gardens: 0 };
     // Streets: kept to the open ground (a tunnel to the district), the short scraps dropped.
     for (const s of streets) {
       for (const piece of clipLines([s.line], s.tags.tunnel ? zone : open)) if (lengthOf(piece) > m(12)) { emitLine(piece, s.tags); n.streets++; }
     }
     for (const b of bridges) for (const piece of clipLines([b.line], waterArea)) { emitLine(piece, b.tags); n.streets++; }
-    if (spec.plots) {
+    if (spec.plots || spec.uses) {
       const blocks = polygons(minus(region, widen(streets.filter(s => !s.tags.tunnel))));
       for (const block of blocks) {
         const paths = block.map(toPath), size = areaOf(paths);
         // Too small or too thin to build on (a scrap between streets) is left open.
-        if (size < m(1) * m(1) * (spec.plots.least ?? 60) || !grow(paths, -m(3)).length) continue;
-        plots(block, paths, spec, k, n, emitArea);
+        if (size < m(1) * m(1) * (spec.plots?.least ?? 60) || !grow(paths, -m(3)).length) continue;
+        const use = useOf(spec, block, k);
+        if (use.tags) for (const poly of polygons(grow(paths, -m(use.inset ?? 2)))) emitArea(poly, use.tags);
+        if (use.strip) strip(block, paths, use.strip, k, n, emitArea);
+        if (use.plots) plots(block, paths, use.plots === true ? spec.plots : { ...(spec.plots ?? {}), ...use.plots }, k, n, emitArea);
       }
     }
     counts[spec.place] = n;
@@ -264,10 +271,37 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
   return { drawn: out, counts };
 }
 
+// What a block is used for. Without `uses`, plots (the district's `plots`). With them, one of the
+// list at random by weight: an area of its own (`tags`: a field, a market garden), a long building
+// down its middle (`strip`: a rope-walk), plots (`plots`: true for the district's, or settings
+// over them), or several together. A weight given as [near, far] runs from one to the other
+// between `from` and `to` metres from `centre`, so a fringe can thin into the country.
+function useOf(spec, block, k) {
+  const U = spec.uses;
+  if (!U) return { plots: true };
+  const c = centroid(block[0]);
+  const t = U.from === undefined ? 0 : Math.max(0, Math.min(1, (dist(c, U.centre ?? [0, 0]) - k.m(U.from)) / (k.m(U.to) - k.m(U.from))));
+  const weights = U.list.map(u => (Array.isArray(u.weight) ? u.weight[0] + (u.weight[1] - u.weight[0]) * t : u.weight ?? 1));
+  let x = k.random() * weights.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < weights.length; i++) if ((x -= weights[i]) < 0) return U.list[i];
+  return U.list[U.list.length - 1];
+}
+// A long building down a block's length (its longest axis), clear of its edges.
+function strip(block, blockPaths, St, k, n, emitArea) {
+  const { m } = k, ring = block[0].slice(0, -1), c = centroid(block[0]);
+  let xx = 0, yy = 0, xy = 0;
+  for (const [x, y] of ring) { xx += (x - c[0]) ** 2; yy += (y - c[1]) ** 2; xy += (x - c[0]) * (y - c[1]); }
+  const a = Math.atan2(2 * xy, xx - yy) / 2, u = [Math.cos(a), Math.sin(a)], v = [-u[1], u[0]], L = 50, w = m(St.width ?? 8) / 2;
+  const rect = [[-L, -w], [L, -w], [L, w], [-L, w]].map(([s, t]) => [c[0] + u[0] * s + v[0] * t, c[1] + u[1] * s + v[1] * t]);
+  const pieces = polygons(inter(union([toPath(rect)]), grow(blockPaths, -m(St.clear ?? 6))));
+  const best = pieces.sort((p, q) => areaOf(q.map(toPath)) - areaOf(p.map(toPath)))[0];
+  if (best && areaOf(best.map(toPath)) > m(St.width ?? 8) * m(St.least ?? 80)) { emitArea(best, St.tags ?? { building: 'yes' }); n.buildings++; }
+}
+
 // A block cut into plots along its edges, each with its building at the front; what is left
 // inside, a garden if the district has them.
-function plots(block, blockPaths, spec, k, n, emitArea) {
-  const P = spec.plots, { random, noise, range, m } = k;
+function plots(block, blockPaths, P, k, n, emitArea) {
+  const { random, noise, range, m } = k;
   const width = range(P.width, 'plots.width'), wide = P.wide ? { chance: P.wide.chance ?? 0.1, width: range(P.wide.width, 'plots.wide.width') } : null;
   const depth = range(P.depth, 'plots.depth'), build = range(P.build ?? P.depth, 'plots.build'), setback = range(P.setback ?? 0, 'plots.setback');
   const gap = m(P.gap ?? 1), cover = P.cover ?? 1, corner = P.corner ?? 40;
@@ -406,13 +440,16 @@ const PATTERNS = {
     const { spec, random, noise, m } = k, O = spec.organic ?? {};
     const base = m(O.spacing ?? 70), vary = O.vary ?? 0.35;
     const [[x0, y0], [x1, y1]] = boundsOf(k.ground);
+    // Filling round streets already laid: no seed near them, and no new street into their blocks.
+    const near = k.avoid ? widen(k.avoid.map(s => ({ line: s.line, half: base * 0.6 }))) : [];
+    const inNear = within(near), seedable = p => k.inRegion(p) && !inNear(p);
     // Seeds: thrown at random and kept only clear of each other, the clearance wandering with noise.
     const gap = p => base * (1 + vary * noise(p[0] / base / 6, p[1] / base / 6));
     const cell = base * (1 - vary), grid = new Map(), key = (i, j) => `${i},${j}`, seeds = [];
     const tries = Math.ceil((x1 - x0) * (y1 - y0) / (cell * cell) * 8);
     for (let t = 0; t < tries; t++) {
       const p = [x0 + random() * (x1 - x0), y0 + random() * (y1 - y0)];
-      if (!k.inRegion(p)) continue;
+      if (!seedable(p)) continue;
       const g = gap(p), i = Math.floor(p[0] / cell), j = Math.floor(p[1] / cell), r = Math.ceil(base * (1 + vary) / cell);
       let clear = true;
       for (let a = -r; a <= r && clear; a++) for (let b = -r; b <= r && clear; b++) for (const q of grid.get(key(i + a, j + b)) ?? []) if (dist(p, q) < g) { clear = false; break; }
@@ -442,9 +479,16 @@ const PATTERNS = {
         seen.add(id);
         if (random() < (O.drop ?? 0.2)) continue;
         const line = resample([a, b], m(6)).map(warp), short = dist(a, b) < base * 0.5;
-        if (short && random() < (O.alleys ?? 0.35)) streets.push({ line, tags: { highway: 'footway', note: O.alleyNote ?? 'An alley' }, half: alley });
+        // Minor ways: short edges as alleys, and (on a fringe) any edge as a lane between fields.
+        if (random() < (short ? O.alleys ?? 0.35 : O.tracks ?? 0)) streets.push({ line, tags: { highway: O.alleyHighway ?? 'footway', note: O.alleyNote ?? 'An alley' }, half: alley });
         else streets.push({ line, tags: { highway: 'residential', ...(O.note ? { note: O.note } : {}) }, half: street });
       }
+    }
+    if (near.length) {
+      const room = minus(k.open, grow(near, -base * 0.3));
+      const kept = [];
+      for (const s of streets) for (const piece of clipLines([s.line], room)) kept.push({ ...s, line: piece });
+      return { streets: kept };
     }
     if (spec.along && spec.backs) streets.push(...besides(k, k.handStreet(spec.along), spec.backs, { highway: 'residential', note: spec.backsNote ?? 'A lane' }, m(spec.backsWidth ?? 6) / 2));
     return { streets };
@@ -470,7 +514,7 @@ const PATTERNS = {
         let nrm = [-d[1], d[0]];
         if (nrm[0] * (p[0] - centre[0]) + nrm[1] * (p[1] - centre[1]) < 0) nrm = [-nrm[0], -nrm[1]];
         const dir = turn(nrm, (random() - 0.5) * 2 * (R.angle ?? 5));
-        const start = [p[0] + dir[0] * (water + m(1)), p[1] + dir[1] * (water + m(1))];
+        const start = [p[0] + dir[0] * (water + m(3)), p[1] + dir[1] * (water + m(3))];
         if (!k.inOpen(start)) continue;
         const line = walk(k, start, dir, m(R.reach ?? 300), { step: m(4), test: k.inOpen });
         if (line.length > 3) streets.push({ line, tags: { highway: 'residential', note: R.crossNote ?? 'A cross street' }, half });

@@ -443,7 +443,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const [lon0, lat0] = remap.toGlobe(map.anchor.earth), km = 6371 * deg;
       const toMap = ([lon, lat]) => [map.anchor.at[0] + (lon - lon0) * km * Math.cos(lat0 * deg) / map.kmPerUnit, map.anchor.at[1] - (lat - lat0) * km / map.kmPerUnit];
       const { drawn, counts } = fabric({ recipe, hand: cityFeatures.get(name), places: geometryOf, land, map, toMap, toGlobe: p => mapToGlobe(map, remap, p), earthToGlobe: p => remap.toGlobe(p), where });
-      if (process.env.FABRIC_DEBUG) console.log(counts);
       for (const f of drawn) { const cls = classify(f.tags, f.geometry.type); if (cls) cityDrawing.push({ cls, geometry: f.geometry, globe: true }); }
       const total = Object.values(counts).reduce((t, c) => ({ streets: t.streets + c.streets, buildings: t.buildings + c.buildings, gardens: t.gardens + c.gardens }), { streets: 0, buildings: 0, gardens: 0 });
       console.log(`${where}: ${total.streets} streets, ${total.buildings} buildings, ${total.gardens} gardens in ${Object.keys(counts).length} districts`);
@@ -455,7 +454,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const features = [];
     for (const cls of CITY_CLASSES) for (const area of [true, false]) {
       const parts = cityDrawing.filter(d => d.cls === cls && /Polygon$/.test(d.geometry.type) === area)
-        .map(d => { const g = area ? windForD3(d.geometry) : d.geometry; return d.globe ? g : remap.project(g); }).filter(Boolean).map(g => round(g, 5));
+        .map(d => { const g = area ? windForD3(d.geometry) : d.geometry; return d.globe ? g : remap.project(g); }).filter(Boolean).map(g => round(g, 5))
+        // A sliver rounded to nothing (a ring of fewer than four points, a line of one) is dropped.
+        .filter(g => g.coordinates.length && (g.type !== 'LineString' || g.coordinates.length >= 2));
       if (!parts.length) continue;
       const coordinates = parts.flatMap(g => (g.type === 'Polygon' || g.type === 'LineString' ? [g.coordinates] : g.coordinates));
       const geometry = { type: area ? 'MultiPolygon' : 'MultiLineString', coordinates };
