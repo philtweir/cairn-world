@@ -154,7 +154,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
         if (f.properties.kind !== 'city') continue;
         const area = f.properties.area, node = svg('path', { class: `${f.properties.class} ${area ? 'area' : 'line'}` });
         gCity.append(node);
-        city.push({ node, type: area ? 'MultiPolygon' : 'MultiLineString', polys: f.geometry.coordinates.map(cc => ({ c: cc, b: geoBounds({ type: area ? 'Polygon' : 'LineString', coordinates: cc }) })) });
+        city.push({ node, type: area ? 'MultiPolygon' : 'MultiLineString', heavy: f.geometry.coordinates.length > 2000, polys: f.geometry.coordinates.map(cc => ({ c: cc, b: geoBounds({ type: area ? 'Polygon' : 'LineString', coordinates: cc }) })) });
       }
       schedule();
     });
@@ -284,7 +284,19 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     const inCity = span < 0.4;
     if (inCity) askCity();
     gCity.style.display = inCity ? '' : 'none';
-    for (const x of city) x.node.setAttribute('d', inCity ? path({ type: x.type, coordinates: x.polys.filter(near).map(p => p.c) }) ?? '' : '');
+    // A city's thousands of buildings are not redrawn while a drag turns the view (so close in, a
+    // turn is a shift): they move with it, and are drawn afresh when it ends.
+    const centre = [-projection.rotate()[0], -projection.rotate()[1]];
+    for (const x of city) {
+      if (inCity && moved && drag && x.heavy && x.at) {
+        const [a, b] = projection(x.at);
+        x.node.setAttribute('transform', `translate(${(a - x.xy[0]).toFixed(1)},${(b - x.xy[1]).toFixed(1)})`);
+        continue;
+      }
+      x.node.setAttribute('d', inCity ? path({ type: x.type, coordinates: x.polys.filter(near).map(p => p.c) }) ?? '' : '');
+      x.node.removeAttribute('transform');
+      x.at = centre; x.xy = projection(centre);
+    }
     relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
     for (const s of shapes) { s.fill.setAttribute('d', (s.g && path(s.g)) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }

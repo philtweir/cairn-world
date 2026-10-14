@@ -539,7 +539,8 @@ writes them (`start_date:edtf`):
 
 - An element tagged `cairn:id=<ResourceID>` is that place's geometry, in place of a row in
   `globe.csv` (the entry itself, its name and what it lies within, stays in `place.csv`). The
-  Orbital and the Serpentine are drawn this way. If its tags also say what it is (a building, a
+  Orbital and the Serpentine are drawn this way. A closed way with a `cairn:id` is the place's
+  outline (an area) unless it is a street, a waterway, a rail or a wall. If its tags also say what it is (a building, a
   canal), it is drawn with the rest as well.
 - Everything else is drawing, written to the layer's `city.json`: streets (`highway`: major,
   street, path), buildings, water (`waterway`, `natural=water`, a canal's banks as `area=yes`),
@@ -550,22 +551,68 @@ writes them (`start_date:edtf`):
   the places, each kind kept as parts with their bounds so only those in view are drawn. Nothing in it is an
   entry: a ward, a market or a station worth a page gets a row in `place.csv` and a `cairn:id`.
 
-Ephemeristorum's file was seeded with a first pass of the city, to be redrawn in JOSM from here:
+**Fabric** (`layers/<layer>/cities/<city>.fabric.json`, `src/fabric.mjs`). What fills a city between
+what is drawn by hand (its lanes, plots and buildings) is not kept by hand: a recipe beside the
+city's `.osm` says how each district is built up, and `npm run globe` grows it on every run and
+draws it in `city.json` with the rest. It is never an entry. It is seeded (`seed`, and each district
+its own stream), so the same recipe and the same `.osm` give the same city; change a district's
+settings, or redraw a canal in JOSM, and only what hangs off it changes. It keeps to the land drawn
+in the basemap (the one coast), clear of every drawn area (water, a building, a square, a garden,
+a closed `barrier=wall`'s enclosure) by a metre, and of every drawn street, rail and wall by its
+width (`width` in metres, else by its kind). It is drawn on one of the globe's maps (`map`), in its
+units; all the recipe's lengths are metres. Libraries: Clipper (`clipper-lib`) for the geometry,
+`d3-delaunay` for the Voronoi networks, `simplex-noise` for the bends.
 
-- Ephe: the Spine down the Mound's tail from the palace to the quay, closes and steps off both sides
-  every 40 m, the tall lands between them, the crest's wide streets and houses about the palace, the
-  quay with its warehouses, accumulator, cranes, two funiculars and the lock, and the undercity's
-  passages; its districts the Crag, the Closes, Ephe's Quay and the Undercity.
-- Stora: the Avenue (the Spine turned half round, as Stora is Ephe's half turned), lanes, walled
-  delegations' compounds with their houses and gardens, the hall and square at its head, its port on
-  the Orbital and four bridges over it into the Verge.
-- The Verge: four ring canals, horseshoes opening onto the lough, with quay streets; radial streets;
-  some 150 blocks of canal houses; three docks with quays and warehouses, a rope-walk and a shipyard;
-  the walled trading houses of the nations; the walled banks of the estuary; its wards the Old Verge,
-  the Rings, the Docks and the Outer Verge.
+Each of the recipe's `districts` names a `place` (a `cairn:id` area of the `.osm`, or a place with
+an outline in `globe.csv`), a `pattern`, and optionally a `margin` kept clear inside its edge:
 
-The Orbital, the Serpentine, the districts and the wards are entries (`cairn:id`); the rest is drawing.
-The streets' and districts' names are working names.
+- `closes`: closes off both sides of a hand-drawn street (`along`, by its `name`): `closes` sets
+  their `spacing` and `length` ([least, most]), `angle` (degrees askew), `curl` (how much they
+  wander), `fork` (the chance of a branch), `steps` (the share of the street, from its start, whose
+  closes are steps) and `width`; `backs` are lanes along the street (`at` metres to a side, a minus
+  for the other, `wander`ing as noise says), which the closes cross.
+- `organic`: streets as the edges of a Voronoi tessellation of seeds thrown at random and kept
+  apart (`organic.spacing`, `vary`), relaxed (`relax` rounds of Lloyd's), bent by a smooth noise
+  warp (`warp` metres, over `scale` metres), with a share `drop`ped so blocks merge; short edges are
+  alleys (`alleys`, a chance) and any edge may be a minor way (`tracks`, as `alleyHighway`, a field
+  lane on a fringe). `along` and `backs` add lanes beside a street, as for closes.
+- `rings`: quay streets along the district's hand-drawn canals (`rings.quay` metres out), cross
+  streets between them square to the canals at uneven `spacing`, and `through` streets (bearings,
+  from `centre`, between `from` and `to` metres) bridging each canal.
+- `frontage`: no new streets, only plots along what is there.
+- `passages`: tunnels only (`passages.beside` a street, `round` a place at a `radius`, and
+  `branches` off them), drawn faint under everything, with no plots.
+
+Any pattern but `passages` may add a `fill`: an `organic` network (its settings) grown only where
+the pattern leaves open ground (Ephe beyond the Spine's ends). The blocks between the streets are
+then cut into `plots` along their edges, side by side at uneven `width` (and now and then a `wide`
+one), `depth` deep, the sides parting at corners; each plot, unless left empty (`cover`, a chance,
+clustered by noise), has a building at its front, `setback` from its edge and `build` deep, `gap`
+from its neighbours, tagged `building` (its kind), `building:levels` (from `levels`) and `tags`.
+`walls: true` walls each plot (a compound); `gardens` lays out what is left of a block behind its
+buildings as gardens (pieces larger than `least` square metres). A block smaller than `plots.least`
+square metres is left open. With `uses`, each block instead takes one of a list, at random by
+`weight`: its own area (`tags`: a market garden, a field), a long building down its length (`strip`:
+a rope-walk), plots (`plots: true`, or settings over the district's), or several; a weight of
+[near, far] runs between the two from `from` to `to` metres off `centre`, so a fringe thins into the
+country.
+
+Ephemeristorum's hand-kept file holds the entries and what stands by design: the Orbital and the
+Serpentine and their water, Ephe's wall, the Spine, the Exarch's Palace (a Greek cross) with its
+parterres and forecourt, the crest streets, Ephe's quay (warehouses, accumulator, cranes, funiculars,
+the lock), the Avenue, Stora's hall, square and port, the bridges over the Orbital, the four ring
+canals (dug in straight reaches with bends, opening onto the lough), the roads round the Orbital and
+beyond the rings, docks dug into the shore between the canals' mouths, a rope-walk, a shipyard, the
+walled trading houses of the nations, and the estuary's walled banks; and the districts and wards:
+the Crag, the Closes, Ephe's Quay and the Undercity; Stora; the Old Verge, the Rings, the Docks (a
+waterfront some 400 m deep) and the Outer Verge. Its recipe builds Ephe as an old town on a ridge
+(closes off the Spine and lanes across them, wynds beyond its ends, lands six to eleven storeys),
+the Crag's houses about the palace, the undercity's passages, Stora's walled compounds in gardens,
+the Old Verge's crooked streets, the Rings' canal houses with gardens behind, the Docks' warehouses
+and labourers' houses, and the Outer Verge thinning from streets and workshops into villas, market
+gardens, orchards, tenter grounds, rope-walks and fields. Laid out so, the city holds some 150,000 to
+200,000 people, about Amsterdam's at the end of the 18th century. The streets' and districts' names
+are working names.
 
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
