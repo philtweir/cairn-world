@@ -1,6 +1,62 @@
 {
   "map": "lough",
   "seed": 1,
+  "terrain": {
+    "cliff": 1.4
+  },
+  "value": {
+    "busy": [
+      {
+        "near": {
+          "cairn:pole": "gates"
+        },
+        "reach": 700
+      },
+      {
+        "near": {
+          "waterway": "dock"
+        },
+        "reach": 700
+      },
+      {
+        "near": {
+          "lock": "yes"
+        },
+        "reach": 600
+      }
+    ],
+    "rich": [
+      {
+        "near": {
+          "cairn:pole": "gates"
+        },
+        "reach": 650
+      },
+      {
+        "near": {
+          "waterway": "dock"
+        },
+        "reach": 650,
+        "weight": -0.9
+      },
+      {
+        "near": {
+          "lock": "yes"
+        },
+        "reach": 450,
+        "weight": -0.5
+      }
+    ],
+    "works": [
+      {
+        "at": [
+          1500,
+          -1500
+        ],
+        "reach": 600
+      }
+    ]
+  },
   "districts": [
     {
       "place": "the-closes",
@@ -335,6 +391,35 @@
           5
         ],
         "building": "house"
+      },
+      "rich": {
+        "fill": {
+          "area": 340,
+          "alley": 3,
+          "garden": 0.4,
+          "courtyard": {
+            "chance": 0.45,
+            "least": 300,
+            "depth": 6
+          }
+        },
+        "levels": [
+          4,
+          5
+        ]
+      },
+      "poor": {
+        "fill": {
+          "area": 110,
+          "vary": 0.8,
+          "alley": 1.4,
+          "empty": 0.03,
+          "garden": 0.04
+        },
+        "levels": [
+          2,
+          4
+        ]
       }
     },
     {
@@ -395,6 +480,51 @@
         "building": "house",
         "gardens": {
           "least": 200
+        }
+      },
+      "rich": {
+        "width": [
+          10,
+          16
+        ],
+        "wide": {
+          "chance": 0.3,
+          "width": [
+            18,
+            26
+          ]
+        },
+        "build": [
+          16,
+          22
+        ],
+        "levels": [
+          4,
+          5
+        ]
+      },
+      "poor": {
+        "width": [
+          5,
+          8
+        ],
+        "wide": {
+          "chance": 0.04,
+          "width": [
+            12,
+            16
+          ]
+        },
+        "build": [
+          12,
+          16
+        ],
+        "levels": [
+          3,
+          4
+        ],
+        "gardens": {
+          "least": 500
         }
       }
     },
@@ -517,23 +647,17 @@
         "building": "house"
       },
       "uses": {
-        "centre": [
-          0,
-          0
-        ],
-        "from": 1900,
-        "to": 2700,
         "list": [
           {
             "weight": [
-              6,
-              0.8
+              7,
+              1.5
             ],
             "plots": true
           },
           {
             "weight": [
-              2,
+              0.6,
               0.4
             ],
             "plots": {
@@ -557,6 +681,36 @@
               ],
               "tags": {
                 "note": "A workshop or yard"
+              }
+            }
+          },
+          {
+            "by": "works",
+            "weight": [
+              5,
+              0
+            ],
+            "plots": {
+              "width": [
+                30,
+                60
+              ],
+              "depth": [
+                30,
+                50
+              ],
+              "build": [
+                20,
+                40
+              ],
+              "cover": 0.8,
+              "building": "industrial",
+              "levels": [
+                1,
+                3
+              ],
+              "tags": {
+                "note": "A works: a sugar house, a distillery, a soap-boiler's, a dye-works or a tobacco works"
               }
             }
           },
@@ -648,11 +802,45 @@
               "landuse": "farmland"
             }
           }
+        ],
+        "by": "busy"
+      },
+      "rich": {
+        "width": [
+          25,
+          45
+        ],
+        "build": [
+          12,
+          18
+        ],
+        "setback": [
+          6,
+          12
+        ],
+        "gap": 5,
+        "levels": [
+          2,
+          3
+        ],
+        "gardens": {
+          "least": 150
+        }
+      },
+      "poor": {
+        "fill": {
+          "area": 90,
+          "vary": 0.8,
+          "chaos": 0.8,
+          "alley": 1.4,
+          "empty": 0.04,
+          "garden": 0.03
+        },
+        "levels": [
+          2,
+          3
         ]
       }
     }
-  ],
-  "terrain": {
-    "cliff": 1.4
-  }
+  ]
 }

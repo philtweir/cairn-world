@@ -231,6 +231,24 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
   const obstacles = union(drawnAreas, widen(lineParts));
   const waterArea = union(water);
   const landArea = union(land.flatMap(g => ringsOf(g).map(r => toPath(r.map(toMap)))));
+  // Value fields (the recipe's `value`): each a list of poles, a pole being the hand-drawn features
+  // with some tags (`near`) or a point (`at`, metres east and south on the map), with a `reach` in
+  // metres and a `weight` (a minus for a pole that lowers it). At a point a field is the sum of its
+  // poles' pull, each falling away as e^-(distance/reach), between -1 and 1: how busy, how rich.
+  const fields = {};
+  for (const [name, poles] of Object.entries(recipe.value ?? {})) {
+    const resolved = poles.map(pole => {
+      let pts;
+      if (pole.at) pts = [pole.at.map(m)];
+      else {
+        const hits = drawn.filter(f => Object.entries(pole.near).every(([a, b]) => f.tags[a] === b));
+        if (!hits.length) throw new Error(`${where}: value.${name}: nothing drawn with ${JSON.stringify(pole.near)}`);
+        pts = hits.map(f => (f.rings.length ? centroid(f.rings[0]) : f.lines[0][Math.floor(f.lines[0].length / 2)]));
+      }
+      return { pts, reach: m(pole.reach ?? 500), weight: pole.weight ?? 1 };
+    });
+    fields[name] = p => Math.max(-1, Math.min(1, resolved.reduce((sum, { pts, reach, weight }) => sum + weight * Math.exp(-Math.min(...pts.map(q => dist(p, q))) / reach), 0)));
+  }
   const handStreet = name => {
     const f = drawn.find(x => x.tags.name === name && x.lines.length);
     if (!f) throw new Error(`${where}: no street named "${name}" in the city's .osm`);
@@ -296,7 +314,7 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
         }
       }
     }
-    const k = { spec, random, noise, zone, ground, region, open, m, range, handStreet, drawn, waterArea, H, rise, T, inRegion: within(region), inOpen: within(open), where: `${where} ${spec.place}` };
+    const k = { spec, random, noise, zone, ground, region, open, m, range, handStreet, drawn, waterArea, H, rise, T, fields, inRegion: within(region), inOpen: within(open), where: `${where} ${spec.place}` };
     const pattern = PATTERNS[spec.pattern];
     if (!pattern) throw new Error(`${where}: district ${spec.place}: no pattern "${spec.pattern}" (${Object.keys(PATTERNS).join(', ')})`);
     const { streets = [], bridges = [], parts = [] } = pattern(k);
@@ -324,7 +342,14 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
         const use = useOf(own, block, k);
         if (use.tags) for (const poly of polygons(grow(paths, -m(use.inset ?? 2)))) emitArea(poly, use.tags);
         if (use.strip) strip(block, paths, use.strip, k, n, emitArea);
-        if (use.plots) { const P = use.plots === true ? own.plots : { ...(own.plots ?? {}), ...use.plots }; (P.fill ? solid : plots)(block, paths, P, k, n, emitArea); }
+        if (use.plots) {
+          let P = use.plots === true ? own.plots : { ...(own.plots ?? {}), ...use.plots };
+          // Wealth: a district's `rich` and `poor` settings, mixed into its plots as far as the
+          // field it names (`wealth`, "rich" if it names none) says, there.
+          const wf = fields[spec.wealth ?? 'rich'];
+          if (wf && (spec.rich || spec.poor)) { const v = wf(c); P = mix(P, v >= 0 ? spec.rich ?? {} : spec.poor ?? {}, Math.abs(v)); }
+          (P.fill ? solid : plots)(block, paths, P, k, n, emitArea);
+        }
       }
     }
     counts[spec.place] = n;
@@ -337,12 +362,17 @@ export function fabric({ recipe, hand, places, land, map, toMap, toGlobe, earthT
 // down its middle (`strip`: a rope-walk), plots (`plots`: true for the district's, or settings
 // over them), or several together. A weight given as [near, far] runs from one to the other
 // between `from` and `to` metres from `centre`, so a fringe can thin into the country.
+// With `by`, a value field instead: a weight's [near, far] runs from where the field is full to
+// where it is nothing (an entry can name its own `by`).
 function useOf(spec, block, k) {
   const U = spec.uses;
   if (!U) return { plots: true };
   const c = centroid(block[0]);
-  const t = U.from === undefined ? 0 : Math.max(0, Math.min(1, (dist(c, U.centre ?? [0, 0]) - k.m(U.from)) / (k.m(U.to) - k.m(U.from))));
-  const weights = U.list.map(u => (Array.isArray(u.weight) ? u.weight[0] + (u.weight[1] - u.weight[0]) * t : u.weight ?? 1));
+  const tOf = by => {
+    if (by) { const f = k.fields[by]; if (!f) throw new Error(`${k.where}: uses: no value field "${by}"`); return 1 - Math.max(0, Math.min(1, f(c))); }
+    return U.from === undefined ? 0 : Math.max(0, Math.min(1, (dist(c, U.centre ?? [0, 0]) - k.m(U.from)) / (k.m(U.to) - k.m(U.from))));
+  };
+  const weights = U.list.map(u => { const t = tOf(u.by ?? U.by); return Array.isArray(u.weight) ? u.weight[0] + (u.weight[1] - u.weight[0]) * t : u.weight ?? 1; });
   let x = k.random() * weights.reduce((a, b) => a + b, 0);
   for (let i = 0; i < weights.length; i++) if ((x -= weights[i]) < 0) return U.list[i];
   return U.list[U.list.length - 1];
@@ -357,6 +387,20 @@ function strip(block, blockPaths, St, k, n, emitArea) {
   const pieces = polygons(inter(union([toPath(rect)]), grow(blockPaths, -m(St.clear ?? 6))));
   const best = pieces.sort((p, q) => areaOf(q.map(toPath)) - areaOf(p.map(toPath)))[0];
   if (best && areaOf(best.map(toPath)) > m(St.width ?? 8) * m(St.least ?? 80)) { emitArea(best, St.tags ?? { building: 'yes' }); n.buildings++; }
+}
+
+// Settings mixed a share t of the way towards others: numbers and [least, most] ranges in
+// between, nested settings likewise, anything else (a tag, a kind) the other's past halfway.
+function mix(a, b, t) {
+  if (typeof a === 'number' && typeof b === 'number') return a + (b - a) * t;
+  if (Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every(x => typeof x === 'number')) return a.map((x, i) => x + (b[i] - x) * t);
+  if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a) && !Array.isArray(b)) {
+    const out = { ...a };
+    for (const [key, v] of Object.entries(b)) out[key] = key in a ? mix(a[key], v, t) : (t > 0.5 ? v : undefined);
+    for (const key of Object.keys(out)) if (out[key] === undefined) delete out[key];
+    return out;
+  }
+  return t > 0.5 ? b : a;
 }
 
 // The smallest rectangle round a ring (its convex hull's, on the side that fits it closest): its
