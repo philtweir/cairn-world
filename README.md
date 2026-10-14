@@ -524,6 +524,28 @@ The Ruiata map is another city's, at the same scale, anchored at Earth 37.62°E 
 the universe's Tor Ruiait, a `mesa` about 3 by 2 km on the globe, its top about 180 m above the
 plain, and the Antenexus's Ruiata, Miurna's capital, on its top.
 
+**Cities** (`layers/<layer>/cities/*.osm`, `src/osm.mjs`). A city is drawn in OpenStreetMap's own
+format, so it can be edited in [JOSM](https://josm.openstreetmap.de/) like any map: open the file
+(File > Open; it stays a local file, and its `upload="never"` keeps JOSM from offering to send it
+to OpenStreetMap), draw, save. Coordinates are Earth's, so the real place under it (Belfast, for
+Ephemeristorum), its historical maps and its elevation all line up in JOSM; `npm run globe -- <layer>`
+remaps them like any Earth shape. OpenStreetMap's tags say what each thing is
+([Map features](https://wiki.openstreetmap.org/wiki/Map_features)), with dates as OpenHistoricalMap
+writes them (`start_date:edtf`):
+
+- An element tagged `cairn:id=<ResourceID>` is that place's geometry, in place of a row in
+  `globe.csv` (the entry itself, its name and what it lies within, stays in `place.csv`). The
+  Orbital and the Serpentine are drawn this way.
+- Everything else is drawing, written to the layer's `city.json`: streets (`highway`: major,
+  street, path), buildings, water (`waterway`, `natural=water`, a canal's banks as `area=yes`),
+  rail and lifts (`railway`, `aerialway`), walls (`barrier=city_wall`), green and other ground
+  (`landuse`, `leisure`). The explorer draws it under the places once a map is within about 40 km,
+  each kind kept as parts with their bounds so only those in view are drawn. Nothing in it is an
+  entry: a ward, a market or a station worth a page gets a row in `place.csv` and a `cairn:id`.
+
+Ephemeristorum's file so far holds the Orbital and the Serpentine, their water, the two bridges
+over the Serpentine and Ephe's wall.
+
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
 edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
