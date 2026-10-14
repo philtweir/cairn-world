@@ -104,12 +104,14 @@ function inRing([x, y], ring) {
 
 // What the explorer draws an element as, from its tags; null for what it does not draw. Areas
 // are filled, lines stroked; the classes are drawn in this order, ground first.
-export const CITY_CLASSES = ['ground', 'green', 'water', 'path', 'street', 'major', 'rail', 'wall', 'building'];
+export const CITY_CLASSES = ['ground', 'green', 'water', 'under', 'path', 'street', 'major', 'rail', 'wall', 'building'];
 const GREEN = /^(park|garden|grass|cemetery|grave_yard|wood|forest|meadow|orchard|allotments|village_green|recreation_ground|scrub|heath)$/;
 const MAJOR = /^(motorway|trunk|primary|secondary|tertiary)(_link)?$/;
 const PATH = /^(footway|path|steps|pedestrian|cycleway|track|bridleway|corridor)$/;
 export function classify(tags, type) {
   const area = type === 'Polygon' || type === 'MultiPolygon';
+  // Underground (a tunnel, a cellar's passage): drawn faint, under the streets.
+  if (!area && (tags.tunnel === 'yes' || Number(tags.layer) < 0) && (tags.highway || tags.railway)) return 'under';
   if (tags.building) return area ? 'building' : null;
   if (tags.natural === 'water' || tags.water || tags.landuse === 'basin' || tags.landuse === 'reservoir' || tags.leisure === 'marina' || tags.waterway === 'dock' || tags.waterway === 'riverbank') return area ? 'water' : null;
   if (tags.waterway) return 'water';
