@@ -13,39 +13,39 @@
           40
         ],
         "length": [
-          120,
-          750
+          60,
+          380
         ],
         "angle": 14,
         "curl": 4,
         "fork": 0.3,
         "steps": 0.45,
         "width": 3,
-        "start": 70,
-        "end": 80,
+        "start": 40,
+        "end": 40,
         "note": "A close off the Spine"
       },
       "backs": [
         {
-          "at": 190,
-          "wander": 35
+          "at": 100,
+          "wander": 20
         },
         {
-          "at": -190,
-          "wander": 35
+          "at": -100,
+          "wander": 20
         },
         {
-          "at": 420,
-          "wander": 45
+          "at": 220,
+          "wander": 30
         },
         {
-          "at": -420,
-          "wander": 45
+          "at": -220,
+          "wander": 30
         }
       ],
       "backsNote": "A lane across the closes, as the Cowgate runs below the Royal Mile",
       "fill": {
-        "spacing": 60,
+        "spacing": 45,
         "vary": 0.35,
         "relax": 1,
         "warp": 10,
@@ -112,27 +112,27 @@
       "passages": {
         "beside": [
           {
-            "at": 90,
+            "at": 50,
+            "wander": 15
+          },
+          {
+            "at": -50,
+            "wander": 15
+          },
+          {
+            "at": 160,
             "wander": 30
           },
           {
-            "at": -90,
+            "at": -160,
             "wander": 30
-          },
-          {
-            "at": 330,
-            "wander": 50
-          },
-          {
-            "at": -330,
-            "wander": 50
           }
         ],
         "round": {
           "place": "exarchs-palace",
-          "radius": 210
+          "radius": 110
         },
-        "branches": 60,
+        "branches": 40,
         "note": "A passage of the undercity"
       }
     },
@@ -141,7 +141,7 @@
       "pattern": "quarters",
       "margin": 4,
       "quarters": {
-        "count": 6,
+        "count": 4,
         "warp": 18,
         "scale": 220,
         "width": 6,
@@ -150,7 +150,7 @@
           {
             "name": "harbourside",
             "near": {
-              "landuse": "port"
+              "name": "Stora's Port"
             },
             "organic": {
               "spacing": 75,
@@ -258,7 +258,6 @@
           },
           {
             "name": "delegations",
-            "weight": 1.2,
             "organic": {
               "spacing": 95,
               "vary": 0.35,
@@ -300,6 +299,9 @@
               "gardens": {
                 "least": 150
               }
+            },
+            "near": {
+              "name": "The Delegates' Hall"
             }
           }
         ]
@@ -651,6 +653,6 @@
     }
   ],
   "terrain": {
-    "cliff": 0.7
+    "cliff": 0.9
   }
 }

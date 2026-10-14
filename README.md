@@ -511,18 +511,20 @@ Hearth to the Trading Post about one 30 km watch.
 
 The Lough map is a city's: 100 m to a map unit, anchored at Earth 5.944°W 54.596°N in Belfast, with
 the 1:10m coast half a degree around it. On it the Antenexus draws Ephemeristorum: the Orbital, a
-ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km), broken where the
-real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
-an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
-lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
-Ephe is the universe's Mound (the Hill, as the Antenexus calls it), a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
-Exarch's Palace, about 120 m above the city's centre, steep to the Serpentine's side, and its tail
-falling round Ephe's lough side towards its port to about 45 m.
+ring of water about two kilometres across its outer bank on the globe (the remap squeezes Belfast),
+which the real Lagan reaches at the weir, to the north-west of the globe's map; inside it the
+island of the twin cities, about a kilometre across, the Serpentine an S across it at right angles
+to the weir's bearing, and Ephe and Stora the halves it divides, Ephe on the lough's side. The city
+itself is a disc about 8 km across the ground, cut to the 1:10m land. Under Ephe is the universe's
+Mound (the Hill, as the Antenexus calls it), a `crag` the size of Edinburgh's Castle Rock and Royal
+Mile ridge: the crag, under the Exarch's Palace, about 120 m above the city's centre, its scarp
+falling some 100 m to the low ground on the Serpentine's side, and its tail falling round Ephe's
+lough side towards its port.
 The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is
-in `globe.water`, so it is cut out of the land from the lough up to the Orbital's break: a ship's
-way in. Just outside the break it widens into a pool about 280 m across, where a steamer can turn,
-and inside it a `cut` makes Ephe's quay, a shelf about 4 m up and 150 m deep cut into the foot of
-the Mound's tail, under a wall about 40 m high. The map's own relief is finer than other maps' (`fine` below).
+in `globe.water`, so it is cut out of the land from the lough up to the Orbital's outer bank: a
+ship's way in. There it widens into a pool about 280 m across, where a steamer can turn, and a lock
+takes ships up into the Orbital; across the moat a `cut` makes Ephe's quay, a shelf about 4 m up and
+80 m deep cut into the foot of the Mound's tail. The map's own relief is finer than other maps' (`fine` below).
 
 The Ruiata map is another city's, at the same scale, anchored at Earth 37.62°E 55.75°N in Moscow: on it
 the universe's Tor Ruiait, a `mesa` about 3 by 2 km on the globe, its top about 180 m above the
@@ -579,13 +581,24 @@ an outline in `globe.csv`), a `pattern`, and optionally a `margin` kept clear in
 - `rings`: quay streets along the district's hand-drawn canals (`rings.quay` metres out), cross
   streets between them square to the canals at uneven `spacing`, and `through` streets (bearings,
   from `centre`, between `from` and `to` metres) bridging each canal.
+- `quarters`: the district cut into `quarters.count` quarters (a warped Voronoi), market streets
+  (`width`) between them, each grown as one of `quarters.list` says: its own `organic` streets and
+  its own `plots`, chosen at random by `weight`, or the one `near` a hand-drawn feature with those
+  tags (`{ "name": "Stora's Port" }`: the harbourside by the port).
 - `frontage`: no new streets, only plots along what is there.
 - `passages`: tunnels only (`passages.beside` a street, `round` a place at a `radius`, and
   `branches` off them), drawn faint under everything, with no plots.
 
 Any pattern but `passages` may add a `fill`: an `organic` network (its settings) grown only where
 the pattern leaves open ground (Ephe beyond the Spine's ends). The blocks between the streets are
-then cut into `plots` along their edges, side by side at uneven `width` (and now and then a `wide`
+then built on one of two ways. With `plots.fill`, a block is filled solid, as an old town's are,
+the way the wards of Watabou's Medieval Fantasy City Generator are built: cut in two across its
+length, near the middle and a little askew (`chaos`), and each half again, until the pieces are a
+building's size (`area` square metres, `vary`ing); the larger cuts leave an `alley` between, and
+now and then a piece is left open (`empty`), a garden by `garden`'s chance. `courtyard` builds a
+large house round a court (its `chance`, the `least` size, the range's `depth`); `misfit` takes a
+piece whole, up to its `area`, for one of its `tags` (a chapel, a hall, an old tower). Otherwise
+a block is cut into `plots` along its edges, side by side at uneven `width` (and now and then a `wide`
 one), `depth` deep, the sides parting at corners; each plot, unless left empty (`cover`, a chance,
 clustered by noise), has a building at its front, `setback` from its edge and `build` deep, `gap`
 from its neighbours, tagged `building` (its kind), `building:levels` (from `levels`) and `tags`.
@@ -597,22 +610,39 @@ a rope-walk), plots (`plots: true`, or settings over the district's), or several
 [near, far] runs between the two from `from` to `to` metres off `centre`, so a fringe thins into the
 country.
 
-Ephemeristorum's hand-kept file holds the entries and what stands by design: the Orbital and the
-Serpentine and their water, Ephe's wall, the Spine, the Exarch's Palace (a Greek cross) with its
-parterres and forecourt, the crest streets, Ephe's quay (warehouses, accumulator, cranes, funiculars,
-the lock), the Avenue, Stora's hall, square and port, the bridges over the Orbital, the four ring
-canals (dug in straight reaches with bends, opening onto the lough), the roads round the Orbital and
-beyond the rings, docks dug into the shore between the canals' mouths, a rope-walk, a shipyard, the
-walled trading houses of the nations, and the estuary's walled banks; and the districts and wards:
-the Crag, the Closes, Ephe's Quay and the Undercity; Stora; the Old Verge, the Rings, the Docks (a
-waterfront some 400 m deep) and the Outer Verge. Its recipe builds Ephe as an old town on a ridge
-(closes off the Spine and lanes across them, wynds beyond its ends, lands six to eleven storeys),
-the Crag's houses about the palace, the undercity's passages, Stora's walled compounds in gardens,
-the Old Verge's crooked streets, the Rings' canal houses with gardens behind, the Docks' warehouses
-and labourers' houses, and the Outer Verge thinning from streets and workshops into villas, market
-gardens, orchards, tenter grounds, rope-walks and fields. Laid out so, the city holds some 150,000 to
-200,000 people, about Amsterdam's at the end of the 18th century. The streets' and districts' names
-are working names.
+The fabric is built on the ground's heights where the map has them (src/terrain.mjs keeps a city
+map's, `relief-<map>-fine.heights.gz`), and `terrain` (the recipe's, or a district's over it) says
+how: ground steeper than `cliff` (rise over run; 0.6) is left as bare rock, with flights of steps
+cut down it every `flights` metres; a lane steeper than `steps` (0.14) is steps, and a street
+steeper than `stairs` (0.2); closes are drawn downhill (`fall`) off the sides of their street, not
+down its length; lanes beside a street keep to their level, as lanes along a hill do; and on a
+slope an `organic` network's seeds are kept closer downhill than across (`terrace`), so its blocks
+lie along the contours.
+
+Ephemeristorum is a fortress city on an island, the twin cities of Ephe and Stora some 1 km across
+inside the Orbital, a moat some 500 m wide, with the Verge on its far bank. Its hand-kept file holds
+the entries and what stands by design: the Orbital's water (its inner bank the island's bastioned
+walls, its outer the Verge's quays) and the lock through its outer bank from the estuary's pool;
+the Serpentine and its water and its two bridges; Ephe's wall, the Spine, the Exarch's Palace (a
+Greek cross) with its parterres and forecourt, the crest streets, and Ephe's quay (warehouses,
+accumulator, cranes, funiculars); the Avenue, the Delegates' Hall and square at its head, Stora's
+port, and its three causeways over the moat, each with its gatehouses; the four ring canals (dug in
+straight reaches with bends, opening onto the lough), the roads round the Orbital and beyond the
+rings, docks dug into the shore between the canals' mouths, a rope-walk, a shipyard, the walled
+trading houses of the nations, and the estuary's walled banks; and the districts and wards: the
+Crag, the Closes, Ephe's Quay and the Undercity; Stora; the Old Verge, the Rings, the Docks (a
+waterfront some 400 m deep) and the Outer Verge. The crag-and-tail under Ephe is the size of
+Edinburgh's Castle Rock and Royal Mile ridge, its scarp some 100 m high, bare rock with steps cut
+down it. The recipe builds Ephe as an old town on that ridge (closes falling off both sides of the
+Spine, lanes across them, wynds beyond its ends, lands six to eleven storeys, every block solid),
+the Crag's houses about the palace, the undercity's passages, Stora as quarters (a harbourside,
+mazes of alleys with courtyard houses, gardens and misfits, and the walled compounds of the
+delegations about their hall), the Old Verge's crooked streets packed solid, the Rings' canal
+houses with gardens behind, the Docks' warehouses and labourers' houses, and the Outer Verge
+thinning from streets and workshops into villas, market gardens, orchards, tenter grounds,
+rope-walks and fields. Laid out so, the city holds some 150,000 to 200,000 people, about
+Amsterdam's at the end of the 18th century: some 30,000 in Ephe, perhaps 10,000 in Stora. The
+streets' and districts' names are working names.
 
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
