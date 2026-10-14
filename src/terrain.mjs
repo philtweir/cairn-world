@@ -46,6 +46,7 @@
 // The shapes are noise (seeded, so a bake is repeatable), as fine as the image being baked holds.
 
 import fs from 'node:fs';
+import zlib from 'node:zlib';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -534,7 +535,17 @@ for (const [name, map] of Object.entries(maps).filter(([, m]) => m.extent)) {
   const corners = [[a - mx, b - my], [c + mx, b - my], [a - mx, d + my], [c + mx, d + my]].map(p => mapToGlobe(map, remap, p));
   const snap = (v, up) => (up ? Math.ceil(v / fine.step) : Math.floor(v / fine.step)) * fine.step;
   const bbox = [snap(Math.min(...corners.map(p => p[0]))), snap(Math.min(...corners.map(p => p[1]))), snap(Math.max(...corners.map(p => p[0])), true), snap(Math.max(...corners.map(p => p[1])), true)].map(v => Math.round(v * 1e4) / 1e4);
-  const { image } = await bake({ ...fine, name: `${name}-fine` }, bbox, seaOf(name));
+  const { image, heights } = await bake({ ...fine, name: `${name}-fine` }, bbox, seaOf(name));
+  // A city's map keeps its heights too, true to a decimetre (the image's alpha is too coarse for a
+  // slope): relief-<name>-fine.heights.gz, gzipped little-endian 16-bit decimetres, row by row from
+  // the north, as the image is. src/fabric.mjs builds on them (steps, terraces, bare rock).
+  if (fine.step <= 0.001) {
+    const dm = new Int16Array(heights.length);
+    heights.forEach((h, i) => { dm[i] = Math.max(-32768, Math.min(32767, Math.round(h * 10))); });
+    const file = `relief-${name}-fine.heights.gz`;
+    fs.writeFileSync(path.join(dir, file), zlib.gzipSync(Buffer.from(dm.buffer), { level: 9 }));
+    image.heights = file;
+  }
   images.push({ ...image, name: `${name}-fine` });
 }
 fs.writeFileSync(path.join(dir, 'rivers.json'), JSON.stringify({ type: 'FeatureCollection', features: riverFeatures }));
