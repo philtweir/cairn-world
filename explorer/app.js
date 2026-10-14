@@ -268,8 +268,10 @@ const basemap = () => (state.basemap ??= (() => {
   };
   // Relief images sit beside relief.json; each gets its address here.
   const reliefDir = () => { const key = [...(view?.stack ?? [])].reverse().find(k => state.viewsMeta.layers[k]?.relief); return key && `${DATA}/${state.viewsMeta.layers[key].relief.replace(/[^/]*$/, '')}`; };
-  return Promise.all([get('basemap'), get('rivers'), get('relief'), get('city')]).then(([b, rv, r, city]) => (b ? {
-    ...b, features: [...b.features, ...(rv?.features ?? []), ...(city?.features ?? [])],
+  return Promise.all([get('basemap'), get('rivers'), get('relief')]).then(([b, rv, r]) => (b ? {
+    ...b, features: [...b.features, ...(rv?.features ?? [])],
+    // A city's streets and buildings are fetched only when a map first comes close to one.
+    city: () => (state.city ??= get('city') ?? Promise.resolve(null)),
     relief: r ? { ...r, images: r.images.map(i => ({ ...i, url: `${reliefDir()}${i.file}${V}` })) } : null,
   } : null));
 })());

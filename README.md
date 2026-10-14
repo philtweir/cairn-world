@@ -515,7 +515,7 @@ ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km)
 real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
 an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
 lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
-Ephe is the universe's Mound, a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
+Ephe is the universe's Mound (the Hill, as the Antenexus calls it), a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
 Exarch's Palace, about 120 m above the city's centre, steep to the Serpentine's side, and its tail
 falling round Ephe's lough side towards its port to about 45 m.
 The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is
@@ -539,16 +539,33 @@ writes them (`start_date:edtf`):
 
 - An element tagged `cairn:id=<ResourceID>` is that place's geometry, in place of a row in
   `globe.csv` (the entry itself, its name and what it lies within, stays in `place.csv`). The
-  Orbital and the Serpentine are drawn this way.
+  Orbital and the Serpentine are drawn this way. If its tags also say what it is (a building, a
+  canal), it is drawn with the rest as well.
 - Everything else is drawing, written to the layer's `city.json`: streets (`highway`: major,
   street, path), buildings, water (`waterway`, `natural=water`, a canal's banks as `area=yes`),
   rail and lifts (`railway`, `aerialway`), walls (`barrier=city_wall`), green and other ground
-  (`landuse`, `leisure`). The explorer draws it under the places once a map is within about 40 km,
-  each kind kept as parts with their bounds so only those in view are drawn. Nothing in it is an
+  (`landuse`, `leisure`), and what is underground (`tunnel=yes` or a negative `layer`), drawn faint
+  and dotted. Tagged nodes (a crane, a lock gate) stay in the file but are not drawn. The explorer
+  fetches `city.json` only when a map first comes within about 40 km of a city, and draws it under
+  the places, each kind kept as parts with their bounds so only those in view are drawn. Nothing in it is an
   entry: a ward, a market or a station worth a page gets a row in `place.csv` and a `cairn:id`.
 
-Ephemeristorum's file so far holds the Orbital and the Serpentine, their water, the two bridges
-over the Serpentine and Ephe's wall.
+Ephemeristorum's file was seeded with a first pass of the city, to be redrawn in JOSM from here:
+
+- Ephe: the Spine down the Mound's tail from the palace to the quay, closes and steps off both sides
+  every 40 m, the tall lands between them, the crest's wide streets and houses about the palace, the
+  quay with its warehouses, accumulator, cranes, two funiculars and the lock, and the undercity's
+  passages; its districts the Crag, the Closes, Ephe's Quay and the Undercity.
+- Stora: the Avenue (the Spine turned half round, as Stora is Ephe's half turned), lanes, walled
+  delegations' compounds with their houses and gardens, the hall and square at its head, its port on
+  the Orbital and four bridges over it into the Verge.
+- The Verge: four ring canals, horseshoes opening onto the lough, with quay streets; radial streets;
+  some 150 blocks of canal houses; three docks with quays and warehouses, a rope-walk and a shipyard;
+  the walled trading houses of the nations; the walled banks of the estuary; its wards the Old Verge,
+  the Rings, the Docks and the Outer Verge.
+
+The Orbital, the Serpentine, the districts and the wards are entries (`cairn:id`); the rest is drawing.
+The streets' and districts' names are working names.
 
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story

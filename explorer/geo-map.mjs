@@ -143,7 +143,22 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   const gCity = svg('g', { class: 'city' });
   el.append(gCity, gWater, gShapes, gLines, gPoints, gLabels);
   const KINDS = { land: 'land', unnamed: 'land unnamed' };
-  let coarse = [], holes = [], details = [], water = [], city = [], relief = null;
+  let coarse = [], holes = [], details = [], water = [], city = [], relief = null, loadCity = null, cityAsked = false;
+  // Cities: each class's areas and lines, kept as parts with their bounds, in the order given;
+  // fetched the first time this map comes close enough to draw them.
+  const askCity = () => {
+    if (cityAsked || !loadCity) return;
+    cityAsked = true;
+    loadCity().then(c => {
+      for (const f of c?.features ?? []) {
+        if (f.properties.kind !== 'city') continue;
+        const area = f.properties.area, node = svg('path', { class: `${f.properties.class} ${area ? 'area' : 'line'}` });
+        gCity.append(node);
+        city.push({ node, type: area ? 'MultiPolygon' : 'MultiLineString', polys: f.geometry.coordinates.map(cc => ({ c: cc, b: geoBounds({ type: area ? 'Polygon' : 'LineString', coordinates: cc }) })) });
+      }
+      schedule();
+    });
+  };
   basemap?.then(b => {
     if (b?.relief?.images?.length) {
       try { relief = reliefLayer(canvas, b.relief); } catch (err) { console.warn('relief:', err); relief = null; }
@@ -187,12 +202,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
       (f.properties.kind === 'river' ? gRiversCoarse : gRiversDetail).append(node);
       water.push({ node, polys: parts(f.geometry, 'river'), type: 'MultiLineString', w: f.properties.w });
     }
-    // Cities: each class's areas and lines, kept as parts with their bounds, in the order given.
-    for (const f of fs.filter(f => f.properties.kind === 'city')) {
-      const area = f.properties.area, node = svg('path', { class: `${f.properties.class} ${area ? 'area' : 'line'}` });
-      gCity.append(node);
-      city.push({ node, type: area ? 'MultiPolygon' : 'MultiLineString', polys: f.geometry.coordinates.map(c => ({ c, b: geoBounds({ type: area ? 'Polygon' : 'LineString', coordinates: c }) })) });
-    }
+    loadCity = b?.city ?? null;
     put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
     schedule();
   });
@@ -272,6 +282,7 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
     // A city only close in: half the view under about 0.4 degrees (some 40 km), so a city's own
     // page, framed on it, shows it.
     const inCity = span < 0.4;
+    if (inCity) askCity();
     gCity.style.display = inCity ? '' : 'none';
     for (const x of city) x.node.setAttribute('d', inCity ? path({ type: x.type, coordinates: x.polys.filter(near).map(p => p.c) }) ?? '' : '');
     relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });

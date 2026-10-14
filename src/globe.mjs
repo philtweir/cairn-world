@@ -367,7 +367,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       if (id) {
         if (rows.some(r => r.id === id)) throw new Error(`${where}: ${f.kind} ${f.id} is the shape of "${id}", which ${rows.find(r => r.id === id).osm ? 'another element' : 'globe.csv'} already gives`);
         rows.push({ id, earth: '', map: '', osm: f.geometry, where: `${where} ${f.kind} ${f.id}` });
-      } else {
+      }
+      // Drawn too if its tags say what it is (an entry that is also a building or a canal).
+      if (f.geometry.type !== 'Point') {
+        // A tagged node (a crane, a lock gate) is not drawn, only kept in the file.
         const cls = classify(f.tags, f.geometry.type);
         if (cls) cityDrawing.push({ cls, geometry: f.geometry });
       }
