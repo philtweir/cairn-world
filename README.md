@@ -612,7 +612,7 @@ country.
 
 The fabric is built on the ground's heights where the map has them (src/terrain.mjs keeps a city
 map's, `relief-<map>-fine.heights.gz`), and `terrain` (the recipe's, or a district's over it) says
-how: ground steeper than `cliff` (rise over run; 0.6) is left as bare rock, with flights of steps
+how: ground steeper than `cliff` (rise over run; 0.6, Ephemeristorum 1.4) is left as bare rock, with flights of steps
 cut down it every `flights` metres; a lane steeper than `steps` (0.14) is steps, and a street
 steeper than `stairs` (0.2); closes are drawn downhill (`fall`) off the sides of their street, not
 down its length; lanes beside a street keep to their level, as lanes along a hill do; and on a
