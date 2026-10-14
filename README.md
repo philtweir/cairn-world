@@ -539,7 +539,8 @@ writes them (`start_date:edtf`):
 
 - An element tagged `cairn:id=<ResourceID>` is that place's geometry, in place of a row in
   `globe.csv` (the entry itself, its name and what it lies within, stays in `place.csv`). The
-  Orbital and the Serpentine are drawn this way.
+  Orbital and the Serpentine are drawn this way. If its tags also say what it is (a building, a
+  canal), it is drawn with the rest as well.
 - Everything else is drawing, written to the layer's `city.json`: streets (`highway`: major,
   street, path), buildings, water (`waterway`, `natural=water`, a canal's banks as `area=yes`),
   rail and lifts (`railway`, `aerialway`), walls (`barrier=city_wall`), green and other ground
