@@ -26,6 +26,8 @@
 //           volcano: a stratovolcano rising to `value` metres over `radius` km, its flanks cut by
 //             wandering gullies
 //           plain: lowland levelled towards `value` metres, gently rolling
+//           mesa: a flat top at `value` metres inside a POLYGON, broken off in steep scarps over
+//             the `radius` km about its ragged edge (a table hill a city can stand on)
 // Every edit leaves the sea as it is, and the coast where Earth has it (see `ashore`).
 //           dunes: a plain of hummocks
 //           river: a valley carved along a LINESTRING, drawn downstream: a floor `radius` km to
@@ -301,8 +303,8 @@ const placeAt = new Map(place.slice(1).filter(r => r[gcol]).map(r => {
 }));
 const maps = settings.globe.maps ?? {};
 const mapCoords = (map, c) => (typeof c[0] === 'number' ? mapToGlobe(map, remap, c) : c.map(x => mapCoords(map, x)));
-const KINDS = ['scale', 'raise', 'mountains', 'volcano', 'plain', 'dunes', 'river'];
-const SHAPES = { scale: ['Point'], raise: ['Point'], volcano: ['Point'], mountains: ['Point', 'Polygon'], plain: ['Polygon'], dunes: ['Polygon'], river: ['LineString'] };
+const KINDS = ['scale', 'raise', 'mountains', 'volcano', 'plain', 'dunes', 'mesa', 'river'];
+const SHAPES = { scale: ['Point'], raise: ['Point'], volcano: ['Point'], mountains: ['Point', 'Polygon'], plain: ['Polygon'], dunes: ['Polygon'], mesa: ['Polygon'], river: ['LineString'] };
 const editsFile = path.join(dir, 'terrain.csv');
 const rows = fs.existsSync(editsFile) ? parseCsv(fs.readFileSync(editsFile, 'utf8')) : [['kind']];
 const col = n => rows[0].indexOf(n);
@@ -375,6 +377,13 @@ function applyEdit(e, h, p) {
       // Levelled, not erased: what was there is kept at a sixth of its relief.
       const target = Math.max(2, rolling);
       return Math.max(1, target + (h - target) * (1 - 0.85 * m));
+    }
+    case 'mesa': {
+      // Flat but for a few per cent of roughness, and the scarp kept to the middle of the edge's fade.
+      const m = e.inside(x, y);
+      if (m <= 0 || h <= 0) return h;
+      const top = e.value * (1 + 0.03 * fbm(e.noise, x, y, 6)), cliff = smoothstep(Math.min(1, Math.max(0, (m - 0.35) / 0.3)));
+      return h + (Math.max(h, top) - h) * cliff * ashore(p);
     }
     case 'river': {
       // Meandering: the distance is measured from a point nudged by noise at two scales.

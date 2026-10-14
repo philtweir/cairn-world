@@ -2,7 +2,7 @@
  "kind": "relief",
  "source": "Terrain Tiles (Mapzen/Tilezen, AWS Open Data: SRTM, GMTED2010, ETOPO1, EU-DEM and others), remapped",
  "top": 4500,
- "edits": 18,
+ "edits": 19,
  "images": [
   {
    "file": "relief-world.webp",
@@ -44,6 +44,19 @@
    "name": "lough"
   },
   {
+   "file": "relief-ruiata.webp",
+   "bbox": [
+    -18.41,
+    17.93,
+    -16.38,
+    19.95
+   ],
+   "width": 204,
+   "height": 203,
+   "step": 0.01,
+   "name": "ruiata"
+  },
+  {
    "file": "relief-dells-fine.webp",
    "bbox": [
     -11.2975,
@@ -68,6 +81,19 @@
    "height": 204,
    "step": 0.0004,
    "name": "lough-fine"
+  },
+  {
+   "file": "relief-ruiata-fine.webp",
+   "bbox": [
+    -17.452,
+    18.8816,
+    -17.3376,
+    18.99
+   ],
+   "width": 287,
+   "height": 272,
+   "step": 0.0004,
+   "name": "ruiata-fine"
   }
  ]
 }
