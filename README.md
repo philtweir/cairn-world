@@ -610,6 +610,15 @@ a rope-walk), plots (`plots: true`, or settings over the district's), or several
 [near, far] runs between the two from `from` to `to` metres off `centre`, so a fringe thins into the
 country.
 
+The recipe's `value` names fields over the city, each a list of poles: hand-drawn features with
+some tags (`near`, as `{ "cairn:pole": "gates" }` or `{ "waterway": "dock" }`) or a point (`at`,
+metres east and south on the map), each pulling with a `weight` (a minus to push) that falls away
+as e^-(distance/`reach`). A district's `rich` and `poor` settings are mixed into its plots as far
+as its `wealth` field (`rich` unless it names another) says, towards `rich` where the field is
+positive and `poor` where it is negative: plot widths, building sizes, heights, gardens, courts.
+With `uses.by` (or an entry's own `by`) a field drives a block's use instead of distance from
+`centre`: a weight's [near, far] runs from where the field is full to where it is nothing.
+
 The fabric is built on the ground's heights where the map has them (src/terrain.mjs keeps a city
 map's, `relief-<map>-fine.heights.gz`), and `terrain` (the recipe's, or a district's over it) says
 how: ground steeper than `cliff` (rise over run; 0.6, Ephemeristorum 1.4) is left as bare rock, with flights of steps
@@ -629,9 +638,11 @@ accumulator, cranes, funiculars); the Avenue, the Delegates' Hall and square at 
 port, and its three causeways over the moat, each with its gatehouses; the four ring canals (dug in
 straight reaches with bends, opening onto the lough), the roads round the Orbital and beyond the
 rings, docks dug into the shore between the canals' mouths, a rope-walk, a shipyard, the walled
-trading houses of the nations, and the estuary's walled banks; and the districts and wards: the
+trading houses of the nations, the Exchange on its square at the head of Stora's middle causeway,
+the Bond (walled bonded stores by the lock), hulks moored in the Orbital, and the estuary's walled
+banks; and the districts and wards: the
 Crag, the Closes, Ephe's Quay and the Undercity; Stora; the Old Verge, the Rings, the Docks (a
-waterfront some 400 m deep) and the Outer Verge. The crag-and-tail under Ephe is the size of
+waterfront some 400 m deep), the Outer Verge and the Gates. The crag-and-tail under Ephe is the size of
 Edinburgh's Castle Rock and Royal Mile ridge, its scarp some 100 m high, bare rock with steps cut
 down it. The recipe builds Ephe as an old town on that ridge (closes falling off both sides of the
 Spine, lanes across them, wynds beyond its ends, lands six to eleven storeys, every block solid),
@@ -640,7 +651,12 @@ mazes of alleys with courtyard houses, gardens and misfits, and the walled compo
 delegations about their hall), the Old Verge's crooked streets packed solid, the Rings' canal
 houses with gardens behind, the Docks' warehouses and labourers' houses, and the Outer Verge
 thinning from streets and workshops into villas, market gardens, orchards, tenter grounds,
-rope-walks and fields. Laid out so, the city holds some 150,000 to 200,000 people, about
+rope-walks and fields. Its fields follow its trade, which is with the Committee Interior itself
+(as foreign trade with China once was only at Canton, and laid out as Amsterdam's staple market
+was): `busy` about the Gates (the Verge's ends of Stora's causeways, about the Exchange), the docks
+and the lock, where the bulk goods lie in bond (in the Bond, and in hulks moored in the Orbital);
+`rich` about the Gates and poor by the docks; and `works`, the trades that make up what is landed,
+on the north-east fringe, downwind. Laid out so, the city holds some 150,000 to 200,000 people, about
 Amsterdam's at the end of the 18th century: some 30,000 in Ephe, perhaps 10,000 in Stora. The
 streets' and districts' names are working names.
 
