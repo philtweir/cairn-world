@@ -87,6 +87,32 @@
           "zoom": 12,
           "exaggerate": 2
         }
+      },
+      "ruiata": {
+        "name": "Ruiata",
+        "anchor": {
+          "at": [
+            0,
+            0
+          ],
+          "earth": [
+            37.62,
+            55.75
+          ]
+        },
+        "kmPerUnit": 0.1,
+        "extent": [
+          -40,
+          -40,
+          40,
+          40
+        ],
+        "margin": 1,
+        "fine": {
+          "step": 0.0004,
+          "zoom": 12,
+          "exaggerate": 2
+        }
       }
     }
   }

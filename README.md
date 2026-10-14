@@ -520,6 +520,10 @@ The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel,
 in `globe.water`, so it is cut out of the land from the lough up to the Orbital's break: a ship's
 way in. The map's own relief is finer than other maps' (`fine` below).
 
+The Ruiata map is another city's, at the same scale, anchored at Earth 37.62°E 55.75°N in Moscow: on it
+the universe's Tor Ruiait, a `mesa` about 3 by 2 km on the globe, its top about 180 m above the
+plain, and the Antenexus's Ruiata, Miurna's capital, on its top.
+
 **Relief.** `npm run terrain -- <layer>` reads real elevation through the globe's remap (the
 inverse of the one above: each point of the globe is looked up on Earth), applies the layer's story
 edits, and bakes shaded-relief images in the globe's own longitude and latitude: one of the whole
@@ -545,6 +549,7 @@ in its own units (`dells POLYGON ((x y, ...))`), with a radius in km:
   by wandering gullies.
 - `plain` and `dunes`: lowland levelled towards a height (Earth's relief kept at a sixth), rolling
   or hummocky.
+- `mesa`: a flat top at a height inside a shape, broken off in steep scarps about its ragged edge.
 - `river`: a valley carved along a line drawn downstream. Its bed falls all the way, under the
   lowest ground near it, to the river it joins or the sea, and its walls widen where it cuts deep.
   So the rivers found from the heights run where the story puts them.
