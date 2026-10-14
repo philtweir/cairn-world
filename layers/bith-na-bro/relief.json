@@ -2,7 +2,7 @@
  "kind": "relief",
  "source": "Terrain Tiles (Mapzen/Tilezen, AWS Open Data: SRTM, GMTED2010, ETOPO1, EU-DEM and others), remapped",
  "top": 4500,
- "edits": 19,
+ "edits": 20,
  "images": [
   {
    "file": "relief-world.webp",
