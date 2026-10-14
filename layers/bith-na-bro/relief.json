@@ -80,6 +80,7 @@
    "width": 206,
    "height": 204,
    "step": 0.0004,
+   "heights": "relief-lough-fine.heights.gz",
    "name": "lough-fine"
   },
   {
@@ -93,6 +94,7 @@
    "width": 287,
    "height": 272,
    "step": 0.0004,
+   "heights": "relief-ruiata-fine.heights.gz",
    "name": "ruiata-fine"
   }
  ]

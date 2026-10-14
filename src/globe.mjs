@@ -31,6 +31,7 @@
 // remapped, for the explorer to draw under the places when a map is zoomed in close.
 
 import fs from 'node:fs';
+import zlib from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseOsm, osmFeatures, classify, CITY_CLASSES } from './osm.mjs';
@@ -442,7 +443,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const land = (detail.length ? detail : basemap.filter(f => /^(land|unnamed)$/.test(f.properties.kind))).map(f => f.geometry);
       const [lon0, lat0] = remap.toGlobe(map.anchor.earth), km = 6371 * deg;
       const toMap = ([lon, lat]) => [map.anchor.at[0] + (lon - lon0) * km * Math.cos(lat0 * deg) / map.kmPerUnit, map.anchor.at[1] - (lat - lat0) * km / map.kmPerUnit];
-      const { drawn, counts } = fabric({ recipe, hand: cityFeatures.get(name), places: geometryOf, land, map, toMap, toGlobe: p => mapToGlobe(map, remap, p), earthToGlobe: p => remap.toGlobe(p), where });
+      // The map's heights, if src/terrain.mjs has kept them (a city's map does), for the slopes.
+      const reliefFile = path.join(ROOT, 'layers', on ?? key, 'relief.json');
+      const image = fs.existsSync(reliefFile) ? JSON.parse(fs.readFileSync(reliefFile, 'utf8')).images.find(i => i.name === `${recipe.map}-fine` && i.heights) : null;
+      const heights = image && (raw => ({ grid: new Int16Array(raw.buffer, raw.byteOffset, raw.length / 2), width: image.width, height: image.height, bbox: image.bbox, step: image.step }))(zlib.gunzipSync(fs.readFileSync(path.join(path.dirname(reliefFile), image.heights))));
+      const { drawn, counts } = fabric({ recipe, hand: cityFeatures.get(name), places: geometryOf, land, map, toMap, toGlobe: p => mapToGlobe(map, remap, p), earthToGlobe: p => remap.toGlobe(p), heights, where });
       for (const f of drawn) { const cls = classify(f.tags, f.geometry.type); if (cls) cityDrawing.push({ cls, geometry: f.geometry, globe: true }); }
       const total = Object.values(counts).reduce((t, c) => ({ streets: t.streets + c.streets, buildings: t.buildings + c.buildings, gardens: t.gardens + c.gardens }), { streets: 0, buildings: 0, gardens: 0 });
       console.log(`${where}: ${total.streets} streets, ${total.buildings} buildings, ${total.gardens} gardens in ${Object.keys(counts).length} districts`);

@@ -122,6 +122,8 @@ export function classify(tags, type) {
   if (tags.barrier === 'city_wall' || tags.barrier === 'wall' || tags.historic === 'city_walls') return 'wall';
   if (tags.highway) return area ? 'ground' : MAJOR.test(tags.highway) ? 'major' : PATH.test(tags.highway) ? 'path' : 'street';
   if (tags.man_made === 'bridge' || tags.bridge) return area ? 'ground' : 'street';
+  // Bare rock, scree, a cliff's face: ground, drawn under the relief's shading.
+  if (/^(bare_rock|scree|cliff|rock|shingle)$/.test(tags.natural ?? '')) return area ? 'ground' : null;
   if (GREEN.test(tags.leisure ?? '') || GREEN.test(tags.landuse ?? '') || GREEN.test(tags.natural ?? '') || tags.amenity === 'grave_yard') return area ? 'green' : null;
   if (tags.landuse || tags.amenity || tags.leisure || tags.place === 'square') return area ? 'ground' : null;
   return null;
