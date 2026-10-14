@@ -46,9 +46,12 @@ const unescape = s => s.replace(/&(lt|gt|quot|apos|amp|#\d+|#x[0-9a-f]+);/gi, (_
 // itself (a square's ring road) is still a line unless it says area=yes.
 const AREA_KEYS = ['building', 'landuse', 'leisure', 'natural', 'amenity', 'place', 'boundary', 'man_made', 'historic', 'water', 'area:highway'];
 // A canal or river drawn as a closed outline (its banks) says area=yes; a dock or riverbank is
-// always an area.
+// always an area. So is a place's own outline (cairn:id) that is not a street, a waterway, a rail
+// or a wall: a district or ward drawn as a closed way with only its name.
+const LINEAR_KEYS = ['highway', 'waterway', 'railway', 'aerialway', 'barrier', 'power', 'route'];
 const isArea = (tags, closed) => closed && tags.area !== 'no'
-  && (tags.area === 'yes' || AREA_KEYS.some(k => k in tags) || tags.waterway === 'dock' || tags.waterway === 'riverbank');
+  && (tags.area === 'yes' || AREA_KEYS.some(k => k in tags) || tags.waterway === 'dock' || tags.waterway === 'riverbank'
+    || ('cairn:id' in tags && !LINEAR_KEYS.some(k => k in tags)));
 
 // Every element worth a geometry, as { kind: 'node'|'way'|'relation', id, tags, geometry } in
 // Earth's longitude and latitude. Nodes with no tags are only the corners of ways.

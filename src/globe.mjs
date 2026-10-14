@@ -34,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseOsm, osmFeatures, classify, CITY_CLASSES } from './osm.mjs';
+import { fabric } from './fabric.mjs';
 import { execFileSync } from 'node:child_process';
 import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity, geoContains, geoCentroid, geoBounds } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
@@ -359,10 +360,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   };
   const rows = readRows(path.join(dir, 'globe.csv'));
   // The layer's cities: their places' shapes join the rows; the rest is drawing, for city.json.
-  const cityDir = path.join(dir, 'cities'), cityDrawing = [];
+  const cityDir = path.join(dir, 'cities'), cityDrawing = [], cityFeatures = new Map();
   for (const file of fs.existsSync(cityDir) ? fs.readdirSync(cityDir).filter(f => f.endsWith('.osm')).sort() : []) {
     const where = path.relative(ROOT, path.join(cityDir, file));
-    for (const f of osmFeatures(parseOsm(fs.readFileSync(path.join(cityDir, file), 'utf8'), where), where)) {
+    const features = osmFeatures(parseOsm(fs.readFileSync(path.join(cityDir, file), 'utf8'), where), where);
+    cityFeatures.set(file.replace(/\.osm$/, ''), features);
+    for (const f of features) {
       const id = f.tags['cairn:id'];
       if (id) {
         if (rows.some(r => r.id === id)) throw new Error(`${where}: ${f.kind} ${f.id} is the shape of "${id}", which ${rows.find(r => r.id === id).osm ? 'another element' : 'globe.csv'} already gives`);
@@ -422,16 +425,37 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
   const water = [...(globe.water ?? []), ...(on ? settings.globe.water ?? [] : [])];
   // Written only once the places are checked (below, for a universe, once its land is drawn).
-  const writePlaces = () => { fs.writeFileSync(placeFile, toCsv(place)); writeCity(); };
+  const writePlaces = basemap => { fs.writeFileSync(placeFile, toCsv(place)); writeCity(basemap); };
   // The cities' drawing, by class (src/osm.mjs's CITY_CLASSES, drawn in that order), areas and lines
   // apart: each a MultiPolygon or MultiLineString in the globe's coordinates, to about a metre.
   const cityFile = path.join(dir, 'city.json');
-  const writeCity = () => {
+  // A city with a recipe for its fabric (cities/<city>.fabric.json, see src/fabric.mjs) has it grown
+  // here, on the land drawn in the basemap, and drawn with the rest (already on the globe).
+  const growFabric = basemap => {
+    for (const file of fs.existsSync(cityDir) ? fs.readdirSync(cityDir).filter(f => f.endsWith('.fabric.json')).sort() : []) {
+      const where = path.relative(ROOT, path.join(cityDir, file)), name = file.replace(/\.fabric\.json$/, '');
+      const recipe = JSON.parse(fs.readFileSync(path.join(cityDir, file), 'utf8'));
+      if (!cityFeatures.has(name)) throw new Error(`${where}: no ${name}.osm beside it, the city it is the fabric of`);
+      const map = maps[recipe.map];
+      if (!map) throw new Error(`${where}: no map "${recipe.map}" in globe.maps`);
+      const detail = basemap.filter(f => /^(land|unnamed)-detail$/.test(f.properties.kind) && f.properties.map === recipe.map);
+      const land = (detail.length ? detail : basemap.filter(f => /^(land|unnamed)$/.test(f.properties.kind))).map(f => f.geometry);
+      const [lon0, lat0] = remap.toGlobe(map.anchor.earth), km = 6371 * deg;
+      const toMap = ([lon, lat]) => [map.anchor.at[0] + (lon - lon0) * km * Math.cos(lat0 * deg) / map.kmPerUnit, map.anchor.at[1] - (lat - lat0) * km / map.kmPerUnit];
+      const { drawn, counts } = fabric({ recipe, hand: cityFeatures.get(name), places: geometryOf, land, map, toMap, toGlobe: p => mapToGlobe(map, remap, p), earthToGlobe: p => remap.toGlobe(p), where });
+      if (process.env.FABRIC_DEBUG) console.log(counts);
+      for (const f of drawn) { const cls = classify(f.tags, f.geometry.type); if (cls) cityDrawing.push({ cls, geometry: f.geometry, globe: true }); }
+      const total = Object.values(counts).reduce((t, c) => ({ streets: t.streets + c.streets, buildings: t.buildings + c.buildings, gardens: t.gardens + c.gardens }), { streets: 0, buildings: 0, gardens: 0 });
+      console.log(`${where}: ${total.streets} streets, ${total.buildings} buildings, ${total.gardens} gardens in ${Object.keys(counts).length} districts`);
+    }
+  };
+  const writeCity = basemap => {
+    growFabric(basemap);
     if (!cityDrawing.length) { fs.rmSync(cityFile, { force: true }); return; }
     const features = [];
     for (const cls of CITY_CLASSES) for (const area of [true, false]) {
       const parts = cityDrawing.filter(d => d.cls === cls && /Polygon$/.test(d.geometry.type) === area)
-        .map(d => remap.project(area ? windForD3(d.geometry) : d.geometry)).filter(Boolean).map(g => round(g, 5));
+        .map(d => { const g = area ? windForD3(d.geometry) : d.geometry; return d.globe ? g : remap.project(g); }).filter(Boolean).map(g => round(g, 5));
       if (!parts.length) continue;
       const coordinates = parts.flatMap(g => (g.type === 'Polygon' || g.type === 'LineString' ? [g.coordinates] : g.coordinates));
       const geometry = { type: area ? 'MultiPolygon' : 'MultiLineString', coordinates };
@@ -447,8 +471,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // named in its views, and in an era without them the same land is unnamed.
   const ownLands = on && rows.some(r => r.earth && !isWkt(r.earth));
   if (on && !ownLands) {
-    checkLand(JSON.parse(fs.readFileSync(path.join(ROOT, 'layers', on, 'basemap.json'), 'utf8')).features, positioned, water, key);
-    writePlaces();
+    const land = JSON.parse(fs.readFileSync(path.join(ROOT, 'layers', on, 'basemap.json'), 'utf8')).features;
+    checkLand(land, positioned, water, key);
+    writePlaces(land);
     console.log(`layers/${key}: ${geometryOf.size} place geometries, on the globe of ${on}`);
     process.exit(0);
   }
@@ -573,7 +598,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const lakeGeom = dropSpecks(round({ type: 'MultiPolygon', coordinates: lakes }, 2), 3e-6);
   if (lakeGeom) features.push({ type: 'Feature', properties: { kind: 'lake', source: 'Natural Earth 1:50m lakes (public domain), remapped' }, geometry: lakeGeom });
   checkLand(features, positioned, water, key);
-  writePlaces();
+  writePlaces(features);
   fs.writeFileSync(path.join(dir, 'basemap.json'), JSON.stringify({ type: 'FeatureCollection', features }));
   console.log(`layers/${key}: ${geometryOf.size} place geometries; basemap ${(fs.statSync(path.join(dir, 'basemap.json')).size / 1024).toFixed(0)} KB`);
 }
