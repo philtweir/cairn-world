@@ -28,6 +28,8 @@
 //           plain: lowland levelled towards `value` metres, gently rolling
 //           mesa: a flat top at `value` metres inside a POLYGON, broken off in steep scarps over
 //             the `radius` km about its ragged edge (a table hill a city can stand on)
+//           cut: ground cut down (or filled up) flat to `value` metres inside a POLYGON, with an
+//             even edge `radius` km wide, not a ragged one: a quay, a terrace, a cutting
 //           crag: a crag and tail along a LINESTRING: a steep crag `value` metres high at its first
 //             point, and a narrow ridge `radius` km to each side falling away along the line to
 //             about a third of that at its end (Edinburgh's castle rock and Royal Mile)
@@ -306,8 +308,8 @@ const placeAt = new Map(place.slice(1).filter(r => r[gcol]).map(r => {
 }));
 const maps = settings.globe.maps ?? {};
 const mapCoords = (map, c) => (typeof c[0] === 'number' ? mapToGlobe(map, remap, c) : c.map(x => mapCoords(map, x)));
-const KINDS = ['scale', 'raise', 'mountains', 'volcano', 'plain', 'dunes', 'mesa', 'crag', 'river'];
-const SHAPES = { scale: ['Point'], raise: ['Point'], volcano: ['Point'], mountains: ['Point', 'Polygon'], plain: ['Polygon'], dunes: ['Polygon'], mesa: ['Polygon'], crag: ['LineString'], river: ['LineString'] };
+const KINDS = ['scale', 'raise', 'mountains', 'volcano', 'plain', 'dunes', 'mesa', 'cut', 'crag', 'river'];
+const SHAPES = { scale: ['Point'], raise: ['Point'], volcano: ['Point'], mountains: ['Point', 'Polygon'], plain: ['Polygon'], dunes: ['Polygon'], mesa: ['Polygon'], cut: ['Polygon'], crag: ['LineString'], river: ['LineString'] };
 const editsFile = path.join(dir, 'terrain.csv');
 const rows = fs.existsSync(editsFile) ? parseCsv(fs.readFileSync(editsFile, 'utf8')) : [['kind']];
 const col = n => rows[0].indexOf(n);
@@ -387,6 +389,12 @@ function applyEdit(e, h, p) {
       if (m <= 0 || h <= 0) return h;
       const top = e.value * (1 + 0.03 * fbm(e.noise, x, y, 6)), cliff = smoothstep(Math.min(1, Math.max(0, (m - 0.35) / 0.3)));
       return h + (Math.max(h, top) - h) * cliff * ashore(p);
+    }
+    case 'cut': {
+      // Built, not grown: the edge is the shape's own, eased over its width, with no noise.
+      if (h <= 0) return h;
+      const m = smoothstep(0.5 - signedDistance(e.ring, x, y) / e.radius);
+      return m <= 0 ? h : h + (e.value - h) * m;
     }
     case 'crag': {
       // Along the tail, from the crag (0) to its end (1); across it, how far from the crest line.

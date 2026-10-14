@@ -520,7 +520,9 @@ Exarch's Palace, about 120 m above the city's centre, steep to the Serpentine's 
 falling round Ephe's lough side towards its port to about 45 m.
 The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is
 in `globe.water`, so it is cut out of the land from the lough up to the Orbital's break: a ship's
-way in. The map's own relief is finer than other maps' (`fine` below).
+way in. Just outside the break it widens into a pool about 280 m across, where a steamer can turn,
+and inside it a `cut` makes Ephe's quay, a shelf about 4 m up and 150 m deep cut into the foot of
+the Mound's tail, under a wall about 40 m high. The map's own relief is finer than other maps' (`fine` below).
 
 The Ruiata map is another city's, at the same scale, anchored at Earth 37.62°E 55.75°N in Moscow: on it
 the universe's Tor Ruiait, a `mesa` about 3 by 2 km on the globe, its top about 180 m above the
@@ -574,6 +576,8 @@ in its own units (`dells POLYGON ((x y, ...))`), with a radius in km:
 - `plain` and `dunes`: lowland levelled towards a height (Earth's relief kept at a sixth), rolling
   or hummocky.
 - `mesa`: a flat top at a height inside a shape, broken off in steep scarps about its ragged edge.
+- `cut`: ground cut down (or filled up) flat to a height inside a shape, with an even edge, not a
+  ragged one: a quay, a terrace, a cutting.
 - `crag`: a crag and tail along a line drawn from the crag: a steep crag at its first point and a
   narrow ridge falling away along it to about a third of the height (a castle rock and its Royal Mile).
 - `river`: a valley carved along a line drawn downstream. Its bed falls all the way, under the
