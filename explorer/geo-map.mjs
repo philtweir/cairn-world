@@ -139,9 +139,11 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
   // the rivers found from the finer heights are drawn instead).
   const gWater = svg('g', { class: 'water' }), gRiversCoarse = svg('g', { mask: `url(#${id}-m)` }), gRiversDetail = svg('g', {});
   gWater.append(gRiversCoarse, gRiversDetail);
-  el.append(gWater, gShapes, gLines, gPoints, gLabels);
+  // A city's streets, buildings and water (city.json, from its .osm), under the water and places.
+  const gCity = svg('g', { class: 'city' });
+  el.append(gCity, gWater, gShapes, gLines, gPoints, gLabels);
   const KINDS = { land: 'land', unnamed: 'land unnamed' };
-  let coarse = [], holes = [], details = [], water = [], relief = null;
+  let coarse = [], holes = [], details = [], water = [], city = [], relief = null;
   basemap?.then(b => {
     if (b?.relief?.images?.length) {
       try { relief = reliefLayer(canvas, b.relief); } catch (err) { console.warn('relief:', err); relief = null; }
@@ -184,6 +186,12 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
       const node = svg('path', { class: `river w${f.properties.w}` });
       (f.properties.kind === 'river' ? gRiversCoarse : gRiversDetail).append(node);
       water.push({ node, polys: parts(f.geometry, 'river'), type: 'MultiLineString', w: f.properties.w });
+    }
+    // Cities: each class's areas and lines, kept as parts with their bounds, in the order given.
+    for (const f of fs.filter(f => f.properties.kind === 'city')) {
+      const area = f.properties.area, node = svg('path', { class: `${f.properties.class} ${area ? 'area' : 'line'}` });
+      gCity.append(node);
+      city.push({ node, type: area ? 'MultiPolygon' : 'MultiLineString', polys: f.geometry.coordinates.map(c => ({ c, b: geoBounds({ type: area ? 'Polygon' : 'LineString', coordinates: c }) })) });
     }
     put(mask, svg('rect', { x: -1e4, y: -1e4, width: 2e4, height: 2e4, fill: 'white' }), holes.map(x => x.hole));
     schedule();
@@ -261,6 +269,11 @@ export function geoMap(ctx, { items, lines = [], basemap, cls = 'geomap', label 
       const show = x.type === 'MultiPolygon' ? x.polys.filter(p => p.a >= minLake) : x.w >= minW ? x.polys : [];
       x.node.setAttribute('d', show.length ? path({ type: x.type, coordinates: (near ? show.filter(near) : show).map(p => p.c) }) ?? '' : '');
     }
+    // A city only close in: half the view under about 0.4 degrees (some 40 km), so a city's own
+    // page, framed on it, shows it.
+    const inCity = span < 0.4;
+    gCity.style.display = inCity ? '' : 'none';
+    for (const x of city) x.node.setAttribute('d', inCity ? path({ type: x.type, coordinates: x.polys.filter(near).map(p => p.c) }) ?? '' : '');
     relief?.render(projection, W, H, { centre: [-projection.rotate()[0], -projection.rotate()[1]], span });
     for (const x of holes) x.hole.setAttribute('d', path(x.box) ?? '');
     for (const s of shapes) { s.fill.setAttribute('d', (s.g && path(s.g)) ?? ''); s.edge.setAttribute('d', path(s.lines) ?? ''); }

@@ -24,10 +24,16 @@
 //
 // A campaign layer's layer.json can say `globe.on: <universe>`: its places go on that universe's
 // globe and regional maps (plus any `globe.maps` of its own), and only its place.csv is written.
+//
+// A layer can also hold cities drawn in OpenStreetMap's format, layers/<layer>/cities/*.osm (see
+// src/osm.mjs): an element tagged cairn:id is that place's geometry, as if globe.csv gave it as an
+// Earth shape, and the rest (streets, buildings, water) is written to layers/<layer>/city.json,
+// remapped, for the explorer to draw under the places when a map is zoomed in close.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseOsm, osmFeatures, classify, CITY_CLASSES } from './osm.mjs';
 import { execFileSync } from 'node:child_process';
 import { geoProjection, geoMercator, geoRotation, geoDistance, geoArea, geoIdentity, geoContains, geoCentroid, geoBounds } from 'd3-geo';
 import { geoProject } from 'd3-geo-projection';
@@ -261,6 +267,16 @@ function snapRing(ring) {
 }
 // d3-geo takes a ring's inside to be on its right (outer rings clockwise): the reverse of GeoJSON.
 const forD3 = mp => ({ type: 'MultiPolygon', coordinates: mp.map(poly => poly.map(ring => [...ring].reverse())) });
+// A (Multi)Polygon in Earth's coordinates wound as d3 takes it, however it was drawn: each outline
+// clockwise, so its inside is the smaller side, and each hole the other way.
+function windForD3(g) {
+  if (!/Polygon$/.test(g.type)) return g;
+  const polys = (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).map(poly => poly.map((ring, i) => {
+    const r = [...ring];
+    return (geoArea({ type: 'Polygon', coordinates: [r] }) > 2 * Math.PI) !== (i > 0) ? r.reverse() : r;
+  }));
+  return g.type === 'Polygon' ? { type: 'Polygon', coordinates: polys[0] } : { type: 'MultiPolygon', coordinates: polys };
+}
 
 // The land no place claims: every country no spec names at all (dissolved by topojson, which
 // works on the sphere), and what is left of a country only parts of which are named (Russia once
@@ -342,9 +358,24 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     return body.filter(r => r[0]).map(r => ({ id: r[0], earth: r[head.indexOf('earth')] ?? '', map: r[head.indexOf('map')] ?? '' }));
   };
   const rows = readRows(path.join(dir, 'globe.csv'));
+  // The layer's cities: their places' shapes join the rows; the rest is drawing, for city.json.
+  const cityDir = path.join(dir, 'cities'), cityDrawing = [];
+  for (const file of fs.existsSync(cityDir) ? fs.readdirSync(cityDir).filter(f => f.endsWith('.osm')).sort() : []) {
+    const where = path.relative(ROOT, path.join(cityDir, file));
+    for (const f of osmFeatures(parseOsm(fs.readFileSync(path.join(cityDir, file), 'utf8'), where), where)) {
+      const id = f.tags['cairn:id'];
+      if (id) {
+        if (rows.some(r => r.id === id)) throw new Error(`${where}: ${f.kind} ${f.id} is the shape of "${id}", which ${rows.find(r => r.id === id).osm ? 'another element' : 'globe.csv'} already gives`);
+        rows.push({ id, earth: '', map: '', osm: f.geometry, where: `${where} ${f.kind} ${f.id}` });
+      } else {
+        const cls = classify(f.tags, f.geometry.type);
+        if (cls) cityDrawing.push({ cls, geometry: f.geometry });
+      }
+    }
+  }
   const isWkt = earth => /^[A-Z]+\s*\(/.test(earth);
   const geometryOf = new Map(), positioned = new Map();
-  const shapeOf = ({ id, earth, map: onMap }) => {
+  const shapeOf = ({ id, earth, map: onMap, osm }) => {
     let g = null;
     if (onMap) {
       const m = /^(\S+)\s+(.*)$/.exec(onMap);
@@ -361,9 +392,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       for (const poly of g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []) {
         poly.forEach((ring, i) => { if ((geoArea({ type: 'Polygon', coordinates: [ring] }) > 2 * Math.PI) !== (i > 0)) ring.reverse(); });
       }
-    } else if (isWkt(earth)) {
-      // Rounded to about a hundredth of its size, between 0.001 and 0.00001 degrees.
-      const w = remap.project(wktToGeometry(earth));
+    } else if (osm || isWkt(earth)) {
+      // Rounded to about a hundredth of its size, between 0.001 and 0.00001 degrees. A city's
+      // outlines, drawn in JOSM, are wound however they were drawn: wound here as d3 has them.
+      const w = remap.project(osm ? windForD3(osm) : wktToGeometry(earth));
       const [[x0, y0], [x1, y1]] = geoBounds(w), size = Math.max(x1 - x0, y1 - y0);
       g = round(w, size > 0 ? Math.min(5, Math.max(3, Math.ceil(Math.log10(100 / size)))) : 3);
     } else if (earth) {
@@ -374,7 +406,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   for (const r of rows) {
     const g = shapeOf(r);
     if (g) geometryOf.set(r.id, g);
-    if (g && (r.map || isWkt(r.earth))) positioned.set(r.id, g);
+    if (g && (r.map || r.osm || isWkt(r.earth))) positioned.set(r.id, g);
   }
 
   // Write the geometry column, leaving every other cell as it is.
@@ -383,11 +415,29 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let gcol = place[0].indexOf('geometry');
   if (gcol < 0) { gcol = place[0].length; place[0].push('geometry'); }
   const known = new Set(place.slice(1).map(r => r[0]));
-  for (const id of geometryOf.keys()) if (!known.has(id)) throw new Error(`globe.csv lists "${id}", which is not in ${path.relative(ROOT, placeFile)}`);
+  for (const id of geometryOf.keys()) if (!known.has(id)) throw new Error(`${rows.find(r => r.id === id)?.where ?? 'globe.csv'} gives a shape for "${id}", which is not in ${path.relative(ROOT, placeFile)}`);
   for (const r of place.slice(1)) { while (r.length < place[0].length) r.push(''); r[gcol] = geometryOf.has(r[0]) ? wkt(geometryOf.get(r[0])) : ''; }
   const water = [...(globe.water ?? []), ...(on ? settings.globe.water ?? [] : [])];
   // Written only once the places are checked (below, for a universe, once its land is drawn).
-  const writePlaces = () => fs.writeFileSync(placeFile, toCsv(place));
+  const writePlaces = () => { fs.writeFileSync(placeFile, toCsv(place)); writeCity(); };
+  // The cities' drawing, by class (src/osm.mjs's CITY_CLASSES, drawn in that order), areas and lines
+  // apart: each a MultiPolygon or MultiLineString in the globe's coordinates, to about a metre.
+  const cityFile = path.join(dir, 'city.json');
+  const writeCity = () => {
+    if (!cityDrawing.length) { fs.rmSync(cityFile, { force: true }); return; }
+    const features = [];
+    for (const cls of CITY_CLASSES) for (const area of [true, false]) {
+      const parts = cityDrawing.filter(d => d.cls === cls && /Polygon$/.test(d.geometry.type) === area)
+        .map(d => remap.project(area ? windForD3(d.geometry) : d.geometry)).filter(Boolean).map(g => round(g, 5));
+      if (!parts.length) continue;
+      const coordinates = parts.flatMap(g => (g.type === 'Polygon' || g.type === 'LineString' ? [g.coordinates] : g.coordinates));
+      const geometry = { type: area ? 'MultiPolygon' : 'MultiLineString', coordinates };
+      const [[x0, y0], [x1, y1]] = geoBounds(geometry);
+      features.push({ type: 'Feature', bbox: [x0, y0, x1, y1].map(v => Math.round(v * 1e5) / 1e5), properties: { kind: 'city', class: cls, area }, geometry });
+    }
+    fs.writeFileSync(cityFile, JSON.stringify({ type: 'FeatureCollection', features }));
+    console.log(`layers/${key}/city.json: ${cityDrawing.length} drawn elements, ${(fs.statSync(cityFile).size / 1024).toFixed(0)} KB`);
+  };
   // A layer on a universe's globe whose places have no Earth shapes of their own (a campaign's
   // points) is drawn on the universe's land. One that names lands of its own (an era's realms) gets
   // its own basemap: the universe's places and its own together, so its named lands are drawn as
