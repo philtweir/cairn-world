@@ -515,7 +515,7 @@ ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km)
 real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
 an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
 lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
-Ephe is the universe's Mound, a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
+Ephe is the universe's Mound (the Hill, as the Antenexus calls it), a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
 Exarch's Palace, about 120 m above the city's centre, steep to the Serpentine's side, and its tail
 falling round Ephe's lough side towards its port to about 45 m.
 The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is

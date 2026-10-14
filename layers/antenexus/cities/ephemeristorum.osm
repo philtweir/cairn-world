@@ -17762,7 +17762,7 @@
     <tag k="highway" v="primary"/>
     <tag k="name" v="The Spine"/>
     <tag k="surface" v="sett"/>
-    <tag k="note" v="Working name. Down the tail of the Mound from the palace to the quay, as the Royal Mile runs from the castle."/>
+    <tag k="note" v="Working name. Down the tail of the Hill from the palace to the quay, as the Royal Mile runs from the castle."/>
   </way>
   <way id="-9">
     <nd ref="-598"/>
@@ -21282,7 +21282,7 @@
     <nd ref="-3059"/>
     <nd ref="-3026"/>
     <tag k="landuse" v="port"/>
-    <tag k="note" v="Ephe's quay, cut into the foot of the Mound's tail"/>
+    <tag k="note" v="Ephe's quay, cut into the foot of the Hill's tail"/>
   </way>
   <way id="-201">
     <nd ref="-3060"/>
