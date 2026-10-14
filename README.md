@@ -515,7 +515,9 @@ ring about a kilometre across on the globe (the remap squeezes Belfast's 1.6 km)
 real Lagan crosses it at the weir, which falls to the north-west of the globe's map; the Serpentine,
 an S across it at right angles to the break; and Ephe and Stora, the halves it divides, Ephe on the
 lough's side. The city itself is a disc about 8 km across the ground, cut to the 1:10m land. Under
-Ephe is the universe's Mound, a steep `raise` of the relief well over 100 m above the city's centre.
+Ephe is the universe's Mound, a `crag` like Edinburgh's castle rock and Royal Mile: the crag, under the
+Exarch's Palace, about 120 m above the city's centre, steep to the Serpentine's side, and its tail
+falling round Ephe's lough side towards its port to about 45 m.
 The universe's Lagan Estuary (the Lagan below its weir and the Victoria Channel, about 220 m wide) is
 in `globe.water`, so it is cut out of the land from the lough up to the Orbital's break: a ship's
 way in. The map's own relief is finer than other maps' (`fine` below).
@@ -572,6 +574,8 @@ in its own units (`dells POLYGON ((x y, ...))`), with a radius in km:
 - `plain` and `dunes`: lowland levelled towards a height (Earth's relief kept at a sixth), rolling
   or hummocky.
 - `mesa`: a flat top at a height inside a shape, broken off in steep scarps about its ragged edge.
+- `crag`: a crag and tail along a line drawn from the crag: a steep crag at its first point and a
+  narrow ridge falling away along it to about a third of the height (a castle rock and its Royal Mile).
 - `river`: a valley carved along a line drawn downstream. Its bed falls all the way, under the
   lowest ground near it, to the river it joins or the sea, and its walls widen where it cuts deep.
   So the rivers found from the heights run where the story puts them.
