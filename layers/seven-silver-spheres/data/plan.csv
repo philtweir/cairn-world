@@ -253,7 +253,7 @@ It picks up where [[session/session-1|Session 1]] ended, at the [[place/bridge-o
 s2-0-table,Before you start: the party,"Three PCs, with what they carry as their sheets have it. **Slots** counts the inventory's ten ([[rule/character-creation-inventory-slots|Inventory Slots]]): _bulky_ items take two, _petty_ none, and **a full ten means 0 HP**. That matters at the temple, where each sphere is _bulky_.
 
 - **Oswald keeps his donkey** ([[creature/oswalds-donkey|Oswald's donkey]], +4 slots). Blindy's cart is hers; the goblins have it, with her.
-- **Food:** a Ration is one item of 3 uses, and each night's camp uses one ([[rule/procedures-make-camp|Make Camp]]). Session 1 had two camps, so each PC starts with **1 use left** (or forgive Session 1's, if they were never marked). Session 2 has five more nights: see [[plan/s2-3-wall|the wall]].
+- **Food is glossed** this session: the PCs eat what the forest gives. Only the goblins' hunger is rolled ([[plan/s2-3-wall|the wall]]).
 - **Oswald has 2 HP.** One spear past it takes STR and calls for a STR save. Tell him so before anything bites.",1,s2,,,PC | STR | DEX | WIL | HP | Armour | Slots | Weapon,"[[pc/oswald|Oswald]] | 9 | 13 | 15 | 2 | 0 | 5 of 10 (+4 donkey) | bonesaw d6
 [[pc/siofra|Siofra]] | 12 | 11 | 10 | 6 | 1 | 8 of 10 (+ Lasarine) | long sword d10, crossbow d8
 [[pc/greg-sayers|Greg Sayers]] | 8 | 10 | 10 | 5 | 0 | 6 of 10 | awl d6"
@@ -268,7 +268,7 @@ It is one confrontation and one roll, and costs no travel watch _(a ruling)_. Sa
 4c | **DEX save** each, round 1 | if it comes to a fight | Telegraph it first: seven goblins are a [[rule/core-rules-detachments|detachment]], their spears _enhanced_ (d12) and _blast_ (every PC near, a roll each), each PC's attack on it _impaired_ (d4). Oswald dies to the first spear. Goblins: [[monstertype/forest-goblin|4 HP, STR 8, DEX 12, WIL 8]]
 4c | **WIL 8** [[rule/core-rules-morale|Morale]] | the band | At its first loss, or the moment someone brandishes the staff at them. Fail: they scatter downriver, and Blindy is left in the cart"
 s2-thrall,The goblins in thrall,"If the band follows the party, it is held by fear, food and faith, and each of those can fail. None of this is in the adventure; these are rulings, built on Cairn's [[rule/core-rules-detachments|Detachments]] and [[rule/core-rules-morale|Morale]].",3,s2,,,Rule | How it works,"They fight as one | A detachment with the goblin's own line ([[monstertype/forest-goblin|4 HP, STR 8, DEX 12, WIL 8, spear d6]]): its attacks _enhanced_ (d12) and _blast_; attacks on it by one person _impaired_; Critical Damage routs it; STR 0 destroys it
-They must be fed | One Ration use a day for the band _(a ruling)_, or a PC spends a watch foraging ([[rule/procedures-supply|Supply]]). Unfed, they save Morale each morning
+They must be fed | Their hunger is what holds them, and what may lose them: a **Die of Fate** at the wall decides whether there was enough ([[plan/s2-3-wall|the wall]])
 Their nerve | A **Morale save (WIL 8)** when: they lose their first; they are down to half; they are asked to pass below the porcelain sentries; they meet the shadow. Fail: they run, and take what they carry with them
 Their prisoner | They keep Blindy in her cart as ""Goblob's prisoner"", and hand her over only if the party asks for her in Goblob's name. She is there when a PC dies ([[plan/s2-blindy|Blindy]])
 They carry | A goblin will carry one sphere, two between three if it is heavy. And run with it on a failed Morale save"
@@ -282,10 +282,13 @@ The others arrive at midday on day 4, with the goblins if they are in thrall. Th
 6 | **d6** [[rolltable/procedures-wilderness-events-table|Wilderness Events]] | Warden, once for their leg | 1 Encounter: d6 on [[rolltable/sss-travel-encounters|Travel Encounters]], then 2d6 Reactions (if the band left with Blindy, a 1 is them, shadowing). 2 Sign: d6 on [[rolltable/sss-signs|Signs]]. 3–6: a sentence
 7 | none | Warden | The reunion; the Thing bargains with them all. A Lore roll ([[rolltable/sss-lore|Lore]]) if they ask what it is: a 5 is Hann
 8 | **DEX save** each, round 1 | only if they open the door and stay to fight | [[monstertype/thing-in-the-tavern|The Thing]]: 12 HP, no armour, STR, DEX and WIL 14, bite d10; past 0 HP and a failed STR save, it drains d6 more STR. It can kill any one of them. It fights only if cornered; let it go"
-s2-3-wall,"3. To the wall, and the wait","The last leg has no lost roll and no events: the porcelain soldiers keep that ground clear. The party is below the wall on the evening of day 5 (day 6 if lost), and the doors open at dawn on day 8. Narrate the leg in a sentence; the wait is about food.",5,s2,0:30–0:32,Days 4–7,Step | Roll | Who | What happens,"1 | none | Warden | The leg to the wall. The sentries change guard above them, eerily
-2 | none | everyone | **Count the food.** Five more nights since the bridge (days 3, 4, 5, 6, 7) is five Ration uses each; most have one. The goblins, if with them, eat one a day
-3 | **Supply** ([[rule/procedures-supply|the Supply action]]): **d4** Rations, **d6** if two forage, **d8** if three | the foragers, one day-watch at the wall | Each Ration found is 3 uses. One good roll feeds them all. Short: those without are _deprived_ and take a Fatigue ([[rule/core-rules-deprivation-fatigue|Deprivation & Fatigue]]); unfed goblins save Morale each morning
-4 | **WIL 8** Morale | the goblins, if with them | To pass below the sentries. Fail: they wait outside the wall: a rearguard, and the spheres they would have carried stay with the party"
+s2-3-wall,"3. To the wall, and the wait","The last leg has no lost roll and no events: the porcelain soldiers keep that ground clear. The party is below the wall on the evening of day 5 (day 6 if lost), and the doors open at dawn on day 8. Narrate the leg and the wait in a minute.
+
+**Food is glossed** in this hour: ""two days below the wall; you eat what the forest gives."" No tracking and no roll for the PCs. Only the thralled goblins' hunger is rolled, because it decides whether they stay.",5,s2,0:30–0:32,Days 4–7,Step | Roll | Who | What happens,"1 | none | Warden | The leg to the wall. The sentries change guard above them, eerily
+2 | none | everyone | The wait: foraging, berries, a hare, river water. If a player asks about food: ""running low; a day's foraging sees you right""
+3 | **d6 Die of Fate** ([[rule/core-rules-die-of-fate|Die of Fate]]) | Warden, at dawn on the last day, if goblins are in thrall | 4–6: there was enough, they stay. 1–3: they grumble, and the Morale save below is made in a sour mood (describe it; the save is the same)
+4 | **WIL 8** Morale | the goblins, if with them | To pass below the sentries. Fail: they wait outside the wall: a rearguard, and the spheres they would have carried stay with the party
+— | _for a longer campaign_ | — | The full rule: each camp uses one Ration use ([[rule/procedures-make-camp|Make Camp]]); a day-watch's [[rule/procedures-supply|Supply]] finds d4 Rations (d6 for two, d8 for three), 3 uses each; without, _deprived_ and a Fatigue"
 s2-4-gatehouse,"4. The gatehouse, in a sentence","""You slip through the [[place/porcelain-gatehouse|gatehouse]] as the guard changes."" If the clock allows (you are at the wall before 0:30), play it instead:",6,s2,0:32,"Day 8, before dawn",Step | Roll | Who | What happens,"1 | none | anyone who looks first | They see the arrow holes and the pressure plates, and step round them
 2 | **d6, 1–2 triggers** | each PC crossing unaware | Arrows, in turn: **d8, then d6, then d4, then dry.** Off **STR**, not HP ([[rule/procedures-traps|Traps]]), less Siofra's 1 Armour. STR 0 is death
 3 | **DEX save** | anyone who climbs the wall instead | Fail: a fall. On the battlements, [[monstertype/porcelain-soldier|the sentries]] attack (6 HP each, polearm d8): run"
@@ -309,3 +312,44 @@ Then tell them what this was: Bith na Bró, the year you chose, and the Seven Sp
 s2-blindy,"Blindy, if a PC dies","When a PC dies, their player takes [[pc/blindy|Blindy]] at once ([[rule/core-rules-character-death|Character Death]]). If the goblins are in thrall, they release ""Goblob's prisoner"" to the party; if they left with her, she has slipped her bonds and caught up, cart and all.
 
 Her secret, how she came by [[document/marcos-map|Marcos's map]], is the Warden's to tell her new player, or not: a good thing to whisper.",9,s2,,,STR | DEX | WIL | HP | Armour | Carries,"6 | 9 | 12 | 6 | 0 | cane sword d6, trick playing cards, fancy hat, torches, Rations (1 use left), 3 gp; her cart (+4 slots), if the goblins gave it back"
+s2-crib,Session 2: the Warden's crib,"One page for the table. The full crib is [[plan/taster-crib|the Warden's crib sheet]].
+
+**The loop.** Describe; ask ""what do you do?""; resolve; say what changed. Nobody rolls unless there is a real risk the player has chosen.
+
+**Roll or not.** A risk to a PC: a **save**, d20 at or under STR, DEX or WIL (1 passes, 20 fails); say what failure costs first. Plain chance: the **Die of Fate**, d6, 4+ goes their way. A stranger's mood: **2d6 Reactions**. Several at once: whoever is most at risk rolls, once. A clever plan: no roll.
+
+**A fight.**
+1. Warn first, and offer a way out.
+2. Round 1: every PC saves **DEX** to act (Oswald's Quicksilver, if he has it, skips it).
+3. PCs say what they do, then roll; results land together; then the foes act.
+4. Damage: weapon die, less armour. Several on one target: keep the highest. _Impaired_ d4, _enhanced_ d12, _blast_ every target near, a roll each.
+5. HP to exactly 0: **Scars**, by the HP lost ([[rolltable/core-rules-scars-table-table|Scars]]). Past 0: the rest off **STR**, then a **STR save** at the new score; fail is Critical Damage: a PC can only crawl, and dies within the hour unless tended (Oswald has bandages). STR 0 is death; a player whose PC dies takes **Blindy**.
+6. **Morale:** foes save WIL at their first loss and at half; a lone foe at 0 HP. **Fleeing:** a DEX save and somewhere to go.
+
+**Outside a fight.** Traps hurt **STR**, not HP (the gatehouse arrows: d8, d6, d4, then dry). **Slots:** ten; _bulky_ takes two (a sphere); ten full is **0 HP**.
+
+**Lines.** ""What do you do?"" · ""That's risky: make a DEX save. If you fail, …"" · ""Everyone roll DEX to act first."" · ""That's past zero: take the rest off STR, then save STR."" · ""You can't, but you could…""",0,s2,,,Who | HP | Armour | STR | DEX | WIL | Attack | Remember,"[[pc/oswald|Oswald]] | **2** | 0 | 9 | 13 | 15 | bonesaw d6 | Best talker (WIL 15). Bandages, leech. One hit from danger. +4 slots (donkey)
+[[pc/siofra|Siofra]] | 6 | 1 | 12 | 11 | 10 | long sword d10, crossbow d8 | 8 slots used: a sphere would fill her (0 HP). Lasarine carries
+[[pc/greg-sayers|Greg Sayers]] | 5 | 0 | 8 | 10 | 10 | awl d6 | Reads the goblins' scrawl. 6 slots used
+[[pc/blindy|Blindy]] (for a dead PC) | 6 | 0 | 6 | 9 | 12 | cane sword d6 | The goblins' prisoner; her secret is the map
+[[monstertype/forest-goblin|Goblin band]] (a detachment) | 4 | 0 | 8 | 12 | 8 | spears **d12**, _blast_ | PCs' attacks on it d4. Morale WIL 8. Routed by Critical Damage
+[[monstertype/thing-in-the-tavern|The Thing]] | 12 | 0 | 14 | 14 | 14 | bite d10 | Past 0 HP and a failed STR save: d6 more STR. Don't let it fight a lone PC
+[[monstertype/shadow-dryad|Shadow-possessed dryad]] | 8 | 0 | 14 | 3 | 12 | branches d8, _blast_ | Lone foe: WIL 12 at 0 HP. Screams without a voice
+[[monstertype/porcelain-soldier|Porcelain soldier]] (1d6) | 6 | 0 | 12 | 6 | 12 | polearm d8 | Only if someone crosses the battlements"
+s2-crib-rolls,"Session 2: every roll, and what failing costs","The rolls this session may call for, in the order they are likely to come. _(a ruling)_ marks this plan's, not the adventure's.",0.5,s2,,,Where | When | Roll | On a fail,"Bridge | the goblins' mood | **2d6** Reactions, one step worse _(a ruling)_ | 2–5 Hostile: they want both liars
+Bridge | talking them round (unless the argument is in their faith: no roll) | **WIL** save, the speaker | They turn hostile
+Bridge | a fight starts | **DEX** each | No turn in round 1
+Bridge | their first loss, or the staff brandished | **WIL 8** Morale, the goblins | They scatter; Blindy left in the cart
+Rising Sun | Siofra rides in | **d6** Outrider table 2 | (Lasarine's breed)
+Rising Sun | lying to or bargaining with the Thing | **WIL** save | It sees through it, pleasantly
+Rising Sun | forcing the bars alone | **STR** save | Noise and an hour; on a pass, the Thing is free
+Road | Oswald and Greg's leg | **d6**, lost on 1–2 | A leg late, by the swamp _(a ruling)_
+Road | once for their leg | **d6** Wilderness Events | (1 Encounter, 2 Sign, 3–6 a sentence)
+Wall | dawn of the last day, goblins with them | **d6** Die of Fate | Hungry and sour
+Wall | passing below the sentries | **WIL 8** Morale, the goblins | They wait outside the wall
+Gatehouse | crossing unaware (if played) | **d6**, 1–2 triggers | Arrows d8 / d6 / d4 off STR
+Temple | the way out, a fight | **DEX** each, round 1 | No turn in round 1
+Temple | past 0 HP | **STR** save at the new score | Critical Damage
+Temple | the dryad appears | **WIL 8** Morale, the goblins | They run, with what they carry
+Temple | the dryad at 0 HP | **WIL 12**, the dryad | It goes down
+Anywhere | fleeing | **DEX** save | Caught"
