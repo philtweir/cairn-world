@@ -9,16 +9,28 @@
     }
   },
   "test": "Test layer: remove when done.",
-  "gate": {
-    "salt": "d92b7b8860aec7323dd0bab7",
-    "sha256": "e6ec6c4c5a9761274cc28af8a6eb6f6ba5ac3430f1264eb13a1d3151e946a2a1",
-    "principal": "group:warden"
-  },
   "globe": {
     "on": "bith-na-bro"
   },
   "access": {
     "closed": true,
     "default": "group:party"
-  }
+  },
+  "gates": [
+    {
+      "salt": "d92b7b8860aec7323dd0bab7",
+      "sha256": "e6ec6c4c5a9761274cc28af8a6eb6f6ba5ac3430f1264eb13a1d3151e946a2a1",
+      "principal": "group:warden"
+    },
+    {
+      "principal": "group:session-1",
+      "salt": "105bc843b39789dc21d02128",
+      "sha256": "5f44fc0b14231963cd7f5aa570be1fcf3d275cc37f43224f4b876fcf31eb5b31"
+    },
+    {
+      "principal": "group:session-2",
+      "salt": "e53cdf9732a5e4ae1f865d55",
+      "sha256": "1034f86a063110a7889e87989a745d48bcb3bea3a0e5161e8b14bf687b61fa83"
+    }
+  ]
 }

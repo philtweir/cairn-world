@@ -1,3 +1,5 @@
 principal,name,member_of
 group:party,The party,
-group:warden,The Warden,group:party
+group:session-1,The party after Session 1,group:party
+group:session-2,The party after Session 2,group:session-1
+group:warden,The Warden,group:session-2

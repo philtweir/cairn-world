@@ -28,7 +28,11 @@
 //
 // A gated view's gate (layer.json "gate", src/set-password.mjs) can name a principal; in a closed
 // view the gate is then that principal's credential, not a door: anyone may open the view, and
-// viewing as that principal (or as any member of it) asks for the password.
+// viewing as that principal (or as any member of it) asks for the password. A closed view can
+// have several such gates ("gates": one per principal), so that each principal has a password of
+// its own: viewing as a principal asks for the password of the nearest gated principal among its
+// groups (itself first), and a password also opens the gated principals its own is a member of
+// (the Warden's opens the party's).
 //
 // The resolved grants, one row per principal, entry and nodegroup (null: the whole entry), are
 // written to views/<view>/tables/access.parquet (src/tables.mjs). What a principal may see is
@@ -81,9 +85,10 @@ function clock(acc, problem) {
 // Everything a closed view's grants come to.
 //   view: its key; stack: its layers, bottom first; access: layer key -> readAccess's result;
 //   models: [{ alias, nodes: [{ alias, nodegroup_id }] }]; entries: [{ id, model, key, layers }];
-//   settings: the view's layer.json "access"; gate: its gate, if any.
-// Returns { principals: [{ id, name, groups, gated }], epochs, default, grants: rows, held }.
-export function resolveAccess({ view, stack, access, models, entries, settings, gate, problem }) {
+//   settings: the view's layer.json "access"; gates: the principals its gates are for.
+// Returns { principals: [{ id, name, groups, gated, gate }], epochs, default, grants: rows, held }:
+// a principal's `gate` is the gated principal whose password viewing as it asks for.
+export function resolveAccess({ view, stack, access, models, entries, settings, gates = [], problem }) {
   // Principals, from every layer in the stack.
   const principals = new Map([[EVERYONE, { id: EVERYONE, name: 'Anyone', member_of: [] }]]);
   for (const key of stack) for (const r of access[key]?.principals ?? []) {
@@ -103,11 +108,26 @@ export function resolveAccess({ view, stack, access, models, entries, settings, 
     for (const g of principals.get(id)?.member_of ?? []) if (principals.has(g)) groupsOf(g, seen);
     return seen.add(EVERYONE);
   };
-  const gatedBy = gate?.principal ?? null;
-  if (gatedBy && !principals.has(gatedBy)) problem(`layers/${view}/layer.json gate.principal "${gatedBy}" is not declared in ${view}'s stack`);
+  const gated = new Set();
+  for (const g of gates) {
+    if (!principals.has(g)) problem(`layers/${view}/layer.json: a gate is for "${g}", which is not declared in ${view}'s stack`);
+    else if (gated.has(g)) problem(`layers/${view}/layer.json: two gates are for "${g}"`);
+    else gated.add(g);
+  }
+  // The nearest gated principal among a principal's groups, itself first, breadth first.
+  const gateOf = id => {
+    const seen = new Set([id]);
+    for (let level = [id]; level.length;) {
+      const hit = level.find(x => gated.has(x));
+      if (hit) return hit;
+      level = level.flatMap(x => principals.get(x)?.member_of ?? []).filter(x => !seen.has(x) && seen.add(x));
+    }
+    return null;
+  };
   const listed = [...principals.values()].map(p => {
     const groups = [...groupsOf(p.id)].sort();
-    return { id: p.id, name: p.name, groups, gated: !!gatedBy && groups.includes(gatedBy) };
+    const gate = gateOf(p.id);
+    return { id: p.id, name: p.name, groups, gated: !!gate, gate };
   });
   const def = settings?.default ?? EVERYONE;
   if (!principals.has(def)) problem(`layers/${view}/layer.json access.default "${def}" is not declared in ${view}'s stack`);

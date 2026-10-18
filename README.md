@@ -13,6 +13,7 @@ npm run build -- --all # also include unpublished universes/campaigns, for local
 npm run serve          # http://localhost:8000
 npm run import-rules -- --rules ../cairn   # regenerate rules/ from a checkout of yochaigal/cairn
 npm run set-password -- <layer>            # put a password in front of one view (see Layers)
+npm run set-password -- <layer> --principal <id>   # a closed view's password for one principal
 npm run globe -- <layer>                   # place a universe's places on its globe (see Maps)
 npm run terrain -- <layer>                 # its relief: remapped real elevation plus story edits (see Maps)
 npm run merge-edits -- <file>              # bake edits exported from the explorer into their layer (see Editing in the explorer)
@@ -247,9 +248,12 @@ In the explorer a closed view has **Viewing as** and **as of**: one principal (i
 included) at one epoch. Lists, counts, links, filters, maps and pages all go through that window:
 an entry it does not name is not there, one it only `discover`s shows its name and nothing else,
 fields it does not grant are absent, and a `[[reference]]` to something outside it is just its
-words. A gate with a `"principal"` is then that principal's password rather than a door: anyone
-can open the view, and viewing as that principal (or a member of it) asks for the password. Closed
-views get no text index, as gated ones don't.
+words. A closed view's `"gates"` (`npm run set-password -- <layer> --principal <id>`, one per
+principal) are passwords rather than a door: anyone can open the view, and viewing as a gated
+principal (or a member of it) asks for its password. A password also opens the gated principals its
+own is a member of, so a ladder of groups (the party, the party after Session 1, after Session 2,
+the Warden) gives each rung a password that opens every rung below it. Closed views get no text
+index, as gated ones don't.
 
 The build checks every row (principals declared, targets and fields that exist, epochs in order)
 and writes the grants, resolved to entry ids and nodegroups, to `views/<view>/tables/access.parquet`
@@ -1030,7 +1034,7 @@ too: build and upload `dist/`.
 | `antenexus` | Era of Bith na Bró | The Antenexus, the present age (812 óT): the Six Kingdoms and Nine States and their realms, the Engineers and their history since the Coming, the churches, the Order of the White Raven, the Dells' settlements and recent history |
 | `ravens-in-the-dells` | Campaign (solo), set in the Antenexus | Albric's cell of the Order: three PCs with ties, gear and finds; Adventure #1 so far; the Omen and the 30 km watch |
 | `the-empire` | Era of Bith na Bró, **test** | The First Empire: player-facing background for Seven Silver Spheres; remove with it |
-| `seven-silver-spheres` | Campaign, closed (the party by default; the Warden behind the password), **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
+| `seven-silver-spheres` | Campaign, closed (the party by default; after Session 1, after Session 2 and the Warden each behind a password), **test**, set in the First Empire | Warden notes for *Seven Silver Spheres* by Martin Orchard ([pointlessmonument.itch.io](https://pointlessmonument.itch.io)): places, routes, monsters, relics, spellbooks, tables, NPCs, events; Marcos's will, letter and map as Documents with each PC's copy; the table's PCs, and the pregens tied to Marcos; its sessions; a Run Plan for it as a 90-minute taster. Set in the First Empire, an era of Bith na Bró (below) |
 
 **The Seven Spheres in Bith na Bró.** *Seven Silver Spheres* is set in Bith na Bró's past: its
 stack is General › Bith na Bró › The First Empire › the campaign, the First Empire being the era
@@ -1065,6 +1069,11 @@ components of it (P148), so it reads as a tree under Texts & Lore, in `section` 
 `[[references]]` put it under "Linked from" on each place, rule and table it uses. It is in the
 campaign's layer, and the view is closed (`access/`): the party sees what it has been shown, session
 by session, and the Run Plan and the adventure's notes only as the Warden, behind the password.
+Its principals are a ladder, each a member of the one before and each but the first with a password
+(`layer.json` `gates`): **the party** (no password: what the players had at the start), **the party
+after Session 1**, **the party after Session 2**, and **the Warden** (everything). Each session's
+reveals are granted to its rung from its epoch; the sessions' "For next time" notes stay the
+Warden's.
 That keeps them out of players' way, but like the notes they are public in this repository.
 
 *Seven Silver Spheres* and The Empire are test layers, to be removed when done. *Seven Silver

@@ -263,12 +263,15 @@ function readSettings(key) {
   if (!r?.holder || !r?.statement) problem(`${rel(file)} needs "rights" with a "holder" and a "statement" (who owns this layer's content, and what it is)`);
   if (r?.licence && !(r.licence.name && r.licence.url)) problem(`${rel(file)} rights.licence needs a "name" and a "url" (or leave it out: all rights reserved)`);
   if (settings.gate && !(/^[0-9a-f]{64}$/.test(settings.gate.sha256 ?? '') && settings.gate.salt)) problem(`${rel(file)} gate needs "salt" and a hex "sha256"`);
+  // A closed view's passwords, one per principal (src/access.mjs); a "gate" naming a principal is one of them.
+  if (settings.gates && !(Array.isArray(settings.gates) && settings.gates.every(g => g.principal && g.salt && /^[0-9a-f]{64}$/.test(g.sha256 ?? '')))) problem(`${rel(file)} gates should be a list of { "principal", "salt", "sha256" }`);
+  const gates = [...(settings.gates ?? []), ...(settings.gate?.principal ? [settings.gate] : [])];
+  if (gates.length && !settings.access?.closed) problem(`${rel(file)} a gate for a principal only applies to a closed view ("access": { "closed": true })`);
   // Who may see what of this layer's view (src/access.mjs): closed, and whom to view it as by default.
   if (settings.access && (typeof settings.access !== 'object' || Object.keys(settings.access).some(k => !['closed', 'default'].includes(k)))) problem(`${rel(file)} access takes "closed" and "default"`);
   // How the world numbers its years (src/edtf.mjs): the marks after a year from its epoch on, and
   // before it, and what they stand for.
   if (settings.calendar && !(settings.calendar.after && settings.calendar.name)) problem(`${rel(file)} calendar needs a "name" and an "after" mark (and optionally "before", "gloss", "epoch")`);
-  if (settings.gate?.principal && !settings.access?.closed) problem(`${rel(file)} gate.principal only applies to a closed view ("access": { "closed": true })`);
   // A basemap (src/globe.mjs writes one) is the land, rivers and lakes the explorer draws under this
   // layer's maps; rivers.json (src/terrain.mjs) the rivers found in its detailed areas; city.json
   // (src/globe.mjs, from the layer's cities/*.osm) the streets, buildings and water of its cities.
@@ -292,7 +295,8 @@ function readSettings(key) {
       if (!(Array.isArray(img.bbox) && img.bbox.length === 4)) problem(`${rel(reliefFile)}: ${img.file} needs a bbox`);
     }
   }
-  return { rights: r ?? null, gate: settings.gate ?? null, access: settings.access ?? null, calendar: settings.calendar ?? null, grants: readAccess(LAYERS_DIR, key, problem), test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), city: drawing('city.json'), relief };
+  // `gate` is a door (a password to open the view at all); `gates`, a closed view's principals' passwords.
+  return { rights: r ?? null, gate: settings.gate && !settings.gate.principal ? settings.gate : null, gates, access: settings.access ?? null, calendar: settings.calendar ?? null, grants: readAccess(LAYERS_DIR, key, problem), test: settings.test ?? null, basemap: drawing('basemap.json'), rivers: drawing('rivers.json'), city: drawing('city.json'), relief };
 }
 
 const layers = {};   // key -> { key, kind, name, published, parents, stack, rights, gate, test }
@@ -514,7 +518,7 @@ for (const v of viewKeys) {
     access: Object.fromEntries(stack.map(k => [k, layers[k].grants])),
     models: ms.map(m => ({ alias: m.alias, nodes: m.built.graph.nodes.filter(n => n.alias).map(n => ({ alias: n.alias, nodegroup_id: n.nodegroup_id })) })),
     entries: ms.flatMap(m => views[v].models[m.alias].entries.map(e => ({ ...e, model: m.alias }))),
-    settings: layers[v].access, gate: layers[v].gate,
+    settings: layers[v].access, gates: layers[v].gates.map(g => g.principal),
   });
 }
 if (problems.length) bail();
@@ -569,9 +573,9 @@ for (const l of shippedLayers) for (const m of usedModels) {
 
 for (const l of shippedLayers) for (const k of ['basemap', 'rivers', 'city', 'relief']) if (layers[l][k]) write(`layers/${l}/${k}.json`, layers[l][k]);
 for (const l of shippedLayers) for (const img of layers[l].relief?.images ?? []) fs.copyFileSync(path.join(LAYERS_DIR, l, img.file), path.join(DIST, 'data', 'layers', l, img.file));
-const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.kind === 'era' ? { when: l.row.get.when || null, sequence: Number(l.row.get.sequence) || 0, dates: l.row.get.dates || null } : {}), ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}), ...(l.calendar ? { calendar: l.calendar } : {}),
+const describe = l => ({ key: l.key, kind: l.kind, name: l.name, stack: l.stack, rights: l.rights, ...(l.kind === 'era' ? { when: l.row.get.when || null, sequence: Number(l.row.get.sequence) || 0, dates: l.row.get.dates || null } : {}), ...(l.test ? { test: l.test } : {}), ...(l.gate ? { gate: l.gate } : {}), ...(l.gates?.length ? { gates: l.gates } : {}), ...(l.calendar ? { calendar: l.calendar } : {}),
   ...Object.fromEntries(['basemap', 'rivers', 'city', 'relief'].filter(k => l[k]).map(k => [k, `layers/${l.key}/${k}.json`])) });
-const open = viewKeys.filter(v => !layers[v].gate);
+const open = viewKeys.filter(v => !layers[v].gate && !layers[v].gates.length);
 write('views.json', {
   default: open.find(v => layers[v].kind === 'campaign') ?? open[0] ?? viewKeys[0] ?? null,
   views: viewKeys.map(v => ({ ...describe(layers[v]), ...(views[v].access ? { access: { default: views[v].access.default, epochs: views[v].access.epochs, principals: views[v].access.principals } } : {}) })),

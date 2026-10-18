@@ -124,8 +124,9 @@ async function load() {
   }
   fillViews();
   const v = state.viewsMeta.views.find(x => x.key === state.view);
-  // A closed view's gate is a principal's credential, asked for when viewing as it (src/access.mjs).
-  if (v.gate && !v.gate.principal) await unlock(v);
+  // A view's gate is a door; a closed view's gates are its principals' passwords, asked for when
+  // viewing as them (src/access.mjs).
+  if (v.gate) await unlock(v, [v.gate]);
   const [manifest, ontology] = await Promise.all([
     fetch(`${DATA}/views/${state.view}/manifest.json${V}`).then(r => r.json()),
     fetch(`${DATA}/ontology.json${V}`).then(r => r.json()),
@@ -172,10 +173,11 @@ async function load() {
   if (v.access) {
     const a = v.access, current = a.epochs.length;
     const stored = k => { try { return localStorage.getItem(`cairn-world:${k}:${state.view}`); } catch { return null; } };
-    const ok = p => p && (!p.gated || remembered(v));
-    // Whom it was last seen as here, else (past the gate) the gate's principal, else the default.
-    const want = a.principals.find(p => p.id === stored('as')) ?? (remembered(v) ? a.principals.find(p => p.id === v.gate.principal) : null);
-    state.as = ok(want) ? want : a.principals.find(p => p.id === a.default);
+    const ok = p => p && canView(v, p);
+    // Whom it was last seen as here, else (past a gate) the most a password opened, else the default.
+    const opened = (v.gates ?? []).filter(g => remembered(v, g)).map(g => a.principals.find(p => p.id === g.principal)).filter(Boolean);
+    const want = a.principals.find(p => p.id === stored('as'));
+    state.as = ok(want) ? want : opened.sort((x, y) => y.groups.length - x.groups.length)[0] ?? a.principals.find(p => p.id === a.default);
     const at = stored('asof');
     state.asOf = at === null || at === 'latest' || !(Number(at) >= 0 && Number(at) <= current) ? current : Number(at);
     await state.store.setWindow({ principals: state.as.groups, epoch: state.asOf });
@@ -197,28 +199,35 @@ async function load() {
 // out: the data is in the public repository and on the site for anyone who goes looking.
 // The salted SHA-256 of the right password is remembered in this browser.
 
-const gateKey = v => `cairn-world:gate:${v.key}`;
-const remembered = v => { try { return localStorage.getItem(gateKey(v)) === v.gate.sha256; } catch { return false; } };
-const remember = v => { try { localStorage.setItem(gateKey(v), v.gate.sha256); } catch { /* private mode: ask again next time */ } };
-const forget = v => { try { localStorage.removeItem(gateKey(v)); } catch { /* nothing stored */ } };
+const gateKey = (v, g) => `cairn-world:gate:${v.key}${g.principal ? `:${g.principal}` : ''}`;
+const remembered = (v, g) => { try { return localStorage.getItem(gateKey(v, g)) === g.sha256; } catch { return false; } };
+const remember = (v, g) => { try { localStorage.setItem(gateKey(v, g), g.sha256); } catch { /* private mode: ask again next time */ } };
+const forget = (v, g) => { try { localStorage.removeItem(gateKey(v, g)); } catch { /* nothing stored */ } };
+// The gates whose passwords open viewing as p: its own gate's, and those of the gated principals
+// that are members of it (the Warden's password opens the party's).
+const gatesFor = (v, p) => !p.gate ? [] : (v.gates ?? []).filter(g => v.access.principals.find(x => x.id === g.principal)?.groups.includes(p.gate));
+const canView = (v, p) => !p.gate || gatesFor(v, p).some(g => remembered(v, g));
 async function sha256(text) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function unlock(v) {
-  if (remembered(v)) return Promise.resolve();
+// Asks for any of `gates`' passwords (unless one is remembered), and remembers the one given.
+function unlock(v, gates, title = v.name) {
+  if (gates.some(g => remembered(v, g))) return Promise.resolve();
   status('');
   const form = $('gate');
-  put($('gate-title'), v.name);
+  put($('gate-title'), title);
   form.hidden = false;
   $('gate-pw').focus();
   return new Promise(resolve => {
     form.addEventListener('submit', async ev => {
       ev.preventDefault();
-      const ok = (await sha256(`${v.gate.salt}:${$('gate-pw').value}`)) === v.gate.sha256;
-      if (!ok) { $('gate-msg').textContent = 'That is not the password.'; $('gate-pw').select(); return; }
-      remember(v);
+      const pw = $('gate-pw').value;
+      let hit = null;
+      for (const g of gates) if ((await sha256(`${g.salt}:${pw}`)) === g.sha256) { hit = g; break; }
+      if (!hit) { $('gate-msg').textContent = 'That is not the password.'; $('gate-pw').select(); return; }
+      remember(v, hit);
       form.hidden = true;
       $('lock').hidden = false;
       status('Loading…');
@@ -243,14 +252,15 @@ function fillViews() {
   // Grouped by universe: the universe itself, then its campaigns.
   put($('view'), groupViews(state.viewsMeta).map(g => h('optgroup', { label: g.label },
     g.views.map(v => h('option', { value: v.key, selected: v.key === state.view },
-      `${'\u2003'.repeat(v.depth ?? 0)}${v.kind === 'universe' ? `${v.name} (universe)` : v.kind === 'era' ? `${v.name} (era)` : v.name}${v.gate && !v.gate.principal ? ' · locked' : ''}`)))));
+      `${'\u2003'.repeat(v.depth ?? 0)}${v.kind === 'universe' ? `${v.name} (universe)` : v.kind === 'era' ? `${v.name} (era)` : v.name}${v.gate ? ' · locked' : ''}`)))));
   // Each view has its own ORM state (and maybe a gate), so switching reloads the page.
   $('view').onchange = ev => { location.hash = `#/${ev.target.value}/`; location.reload(); };
   document.querySelector('.brand').setAttribute('href', `#/${state.view}/`);
   const v = state.viewsMeta.views.find(x => x.key === state.view);
   const lock = $('lock');
-  lock.hidden = !(v.gate && remembered(v));
-  lock.onclick = () => { forget(v); location.reload(); };
+  const all = [...(v.gate ? [v.gate] : []), ...(v.gates ?? [])];
+  lock.hidden = !all.some(g => remembered(v, g));
+  lock.onclick = () => { all.forEach(g => forget(v, g)); location.reload(); };
 }
 
 // ---- Sidebar --------------------------------------------------------------------------------
@@ -904,13 +914,13 @@ try {
   const view = state.viewsMeta.views.find(x => x.key === state.view);
   if (view.access) {
     const a = view.access, set = (k, val) => { try { localStorage.setItem(`cairn-world:${k}:${state.view}`, val); } catch { /* not remembered */ } };
-    put($('as'), a.principals.map(p => h('option', { value: p.id, selected: p.id === state.as.id }, `${p.name}${p.gated && !remembered(view) ? ' (password)' : ''}`)));
+    put($('as'), a.principals.map(p => h('option', { value: p.id, selected: p.id === state.as.id }, `${p.name}${canView(view, p) ? '' : ' (password)'}`)));
     put($('asof'), [{ epoch: 0, name: 'The start' }, ...a.epochs].map(x => h('option', { value: x.epoch, selected: x.epoch === state.asOf }, x.epoch === a.epochs.length ? `${x.name} (latest)` : x.name)));
     $('asof-wrap').hidden = !a.epochs.length;
     $('access-wrap').hidden = false;
     $('as').addEventListener('change', async ev => {
       const p = a.principals.find(x => x.id === ev.target.value);
-      if (p.gated && !remembered(view)) { $('access-wrap').hidden = true; await unlock(view); }
+      if (!canView(view, p)) { $('access-wrap').hidden = true; await unlock(view, gatesFor(view, p), `${view.name}: ${p.name}`); }
       set('as', p.id);
       location.reload();
     });
